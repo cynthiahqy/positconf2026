@@ -9,9 +9,12 @@ format:
   letterbox-revealjs: 
     theme: [default, _style.scss]
     slide-number: c/t
+execute: 
+  eval: false
 ---
 
 ```{r}
+#| eval: true
 library(ggplot2)
 library(palmerpenguins)
 ```
@@ -27,13 +30,16 @@ library(palmerpenguins)
 - 📦 {ggtilecal}
 
 ## About Me!
-
+::: fragment
 - 👩 Research Fellow with [_Prof. Rob Hyndman_](https://robjhyndman.com), Monash EBS
 - 👩‍🎓 Thesis: **Unified Principles and Tools for Complex Datasets and Data-Driven Workflows**
+:::
+::: fragment
 - 📊 Research Interests
   - 🌰 "alternative" data for empirical social science research
   - 🤖 Leveraging LLMs and genAI in data wrangling and preparation
   - 🛠️ Tools for better data science -- including visualisation!
+:::
 
 ## About Me!
 
@@ -56,9 +62,9 @@ library(palmerpenguins)
 ![](assets/allisonhorst-ggplot2-eda.png)
 :::
 
-## What about the 'Grammar of Graphics'? 🪄
+## What about the Grammar of Graphics? {visibility="hidden"}
 
-::: {aside}
+::: {.image-placeholder}
 INSERT IMAGE
 :::
 
@@ -72,6 +78,7 @@ INSERT IMAGE
 
 ```{r}
 #| echo: true
+#| eval: true
 ggplot(
   data = penguins, 
   mapping = aes(x = bill_length_mm,
@@ -143,13 +150,13 @@ geom_mean <- function() {
 ggplot(mpg, aes(class, cty)) + geom_mean()
 ggplot(mpg, aes(drv, cty)) + geom_mean()
 ```
-## Wrap everything into helper functions!
+## Wrap it all into helper functions!
 
 ::: {.image-placeholder}
 IMAGE/ILLUSTRATION -- ggplot -> helper
 :::
 
-## But not all helper functions are made equal...
+## A helpful calendar plot helper!
 
 
 ::: {.columns}
@@ -278,7 +285,7 @@ helper function with just one input slot
 ggdibbler / ggtime / sf 
 :::
 
-# plot "assembly" helpers
+# Plot (assembly) helpers
 
 ## Design goals
 
@@ -310,20 +317,37 @@ Grammatical customisation
 #| eval: false
 #| file: assets/example-ggtilecal-initial.R
 #| echo: true
+#| filename: very-long-ggplot-script.R
 ```
 
 :::
 ::: {.column}
-::: {.image-placeholder}
-![screenshot of interactive calendar plot]
-:::
+
+<iframe src="https://cynthiahqy.github.io/ggtilecal/index.html" width="100%" height="500px" style="border: 1px solid #ccc; border-radius: 8px;"></iframe>
 
 :::
 :::
+
+## autoplot() by default
+
+```{.r}
+library(ggtilecal)
+make_empty_month_days(c("2024-01-05", "2024-06-30")) -> dates
+```
+```{.r}
+dates |>
+  gg_facet_wrap_months(
+    .events_long = dates,
+    date_col = unit_date
+  )
+```
 
 ## Grammatical default inputs
 
-```{.r code-line-numbers="1|1-4|5|5-9|10|10-19|20"}
+::: {.columns}
+::: {.column}
+
+```{.r code-line-numbers="1|1-4|5|5-9|10|10-19|20" filename="function interface"}
 gg_facet_wrap_months(
   ## --- data ----
   .events_long, 
@@ -346,9 +370,20 @@ gg_facet_wrap_months(
   .other = list()
 )
 ```
+:::
+::: {.column}
+
+::: {.image-placeholder}
+grammatical defaults
+:::
+:::
+:::
+
 ## Modular internals
 
-```{.r code-line-numbers="1|2|2-5|7-8|9-15|16-19|1-22"}
+::: {.columns}
+::: {.column}
+```{.r code-line-numbers="1|2|2-5|7-8|9-15|16-19|1-22" filename="helper internals"}
 gg_facet_wrap_months <- function(...){
   ## Data Helpers
   cal_data <- .events_long |>
@@ -372,15 +407,25 @@ gg_facet_wrap_months <- function(...){
   base_plot
 }
 ```
+:::
+::: {.column}
+
+::: {.image-placeholder}
+grammatical defaults
+:::
+:::
+:::
 
 ## Customising colours
 
-```{.r}
-library(ggplot2)
-library(ggtilecal)
-make_empty_month_days(c("2024-01-05", "2024-06-30")) |>
+ADD output
+
+```{.r code-line-numbers="13,10,5"}
+dates |>
   gg_facet_wrap_months(
-    unit_date,
+    .events_long = dates,
+    date_col = unit_date,
+    ## -- changing the default inputs --
     .geom = list(
       geom_tile(color = "grey70",
                 fill = "transparent"),
@@ -388,38 +433,40 @@ make_empty_month_days(c("2024-01-05", "2024-06-30")) |>
                 color = "#6a329f")),
     .theme = list(
       theme_bw_tilecal(),
-      theme(strip.background = element_rect(fill = "#d9d2e9")))
+      theme(
+        strip.background = element_rect(fill = "#d9d2e9")))
     )
-```                       
-
+```
 
 ## Adding interactivity
 
 ```{.r}
 # remotes::install_github("cynthiahqy/ggtilecal")
-library(ggiraph)
 library(ggplot2)
 library(ggtilecal)
+library(ggiraph)
+```
 
-gi <- demo_events_gpt |>
+```{.r}
+default_plot <- demo_events_gpt |>
     reframe_events(startDate, endDate) |>
-  gg_facet_wrap_months(unit_date) +
+    gg_facet_wrap_months(unit_date)
+
+gi <- default_plot +
   geom_text(aes(label = event_emoji), nudge_y = -0.25, na.rm = TRUE) +
   geom_tile_interactive(
-        aes(
-            tooltip = paste(event_title),
-            data_id = event_id
-        ),
-        alpha = 0.2,
-        fill = "transparent",
-        colour = "grey80"
-    )
+    aes(tooltip = paste(event_title),
+        data_id = event_id),
+    alpha = 0.2,
+    fill = "transparent",
+    colour = "grey80"
+)
 
 girafe(ggobj = gi)
 ```
-## Supporting customisation
+## Supporting customisation with docs
 
-* explain documentation approach
+<iframe src="https://cynthiahqy.github.io/ggtilecal/reference/gg_facet_wrap_months.html" width="100%" height="500px" style="border: 1px solid #ccc; border-radius: 8px;"></iframe>
 
 ## Design principles for plot helpers
 
