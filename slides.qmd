@@ -1,0 +1,443 @@
+---
+title: "Reusing ‘ggplot2’ code: how to design better plot helper functions"
+subtitle: "Combined Melbourne R User and Statistical Society of Australia-VIC Meeting, 5 Aug 2025"
+abstract: |
+  Wrapping ‘ggplot2’ code into plot helper functions is a common way to make multiple versions of a custom plot without copying and pasting the same code over and over again. Helper functions can replace long and complex ‘ggplot2’ code chunks with just a single function call. However, if that single function is not designed carefully, the initial convenience can often turn into frustration. While helper functions can reduce the amount of code needed to remake a complicated plot, they often mask the underlying layered grammar of graphics, complicating further customisation and tweaking of the plot. This talk addresses how to design effective ‘ggplot2’ plot helper functions that maximise reuse convenience whilst preserving access to the elegant flexibility of layered plot composition. By studying existing ‘ggplot2’ extensions for producing calendar plots, we identify a number of common pitfalls, including overly specific function arguments and hidden data manipulations. Then, we propose a strategy for avoiding these pitfalls and retain the benefits of ‘ggplot2’ by: separating data preparation from plotting, utilising list arguments for customisation, and providing transparent documentation. We illustrate these strategies using examples from the design of the ‘ggtilecal’ package, which provides helper functions for plotting calendars using the geom_tile() geometry from ggplot2.
+author: 
+  - name: "Cynthia A. Huang"
+format:
+  letterbox-revealjs: 
+    theme: [default, _style.scss]
+    slide-number: c/t
+---
+
+```{r}
+library(ggplot2)
+library(palmerpenguins)
+```
+
+# Introduction
+
+## Presentation Overview
+
+- 👋 About Me
+- 💨 Super brief ggplot intro/recap
+- ♻️ Ways to reuse ggplot2 code?
+- 💡 Plot (assembly) helpers!
+- 📦 {ggtilecal}
+
+## About Me!
+
+- 👩 Research Fellow with [_Prof. Rob Hyndman_](https://robjhyndman.com), Monash EBS
+- 👩‍🎓 Thesis: **Unified Principles and Tools for Complex Datasets and Data-Driven Workflows**
+- 📊 Research Interests
+  - 🌰 "alternative" data for empirical social science research
+  - 🤖 Leveraging LLMs and genAI in data wrangling and preparation
+  - 🛠️ Tools for better data science -- including visualisation!
+
+## About Me!
+
+::: incremental
+- 🤹🏻‍♀️ Extra-Curricular
+  - 🎙️ Regular host on [The Random Sample](https://www.therandomsample.com.au/podcasts/) podcast
+  - 👩🏻‍🏫 Research productivity and other fun things with Quarto and git
+- 👩🏻 Outside Research:
+  - 🧗🏻‍♀️ Climbing
+  - 🧘🏻‍♀️ Yoga
+  - 🤸🏻‍♀️ Aerial & Acroyoga
+  - 👩🏻‍🍳 Foodie
+:::
+
+# Data Visualisation as Grammatical Constructs
+
+## Have you heard of 'ggplot2'? 📊
+
+::: {.smaller}
+![](assets/allisonhorst-ggplot2-eda.png)
+:::
+
+## What about the 'Grammar of Graphics'? 🪄
+
+::: {aside}
+INSERT IMAGE
+:::
+
+## Layered Grammar of Graphics ➕
+::: {.columns}
+::: {.column width="60%"}
+![*👩🏻‍🎨: I want my plots to reflect my data auto-magically!*](assets/allisonhorst-ggplot2-datamasterpiece.png)
+
+:::
+::: {.column .small .fragment width="40%"}
+
+```{r}
+#| echo: true
+ggplot(
+  data = penguins, 
+  mapping = aes(x = bill_length_mm,
+                y = bill_depth_mm,
+                color = species)) +
+  geom_point() +
+  theme_bw()
+```
+
+:::
+:::
+
+## But ggplot recipes can get long...
+
+::: {.smallest}
+```{r}
+#| eval: false
+#| file: assets/example-ggtilecal-initial.R
+#| echo: true
+```
+
+:::
+
+
+
+<!-- ## What if I just want to tweak it a little?
+
+::: {.image-placeholder}
+insert diff
+::: -->
+
+# Ways to reuse ggplot code
+
+## Copy & Paste
+
+::: {.image-placeholder}
+copy paste icon + yuck emoji
+:::
+
+## Store layers as objects or in lists
+
+💡 Useful if components are exactly the same each time!
+
+```{.r}
+bestfit <- geom_smooth(
+  method = "lm", 
+  se = FALSE, 
+  colour = alpha("steelblue", 0.5),
+  linewidth = 2
+)
+ggplot(mpg, aes(cty, hwy)) + 
+  geom_point() + 
+  bestfit
+#> `geom_smooth()` using formula = 'y ~ x'
+ggplot(mpg, aes(displ, hwy)) + 
+  geom_point() + 
+  bestfit
+#> `geom_smooth()` using formula = 'y ~ x'
+```
+## Store layers as objects or **in lists** {visibility="hidden"}
+
+```{.r}
+geom_mean <- function() {
+  list(
+    stat_summary(fun = "mean", geom = "bar", fill = "grey70"),
+    stat_summary(fun.data = "mean_cl_normal", geom = "errorbar", width = 0.4)
+  )
+}
+ggplot(mpg, aes(class, cty)) + geom_mean()
+ggplot(mpg, aes(drv, cty)) + geom_mean()
+```
+## Wrap everything into helper functions!
+
+::: {.image-placeholder}
+IMAGE/ILLUSTRATION -- ggplot -> helper
+:::
+
+## But not all helper functions are made equal...
+
+
+::: {.columns}
+::: {.column .small}
+```{.r}
+ggweekly::ggweek_planner(
+    start_day = lubridate::today(),
+    end_day = start_day +
+        lubridate::weeks(8) - lubridate::days(1),
+    highlight_days = NULL,
+    week_start = c("isoweek", "epiweek"),
+    week_start_label = c("month day", "week", "none"),
+    show_day_numbers = TRUE,
+    show_month_start_day = TRUE,
+    show_month_boundaries = TRUE,
+    highlight_text_size = 2,
+    month_text_size = 4,
+    day_number_text_size = 2,
+    month_color = "#f78154",
+    day_number_color = "grey80",
+    weekend_fill = "#f8f8f8",
+    holidays = ggweekly::us_federal_holidays,
+    font_base_family = "PT Sans",
+    font_label_family = "PT Sans Narrow",
+    font_label_text = NULL
+)
+```
+:::
+::: {.column}
+
+::: {.image-placeholder}
+get example ggweekly
+:::
+:::
+:::
+
+
+## Beware false savings!
+
+::: {.columns}
+::: {.column}
+```{.r}
+calendR(
+    year = format(Sys.Date(), "%Y"),
+    month = NULL,
+    from = NULL,
+    to = NULL,
+    start = c("S", "M"),
+    orientation = c("portrait", "landscape"),
+    title,
+    title.size = 20,
+    title.col = "gray30",
+    subtitle = "",
+    subtitle.size = 10,
+    subtitle.col = "gray30",
+    text = NULL,
+    text.pos = NULL,
+    text.size = 4,
+    text.col = "gray30",
+    special.days = NULL,
+    special.col = "gray90",
+    gradient = FALSE,
+    low.col = "white",
+    col = "gray30",
+    lwd = 0.5,
+    lty = 1,
+    font.family = "sans",
+    font.style = "plain",
+    day.size = 3,
+    days.col = "gray30",
+    weeknames,
+    weeknames.col = "gray30",
+    weeknames.size = 4.5,
+    week.number = FALSE,
+    week.number.col = "gray30",
+    week.number.size = 8,
+    monthnames,
+    months.size = 10,
+    months.col = "gray30",
+    months.pos = 0.5,
+    mbg.col = "white",
+    legend.pos = "none",
+    legend.title = "",
+    bg.col = "white",
+    bg.img = "",
+    margin = 1,
+    ncol,
+    lunar = FALSE,
+    lunar.col = "gray60",
+    lunar.size = 7,
+    pdf = FALSE,
+    doc_name = "",
+    papersize = "A4"
+)
+```
+:::
+::: {.column .big style="text-align: center"}
+Sometimes 
+
+**"saved" lines of code**
+
+turn into
+
+**confusing lists of plot specific arguments**
+:::
+:::
+
+## autoplot() with reduced visibility
+
+::: {.columns}
+::: {.column}
+```{.r}
+ggcal(dates, fills)
+```
+:::
+::: {.column}
+::: {.image-placeholder}
+helper function with just one input slot
+:::
+:::
+:::
+
+## New ggplot components?
+
+::: {.image-placeholder}
+ggdibbler / ggtime / sf 
+:::
+
+# plot "assembly" helpers
+
+## Design goals
+
+## Solution
+
+::: {.columns}
+::: {.column}
+::: {.image-placeholder}
+Grammatical default inputs
+:::
+:::
+::: {.column}
+::: {.image-placeholder}
+Modular internals
+:::
+:::
+::: {.column}
+::: {.image-placeholder}
+Grammatical customisation
+:::
+:::
+:::
+
+## Case study
+
+::: {.columns}
+::: {.column .smallest}
+```{r}
+#| eval: false
+#| file: assets/example-ggtilecal-initial.R
+#| echo: true
+```
+
+:::
+::: {.column}
+::: {.image-placeholder}
+![screenshot of interactive calendar plot]
+:::
+
+:::
+:::
+
+## Grammatical default inputs
+
+```{.r code-line-numbers="1|1-4|5|5-9|10|10-19|20"}
+gg_facet_wrap_months(
+  ## --- data ----
+  .events_long, 
+  date_col,
+  locale = NULL,
+  ## --- facets / layout ----
+  week_start = NULL, 
+  nrow = NULL, 
+  ncol = NULL,
+  ## --- default layers ---
+  .geom = list(
+    geom_tile(color = "grey70", fill = "transparent"),
+    geom_text(nudge_y = 0.25)
+  ),
+  .scale_coord = list(
+    scale_y_reverse(),
+    scale_x_discrete(position = "top"),
+    coord_fixed(expand = TRUE)),
+  .theme = list(theme_bw_tilecal()),
+  .other = list()
+)
+```
+## Modular internals
+
+```{.r code-line-numbers="1|2|2-5|7-8|9-15|16-19|1-22"}
+gg_facet_wrap_months <- function(...){
+  ## Data Helpers
+  cal_data <- .events_long |>
+    fill_missing_units({{ date_col }}) |>
+    calc_calendar_vars({{ date_col }})
+
+  ## Plot Construction
+  base_plot <- cal_data |>
+    ggplot2::ggplot(mapping = aes_string(
+      x = "TC_wday_label",
+      y = "TC_month_week",
+      label = "TC_mday"
+    )) +
+    facet_wrap(c("TC_month_label"), axes = "all_x", nrow = nrow, ncol = ncol) +
+    labs(y = NULL, x = NULL) +
+    .geom +
+    .scale_coord +
+    .theme +
+    .others
+
+  base_plot
+}
+```
+
+## Customising colours
+
+```{.r}
+library(ggplot2)
+library(ggtilecal)
+make_empty_month_days(c("2024-01-05", "2024-06-30")) |>
+  gg_facet_wrap_months(
+    unit_date,
+    .geom = list(
+      geom_tile(color = "grey70",
+                fill = "transparent"),
+      geom_text(nudge_y = 0.25,
+                color = "#6a329f")),
+    .theme = list(
+      theme_bw_tilecal(),
+      theme(strip.background = element_rect(fill = "#d9d2e9")))
+    )
+```                       
+
+
+## Adding interactivity
+
+```{.r}
+# remotes::install_github("cynthiahqy/ggtilecal")
+library(ggiraph)
+library(ggplot2)
+library(ggtilecal)
+
+gi <- demo_events_gpt |>
+    reframe_events(startDate, endDate) |>
+  gg_facet_wrap_months(unit_date) +
+  geom_text(aes(label = event_emoji), nudge_y = -0.25, na.rm = TRUE) +
+  geom_tile_interactive(
+        aes(
+            tooltip = paste(event_title),
+            data_id = event_id
+        ),
+        alpha = 0.2,
+        fill = "transparent",
+        colour = "grey80"
+    )
+
+girafe(ggobj = gi)
+```
+## Supporting customisation
+
+* explain documentation approach
+
+## Design principles for plot helpers
+
+1. Expose
+2. Separate
+3. Document
+
+## 
+
+::: {.columns}
+::: {.column}
+### Questions?
+:::
+::: {.column}
+### Further Resources
+- [Programming with ggplot2, _ggplot2: Elegant Graphics for Data Analysis (3e)_](https://ggplot2-book.org/programming.html)
+- [Design Principles for Plot Helper Functions, _cynthiahqy.com_](https://www.cynthiahqy.com/posts/ggplot-helper-design/)
+- [ggtilecal]()
+:::
+:::
+

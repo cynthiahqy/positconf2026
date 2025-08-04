@@ -1,0 +1,1 @@
+A group of fuzzy round monsters with binoculars, backpacks and guide books looking up a graphs flying around with wings (like birders, but with exploratory data visualizations). Stylized text reads “ggplot2: visual data exploration."
