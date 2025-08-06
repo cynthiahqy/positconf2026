@@ -9,6 +9,7 @@ format:
   letterbox-revealjs: 
     theme: [default, _style.scss]
     slide-number: c/t
+    footer: "[cynthiahqy.quarto.pub/ggplot-helpers-melburn-ssa-2025](https://cynthiahqy.quarto.pub/ggplot-helpers-melburn-ssa-2025)"
 execute: 
   eval: false
 ---
@@ -62,10 +63,10 @@ library(palmerpenguins)
 ![](assets/allisonhorst-ggplot2-eda.png)
 :::
 
-## What about the Grammar of Graphics? {visibility="hidden"}
+## Grammar-based data visualisation
 
-::: {.image-placeholder}
-INSERT IMAGE
+::: {.sketch-container}
+![](assets/notability/ggplot2-helper-machine-overview.png){fig-align="center"}
 :::
 
 ## Layered Grammar of Graphics ➕
@@ -79,6 +80,8 @@ INSERT IMAGE
 ```{r}
 #| echo: true
 #| eval: true
+#| code-line-numbers: "2|3-5|6|7|8"
+#| output-location: fragment
 ggplot(
   data = penguins, 
   mapping = aes(x = bill_length_mm,
@@ -91,8 +94,12 @@ ggplot(
 :::
 :::
 
+
+
 ## But ggplot recipes can get long...
 
+::: {.columns}
+::: {.column}
 ::: {.smallest}
 ```{r}
 #| eval: false
@@ -101,6 +108,16 @@ ggplot(
 ```
 
 :::
+:::
+::: {.column}
+
+::: {.fa-container}
+{{< fa face-dizzy size=10x >}}
+:::
+
+:::
+:::
+
 
 
 
@@ -114,16 +131,76 @@ insert diff
 
 ## Copy & Paste
 
-::: {.image-placeholder}
-copy paste icon + yuck emoji
+::: {.columns}
+::: {.column}
+```{r}
+#| echo: true
+#| eval: false
+#| code-line-numbers: "|5,14"
+
+
+ggplot(
+  data = penguins, 
+  mapping = aes(
+    x = bill_length_mm,
+    y = bill_depth_mm,
+    color = species)) +
+  geom_point()
+
+## -- SPOT THE DIFFERENCE --
+
+ggplot(
+  data = penguins, 
+  mapping = aes(
+    x = bill_length_mm,
+    y = flipper_length_mm,
+    color = species)) +
+  geom_point()
+```
+:::
+::: {.column }
+::: {.image-placeholder style="margin: 0;"}
+{{< fa solid paste size=10x >}}
+:::
+:::
 :::
 
-## Store layers as objects or in lists
+
+
+
+## Store layers as objects or in lists {auto-animate=true}
 
 💡 Useful if components are exactly the same each time!
 
-```{.r}
-bestfit <- geom_smooth(
+```{r}
+#| echo: true
+#| eval: true
+#| output-location: column
+#| code-line-numbers: "|3-8"
+ggplot(mpg, aes(cty, hwy)) + 
+  geom_point() + 
+  geom_smooth(
+  method = "lm", 
+  se = FALSE, 
+  colour = alpha("steelblue", 0.5),
+  linewidth = 2
+)
+```
+::: aside
+Example from [_ggplot2: Elegant Graphics for Data Analysis (3e)_](https://ggplot2-book.org/programming.html#single-components)
+:::
+
+## Store layers as objects or in lists {auto-animate=true}
+
+💡 Useful if components are exactly the same each time!
+
+```{r}
+#| echo: true
+#| eval: true
+#| output-location: column
+#| code-line-numbers: "1-6|10"
+bestfit <- 
+geom_smooth(
   method = "lm", 
   se = FALSE, 
   colour = alpha("steelblue", 0.5),
@@ -132,12 +209,12 @@ bestfit <- geom_smooth(
 ggplot(mpg, aes(cty, hwy)) + 
   geom_point() + 
   bestfit
-#> `geom_smooth()` using formula = 'y ~ x'
-ggplot(mpg, aes(displ, hwy)) + 
-  geom_point() + 
-  bestfit
-#> `geom_smooth()` using formula = 'y ~ x'
 ```
+
+::: aside
+Example from [_ggplot2: Elegant Graphics for Data Analysis (3e)_](https://ggplot2-book.org/programming.html#single-components)
+:::
+
 ## Store layers as objects or **in lists** {visibility="hidden"}
 
 ```{.r}
@@ -150,18 +227,34 @@ geom_mean <- function() {
 ggplot(mpg, aes(class, cty)) + geom_mean()
 ggplot(mpg, aes(drv, cty)) + geom_mean()
 ```
-## Wrap it all into helper functions!
+## Wrap it all into helper functions! 
 
-::: {.image-placeholder}
-IMAGE/ILLUSTRATION -- ggplot -> helper
+::: {.sketch-container}
+![](assets/notability/ggplot2-helper-wrapped.png){fig-align="center" width="70%"}
 :::
 
-## A helpful calendar plot helper!
+## Convenience vs. flexibility
 
 
 ::: {.columns}
-::: {.column .small}
-```{.r}
+::: {.column}
+
+```{r}
+#| echo: true
+#| eval: true
+#| output-location: fragment
+library(ggweekly)
+ggweek_planner(
+  start_day = "2019-04-01", 
+  end_day = "2019-06-30", 
+)
+```
+:::
+::: {.column .small .fragment}
+
+What about customisation?
+
+```{.r code-line-numbers="|11-13|14-16|18-20|17"}
 ggweekly::ggweek_planner(
     start_day = lubridate::today(),
     end_day = start_day +
@@ -185,16 +278,46 @@ ggweekly::ggweek_planner(
 )
 ```
 :::
-::: {.column}
-
-::: {.image-placeholder}
-get example ggweekly
-:::
-:::
 :::
 
+::: aside
+Example from [`github.com/gadenbuie/ggweekly`](https://github.com/gadenbuie/ggweekly)
+:::
 
-## Beware false savings!
+## Similar function, different wrapper?
+
+::: {.columns}
+::: {.column .small}
+```{r}
+#| echo: true
+#| eval: true
+#| output-location: default
+library(ggcal)
+
+mydate <- 
+  seq(
+    as.Date("2017-02-01"),
+    as.Date("2017-07-22"),
+    by="1 day")
+myfills <- 
+  rnorm(length(mydate))
+
+print(ggcal(mydate, myfills))
+```
+:::
+::: {.column .big .fragment}
+
+* how many arguments does `ggcal()` have?
+* what format should `dates`, `fills` be?
+
+:::
+:::
+
+::: aside
+Example from [`github.com/jayjacobs/ggcal`](https://github.com/jayjacobs/ggcal/)
+:::
+
+## Another helpful calendar maker?
 
 ::: {.columns}
 ::: {.column}
@@ -254,6 +377,26 @@ calendR(
 ```
 :::
 ::: {.column .big style="text-align: center"}
+* Is this using ggplot2?
+* What are the inputs?
+* Internal data preparation?
+* ...?
+:::
+:::
+
+::: aside
+Example from [`github.com/R-CoderDotCom/calendR`](https://github.com/R-CoderDotCom/calendR)
+:::
+
+## Beware false savings!
+::: {columns}
+::: {.column}
+
+::: {.sketch-container}
+![](assets/notability/ggplot2-helper-replace-vert.png){fig-align="center"}
+:::
+:::
+::: {.column .fragment .big style="text-align: center"}
 Sometimes 
 
 **"saved" lines of code**
@@ -264,32 +407,35 @@ turn into
 :::
 :::
 
-## autoplot() with reduced visibility
+## Adding new grammar components?
 
 ::: {.columns}
 ::: {.column}
-```{.r}
-ggcal(dates, fills)
-```
+
+<iframe src="https://mjskay.github.io/ggdist/" width="100%" height="500px" style="border: 1px solid #ccc; border-radius: 8px;"></iframe>
+
 :::
-::: {.column}
-::: {.image-placeholder}
-helper function with just one input slot
-:::
+::: {.column .fragment}
+Special data semantics need special handling:
+
+  * time: `ggweekly`, `ggcal`, `CalendR`... `ggtime` (WIP)
+  * variation & uncertainty: `ggdist`, [`ggdibbler`](https://harriet-mason.github.io/ggdibbler/articles/ggdibbler-vignette.html)
+  * space: `sf`
 :::
 :::
 
-## New ggplot components?
-
-::: {.image-placeholder}
-ggdibbler / ggtime / sf 
-:::
 
 # Plot (assembly) helpers
 
 ## Design goals
+::: {.incremental .big}
+* Quick 'autoplotting'
+* Minimise plot-specific arguments
+* Retain ggplot syntax & error messages
+* Integrate well with other ggplot2 components
+:::
 
-## Solution
+## Solution {visibility="hidden"}
 
 ::: {.columns}
 ::: {.column}
@@ -309,7 +455,7 @@ Grammatical customisation
 :::
 :::
 
-## Case study
+## Case study: Interactive calendar!
 
 ::: {.columns}
 ::: {.column .smallest}
@@ -321,33 +467,59 @@ Grammatical customisation
 ```
 
 :::
+::: {.column .small .incremental}
+
+- data wrangling:
+    - reshaping via `reframe()`
+    - creating new variables
+    - fill in missing days
+    - calculating facet and layout (e.g. `Month`, `Month_week`)
+- `ggplot2` components:
+    - `scale`, `coord` and `facet` to layout the calendar
+    - `theme` modification to style the plot as a calendar
+    - interactive `geom` from `{ggiraph}`
+
+:::
+:::
+
+## Convenient autoplotting
+
+::: {.columns}
 ::: {.column}
 
 <iframe src="https://cynthiahqy.github.io/ggtilecal/index.html" width="100%" height="500px" style="border: 1px solid #ccc; border-radius: 8px;"></iframe>
 
 :::
+::: {.column .fragment}
+
+```{r}
+#| output-location: fragment
+#| echo: true
+#| eval: true
+#| code-line-numbers: "5-7"
+library(ggtilecal)
+dates <- make_empty_month_days(
+  c("2024-01-05", "2024-06-30"))
+
+gg_facet_wrap_months(
+  dates,
+  unit_date)
+```
+
+:::
 :::
 
-## autoplot() by default
 
-```{.r}
-library(ggtilecal)
-make_empty_month_days(c("2024-01-05", "2024-06-30")) -> dates
-```
-```{.r}
-dates |>
-  gg_facet_wrap_months(
-    .events_long = dates,
-    date_col = unit_date
-  )
-```
-
-## Grammatical default inputs
+## ggplot lists as default inputs
 
 ::: {.columns}
 ::: {.column}
 
-```{.r code-line-numbers="1|1-4|5|5-9|10|10-19|20" filename="function interface"}
+<iframe src="https://cynthiahqy.github.io/ggtilecal/index.html" width="100%" height="500px" style="border: 1px solid #ccc; border-radius: 8px;"></iframe>
+
+:::
+::: {.column .fragment}
+```{.r code-line-numbers="1|1-5|6|6-9|10|10-19|20" filename="function-interface"}
 gg_facet_wrap_months(
   ## --- data ----
   .events_long, 
@@ -371,19 +543,19 @@ gg_facet_wrap_months(
 )
 ```
 :::
-::: {.column}
-
-::: {.image-placeholder}
-grammatical defaults
-:::
-:::
 :::
 
 ## Modular internals
 
 ::: {.columns}
-::: {.column}
-```{.r code-line-numbers="1|2|2-5|7-8|9-15|16-19|1-22" filename="helper internals"}
+::: {.column style="align-items: start;"}
+
+::: {.sketch-container style="margin: 0; align-items: start;"}
+![](assets/notability/ggplot2-helper-internals.png)
+:::
+:::
+::: {.column .fragment}
+```{.r code-line-numbers="1|2|2-5|7-8|9-15|16-19|1-22" filename="internals"}
 gg_facet_wrap_months <- function(...){
   ## Data Helpers
   cal_data <- .events_long |>
@@ -408,31 +580,39 @@ gg_facet_wrap_months <- function(...){
 }
 ```
 :::
-::: {.column}
-
-::: {.image-placeholder}
-grammatical defaults
-:::
-:::
 :::
 
 ## Customising colours
 
-ADD output
+<!-- TODO: get code animation to work -->
 
-```{.r code-line-numbers="13,10,5"}
-dates |>
-  gg_facet_wrap_months(
-    .events_long = dates,
-    date_col = unit_date,
-    ## -- changing the default inputs --
+```{r}
+#| echo: true
+#| eval: true
+#| output-location: slide
+gg_facet_wrap_months(dates, unit_date,
     .geom = list(
-      geom_tile(color = "grey70",
-                fill = "transparent"),
+      geom_tile(color = "grey70", fill = "transparent"),
+      geom_text(nudge_y = 0.25),
+    .theme = list(theme_bw_tilecal())
+    )
+)
+```
+
+
+## Customising colours
+
+```{r}
+#| echo: true
+#| eval: true
+#| code-line-numbers: "|5,8"
+#| output-location: slide
+gg_facet_wrap_months(dates, unit_date,
+    .geom = list(
+      geom_tile(color = "grey70", fill = "transparent"),
       geom_text(nudge_y = 0.25,
                 color = "#6a329f")),
-    .theme = list(
-      theme_bw_tilecal(),
+    .theme = list(theme_bw_tilecal(),
       theme(
         strip.background = element_rect(fill = "#d9d2e9")))
     )
@@ -440,14 +620,16 @@ dates |>
 
 ## Adding interactivity
 
-```{.r}
-# remotes::install_github("cynthiahqy/ggtilecal")
+```{r}
+#| echo: true
+#| eval: true
+#| code-line-numbers: "2,5-7|1,10|3,11-16"
+#| output-location: slide
+
 library(ggplot2)
 library(ggtilecal)
 library(ggiraph)
-```
 
-```{.r}
 default_plot <- demo_events_gpt |>
     reframe_events(startDate, endDate) |>
     gg_facet_wrap_months(unit_date)
@@ -464,27 +646,93 @@ gi <- default_plot +
 
 girafe(ggobj = gi)
 ```
-## Supporting customisation with docs
 
-<iframe src="https://cynthiahqy.github.io/ggtilecal/reference/gg_facet_wrap_months.html" width="100%" height="500px" style="border: 1px solid #ccc; border-radius: 8px;"></iframe>
-
-## Design principles for plot helpers
-
-1. Expose
-2. Separate
-3. Document
-
-## 
+## Supporting customisation
 
 ::: {.columns}
 ::: {.column}
-### Questions?
+
+<iframe src="https://cynthiahqy.github.io/ggtilecal/reference/gg_facet_wrap_months.html" width="100%" height="500px" style="border: 1px solid #ccc; border-radius: 8px;"></iframe>
+
+:::
+::: {.column .incremental}
+
+**Explain:**
+
+1. Data preparation steps
+2. How the ggplot2 recipe works
+3. How to modify the plot
+
+:::
+:::
+
+
+
+## Design principles for plot helpers
+
+::: {.columns}
+::: {.column .incremental width="30%"}
+
+1. **Expose** ggplot syntax & recipe
+2. **Separate** functionality
+3. **Document** grammatical customisation
+
+:::
+::: {.column .fragment width="70%"}
+![](assets/notability/ggplot2-helper-design-principles-summary.png)
+:::
+:::
+
+[_But remember **rules are made to be broken!**_]{.fragment}
+
+
+<!-- - separate data transformation steps from ggplot construction
+- expose as many components of the `ggplot2` recipe as possible
+- minimise the number of plot-specfic arguments by using lists of components to accept ggplot2 customisation options
+- explicitly document the internal workings of the helper function -->
+
+## Thanks for Listening!
+:::: {.columns}
+::: {.column width="40%"}
+
+![](assets/headshot-cynthia.jpg){style="border-radius:50%" height="400px" fig-align="center"}
+:::
+
+::: {.column width="60%"}
+**Find me at:**
+
+- [cynthiahqy.com](https://cynthiahqy.com), 
+- [\@cynthiahqy](https://www.linkedin.com/in/cynthiahqy/) and 
+- *cynthiahqy[at]gmail.com*.
+
+
+::: callout-tip
+## Join us at WOMBAT2025!
+
+- data/vis/R tutorials & talks
+- Sep 29-30 @ 750 Collins St
+- [wombat2025.numbat.space](https://wombat2025.numbat.space)
+
+:::
+:::
+
+::::
+
+## Thanks for listening! {visibility="hidden"}
+
+::: {.columns}
+::: {.column}
+
+![](assets/headshot-cynthia.jpg){style="border-radius:50%" height="500px" fig-align="center"}
+
+[_cynthiahqy.com_](cynthiahqy.com)
+
+
 :::
 ::: {.column}
-### Further Resources
-- [Programming with ggplot2, _ggplot2: Elegant Graphics for Data Analysis (3e)_](https://ggplot2-book.org/programming.html)
-- [Design Principles for Plot Helper Functions, _cynthiahqy.com_](https://www.cynthiahqy.com/posts/ggplot-helper-design/)
-- [ggtilecal]()
+- 📝 [Design Principles for Plot Helper Functions](https://www.cynthiahqy.com/posts/ggplot-helper-design/)
+- 📦 [ggtilecal](https://github.com/cynthiahqy/ggtilecal/)
+- [Register for WOMBAT 2025!](https://wombat2025.numbat.space)
 :::
 :::
 
