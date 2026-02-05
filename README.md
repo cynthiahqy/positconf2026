@@ -2,6 +2,8 @@
 
 2025-08-05
 
+https://www.statsoc.org.au/event-6260056
+
 ## Reusing ‘ggplot2’ code: how to design better plot helper functions
 
 ## Abstract
