@@ -1,6 +1,6 @@
 ---
-title: "Reusing ‘ggplot2’ code: how to design better plot helper functions"
-subtitle: "Combined Melbourne R User and Statistical Society of Australia-VIC Meeting, 5 Aug 2025"
+title: "Reusing 'ggplot2' code: how to design better plot helper functions"
+# subtitle: "Combined Melbourne R User and Statistical Society of Australia-VIC Meeting, 5 Aug 2025"
 abstract: |
   Wrapping ‘ggplot2’ code into plot helper functions is a common way to make multiple versions of a custom plot without copying and pasting the same code over and over again. Helper functions can replace long and complex ‘ggplot2’ code chunks with just a single function call. However, if that single function is not designed carefully, the initial convenience can often turn into frustration. While helper functions can reduce the amount of code needed to remake a complicated plot, they often mask the underlying layered grammar of graphics, complicating further customisation and tweaking of the plot. This talk addresses how to design effective ‘ggplot2’ plot helper functions that maximise reuse convenience whilst preserving access to the elegant flexibility of layered plot composition. By studying existing ‘ggplot2’ extensions for producing calendar plots, we identify a number of common pitfalls, including overly specific function arguments and hidden data manipulations. Then, we propose a strategy for avoiding these pitfalls and retain the benefits of ‘ggplot2’ by: separating data preparation from plotting, utilising list arguments for customisation, and providing transparent documentation. We illustrate these strategies using examples from the design of the ‘ggtilecal’ package, which provides helper functions for plotting calendars using the geom_tile() geometry from ggplot2.
 author: 
@@ -20,221 +20,21 @@ library(ggplot2)
 library(palmerpenguins)
 ```
 
-# Introduction
+<!-- PERSONAL vs. GGPLOT -->
 
-## Presentation Overview
+## Two years ago...
 
-- 👋 About Me
-- 💨 Super brief ggplot intro/recap
-- ♻️ Ways to reuse ggplot2 code?
-- 💡 Plot (assembly) helpers!
-- 📦 {ggtilecal}
+Photo from posit::conf(2024)
 
-## About Me!
-::: fragment
-- 👩 Research Fellow with [_Prof. Rob Hyndman_](https://robjhyndman.com), Monash EBS
-- 👩‍🎓 Thesis: **Unified Principles and Tools for Complex Datasets and Data-Driven Workflows**
-:::
-::: fragment
-- 📊 Research Interests
-  - 🌰 "alternative" data for empirical social science research
-  - 🤖 Leveraging LLMs and genAI in data wrangling and preparation
-  - 🛠️ Tools for better data science -- including visualisation!
-:::
+## Today
 
-## About Me!
+- how wanting to package up the calendar I made led to STRONG opinions on helper functions.
 
-::: incremental
-- 🤹🏻‍♀️ Extra-Curricular
-  - 🎙️ Regular host on [The Random Sample](https://www.therandomsample.com.au/podcasts/) podcast
-  - 👩🏻‍🏫 Research productivity and other fun things with Quarto and git
-- 👩🏻 Outside Research:
-  - 🧗🏻‍♀️ Climbing
-  - 🧘🏻‍♀️ Yoga
-  - 🤸🏻‍♀️ Aerial & Acroyoga
-  - 👩🏻‍🍳 Foodie
-:::
+# Hasn't someone else already solved the calendar problem?
 
-# Data Visualisation as Grammatical Constructs
+## ... but I want a monthly layout!
 
-## Have you heard of 'ggplot2'? 📊
-
-::: {.smaller}
-![](assets/allisonhorst-ggplot2-eda.png)
-:::
-
-## Grammar-based data visualisation
-
-::: {.sketch-container}
-![](assets/notability/ggplot2-helper-machine-overview.png){fig-align="center"}
-:::
-
-## Layered Grammar of Graphics ➕
-::: {.columns}
-::: {.column width="60%"}
-![*👩🏻‍🎨: I want my plots to reflect my data auto-magically!*](assets/allisonhorst-ggplot2-datamasterpiece.png)
-
-:::
-::: {.column .small .fragment width="40%"}
-
-```{r}
-#| echo: true
-#| eval: true
-#| code-line-numbers: "2|3-5|6|7|8"
-#| output-location: fragment
-ggplot(
-  data = penguins, 
-  mapping = aes(x = bill_length_mm,
-                y = bill_depth_mm,
-                color = species)) +
-  geom_point() +
-  theme_bw()
-```
-
-:::
-:::
-
-
-
-## But ggplot recipes can get long...
-
-::: {.columns}
-::: {.column}
-::: {.smallest}
-```{r}
-#| eval: false
-#| file: assets/example-ggtilecal-initial.R
-#| echo: true
-```
-
-:::
-:::
-::: {.column}
-
-::: {.fa-container}
-{{< fa face-dizzy size=10x >}}
-:::
-
-:::
-:::
-
-
-
-
-<!-- ## What if I just want to tweak it a little?
-
-::: {.image-placeholder}
-insert diff
-::: -->
-
-# Ways to reuse ggplot code
-
-## Copy & Paste
-
-::: {.columns}
-::: {.column}
-```{r}
-#| echo: true
-#| eval: false
-#| code-line-numbers: "|5,14"
-
-
-ggplot(
-  data = penguins, 
-  mapping = aes(
-    x = bill_length_mm,
-    y = bill_depth_mm,
-    color = species)) +
-  geom_point()
-
-## -- SPOT THE DIFFERENCE --
-
-ggplot(
-  data = penguins, 
-  mapping = aes(
-    x = bill_length_mm,
-    y = flipper_length_mm,
-    color = species)) +
-  geom_point()
-```
-:::
-::: {.column }
-::: {.image-placeholder style="margin: 0;"}
-{{< fa solid paste size=10x >}}
-:::
-:::
-:::
-
-
-
-
-## Store layers as objects or in lists {auto-animate=true}
-
-💡 Useful if components are exactly the same each time!
-
-```{r}
-#| echo: true
-#| eval: true
-#| output-location: column
-#| code-line-numbers: "|3-8"
-ggplot(mpg, aes(cty, hwy)) + 
-  geom_point() + 
-  geom_smooth(
-  method = "lm", 
-  se = FALSE, 
-  colour = alpha("steelblue", 0.5),
-  linewidth = 2
-)
-```
-::: aside
-Example from [_ggplot2: Elegant Graphics for Data Analysis (3e)_](https://ggplot2-book.org/programming.html#single-components)
-:::
-
-## Store layers as objects or in lists {auto-animate=true}
-
-💡 Useful if components are exactly the same each time!
-
-```{r}
-#| echo: true
-#| eval: true
-#| output-location: column
-#| code-line-numbers: "1-6|10"
-bestfit <- 
-geom_smooth(
-  method = "lm", 
-  se = FALSE, 
-  colour = alpha("steelblue", 0.5),
-  linewidth = 2
-)
-ggplot(mpg, aes(cty, hwy)) + 
-  geom_point() + 
-  bestfit
-```
-
-::: aside
-Example from [_ggplot2: Elegant Graphics for Data Analysis (3e)_](https://ggplot2-book.org/programming.html#single-components)
-:::
-
-## Store layers as objects or **in lists** {visibility="hidden"}
-
-```{.r}
-geom_mean <- function() {
-  list(
-    stat_summary(fun = "mean", geom = "bar", fill = "grey70"),
-    stat_summary(fun.data = "mean_cl_normal", geom = "errorbar", width = 0.4)
-  )
-}
-ggplot(mpg, aes(class, cty)) + geom_mean()
-ggplot(mpg, aes(drv, cty)) + geom_mean()
-```
-## Wrap it all into helper functions! 
-
-::: {.sketch-container}
-![](assets/notability/ggplot2-helper-wrapped.png){fig-align="center" width="70%"}
-:::
-
-## Convenience vs. flexibility
-
+<!-- Convenience vs. flexibility -->
 
 ::: {.columns}
 ::: {.column}
@@ -407,7 +207,7 @@ turn into
 :::
 :::
 
-## Adding new grammar components?
+## Adding new grammar components? {visibility="hidden"}
 
 ::: {.columns}
 ::: {.column}
@@ -425,37 +225,45 @@ Special data semantics need special handling:
 :::
 
 
-# Plot (assembly) helpers
+# How should I package *my* magical calendar recipe?
 
-## Design goals
-::: {.incremental .big}
-* Quick 'autoplotting'
-* Minimise plot-specific arguments
-* Retain ggplot syntax & error messages
-* Integrate well with other ggplot2 components
-:::
-
-## Solution {visibility="hidden"}
+<!-- ## But what about ggplot recipes can get long...
 
 ::: {.columns}
 ::: {.column}
-::: {.image-placeholder}
-Grammatical default inputs
+::: {.smallest}
+```{r}
+#| eval: false
+#| file: assets/example-ggtilecal-initial.R
+#| echo: true
+```
+
 :::
 :::
 ::: {.column}
-::: {.image-placeholder}
-Modular internals
+
+::: {.fa-container}
+{{< fa face-dizzy size=10x >}}
 :::
-:::
-::: {.column}
-::: {.image-placeholder}
-Grammatical customisation
-:::
+
 :::
 :::
 
-## Case study: Interactive calendar!
+
+
+
+<!-- ## What if I just want to tweak it a little?
+
+::: {.image-placeholder}
+insert diff
+::: -->
+
+## Especially for things ggplot2 wasn't designed for... {visibility="hidden"}
+
+![](assets/calendars/image.png)
+
+
+## What's in my ggplot2 recipe?
 
 ::: {.columns}
 ::: {.column .smallest}
@@ -482,35 +290,49 @@ Grammatical customisation
 :::
 :::
 
-## Convenient autoplotting
 
+##  Design goals
 ::: {.columns}
+
 ::: {.column}
 
-<iframe src="https://cynthiahqy.github.io/ggtilecal/index.html" width="100%" height="500px" style="border: 1px solid #ccc; border-radius: 8px;"></iframe>
-
-:::
-::: {.column .fragment}
-
-```{r}
-#| output-location: fragment
-#| echo: true
-#| eval: true
-#| code-line-numbers: "5-7"
-library(ggtilecal)
-dates <- make_empty_month_days(
-  c("2024-01-05", "2024-06-30"))
-
-gg_facet_wrap_months(
-  dates,
-  unit_date)
-```
-
-:::
+::: {.incremental .big}
+* Quick 'autoplotting'
+* Minimise plot-specific arguments
+* Retain ggplot syntax & error messages
+* Integrate well with other ggplot2 components
 :::
 
+:::
 
-## ggplot lists as default inputs
+::: {.column}
+
+::: {.sketch-container}
+![](assets/notability/ggplot2-helper-wrapped.png){fig-align="center" width="70%"}
+:::
+
+:::
+
+:::
+
+## My solution: Transparent 'Window' Helpers
+
+![Expose, separate, instruct](assets/notability/ggplot2-helper-design-principles-summary.png)
+
+
+## Expose: Keeping the magic 📊
+
+::: {.smaller}
+![](assets/allisonhorst-ggplot2-eda.png)
+:::
+
+<!-- ## Grammar-based data visualisation
+
+::: {.sketch-container}
+![](assets/notability/ggplot2-helper-machine-overview.png){fig-align="center"}
+::: -->
+
+## Expose: lists as default inputs
 
 ::: {.columns}
 ::: {.column}
@@ -545,7 +367,61 @@ gg_facet_wrap_months(
 :::
 :::
 
-## Modular internals
+## Expose: autoplot
+
+::: {.columns}
+::: {.column}
+
+<iframe src="https://cynthiahqy.github.io/ggtilecal/index.html" width="100%" height="500px" style="border: 1px solid #ccc; border-radius: 8px;"></iframe>
+
+:::
+::: {.column .fragment}
+
+```{r}
+#| output-location: fragment
+#| echo: true
+#| eval: true
+#| code-line-numbers: "5-7"
+library(ggtilecal)
+dates <- make_empty_month_days(
+  c("2024-01-05", "2024-06-30"))
+
+gg_facet_wrap_months(
+  dates,
+  unit_date)
+```
+
+:::
+:::
+
+
+## Modular: Layered Grammar of Graphics ➕ {visibility="hidden"}
+::: {.columns}
+::: {.column width="60%"}
+![*👩🏻‍🎨: I want my plots to reflect my data auto-magically!*](assets/allisonhorst-ggplot2-datamasterpiece.png)
+
+:::
+::: {.column .small .fragment width="40%"}
+
+```{r}
+#| echo: true
+#| eval: true
+#| code-line-numbers: "2|3-5|6|7|8"
+#| output-location: fragment
+ggplot(
+  data = penguins, 
+  mapping = aes(x = bill_length_mm,
+                y = bill_depth_mm,
+                color = species)) +
+  geom_point() +
+  theme_bw()
+```
+
+:::
+:::
+
+
+## Modular: inside jobs
 
 ::: {.columns}
 ::: {.column style="align-items: start;"}
@@ -581,6 +457,32 @@ gg_facet_wrap_months <- function(...){
 ```
 :::
 :::
+
+## Instruct: Customisation
+
+::: {.columns}
+::: {.column}
+
+<iframe src="https://cynthiahqy.github.io/ggtilecal/reference/gg_facet_wrap_months.html" width="100%" height="500px" style="border: 1px solid #ccc; border-radius: 8px;"></iframe>
+
+:::
+::: {.column .incremental}
+
+**Explain:**
+
+1. Data preparation steps
+2. How the ggplot2 recipe works
+3. How to modify the plot
+
+:::
+:::
+
+<!-- - separate data transformation steps from ggplot construction
+- expose as many components of the `ggplot2` recipe as possible
+- minimise the number of plot-specfic arguments by using lists of components to accept ggplot2 customisation options
+- explicitly document the internal workings of the helper function -->
+
+# Did it pay off?
 
 ## Customising colours
 
@@ -647,26 +549,9 @@ gi <- default_plot +
 girafe(ggobj = gi)
 ```
 
-## Supporting customisation
+## Help improve these design ideas!
 
-::: {.columns}
-::: {.column}
-
-<iframe src="https://cynthiahqy.github.io/ggtilecal/reference/gg_facet_wrap_months.html" width="100%" height="500px" style="border: 1px solid #ccc; border-radius: 8px;"></iframe>
-
-:::
-::: {.column .incremental}
-
-**Explain:**
-
-1. Data preparation steps
-2. How the ggplot2 recipe works
-3. How to modify the plot
-
-:::
-:::
-
-
+SURVEY SIGNUP
 
 ## Design principles for plot helpers
 
@@ -684,12 +569,6 @@ girafe(ggobj = gi)
 :::
 
 [_But remember **rules are made to be broken!**_]{.fragment}
-
-
-<!-- - separate data transformation steps from ggplot construction
-- expose as many components of the `ggplot2` recipe as possible
-- minimise the number of plot-specfic arguments by using lists of components to accept ggplot2 customisation options
-- explicitly document the internal workings of the helper function -->
 
 ## Thanks for Listening!
 :::: {.columns}
@@ -736,3 +615,123 @@ girafe(ggobj = gi)
 :::
 :::
 
+# Appendix
+
+## Copy & Paste
+
+::: {.columns}
+::: {.column}
+```{r}
+#| echo: true
+#| eval: false
+#| code-line-numbers: "|5,14"
+
+
+ggplot(
+  data = penguins, 
+  mapping = aes(
+    x = bill_length_mm,
+    y = bill_depth_mm,
+    color = species)) +
+  geom_point()
+
+## -- SPOT THE DIFFERENCE --
+
+ggplot(
+  data = penguins, 
+  mapping = aes(
+    x = bill_length_mm,
+    y = flipper_length_mm,
+    color = species)) +
+  geom_point()
+```
+:::
+::: {.column }
+::: {.image-placeholder style="margin: 0;"}
+{{< fa solid paste size=10x >}}
+:::
+:::
+:::
+
+
+
+
+## Store layers as objects or in lists {auto-animate=true}
+
+💡 Useful if components are exactly the same each time!
+
+```{r}
+#| echo: true
+#| eval: true
+#| output-location: column
+#| code-line-numbers: "|3-8"
+ggplot(mpg, aes(cty, hwy)) + 
+  geom_point() + 
+  geom_smooth(
+  method = "lm", 
+  se = FALSE, 
+  colour = alpha("steelblue", 0.5),
+  linewidth = 2
+)
+```
+::: aside
+Example from [_ggplot2: Elegant Graphics for Data Analysis (3e)_](https://ggplot2-book.org/programming.html#single-components)
+:::
+
+## Store layers as objects or in lists {auto-animate=true}
+
+💡 Useful if components are exactly the same each time!
+
+```{r}
+#| echo: true
+#| eval: true
+#| output-location: column
+#| code-line-numbers: "1-6|10"
+bestfit <- 
+geom_smooth(
+  method = "lm", 
+  se = FALSE, 
+  colour = alpha("steelblue", 0.5),
+  linewidth = 2
+)
+ggplot(mpg, aes(cty, hwy)) + 
+  geom_point() + 
+  bestfit
+```
+
+::: aside
+Example from [_ggplot2: Elegant Graphics for Data Analysis (3e)_](https://ggplot2-book.org/programming.html#single-components)
+:::
+
+## Store layers as objects or **in lists** {visibility="hidden"}
+
+```{.r}
+geom_mean <- function() {
+  list(
+    stat_summary(fun = "mean", geom = "bar", fill = "grey70"),
+    stat_summary(fun.data = "mean_cl_normal", geom = "errorbar", width = 0.4)
+  )
+}
+ggplot(mpg, aes(class, cty)) + geom_mean()
+ggplot(mpg, aes(drv, cty)) + geom_mean()
+```
+
+## Solution {visibility="hidden"}
+
+::: {.columns}
+::: {.column}
+::: {.image-placeholder}
+Grammatical default inputs
+:::
+:::
+::: {.column}
+::: {.image-placeholder}
+Modular internals
+:::
+:::
+::: {.column}
+::: {.image-placeholder}
+Grammatical customisation
+:::
+:::
+:::
