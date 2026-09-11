@@ -9,7 +9,7 @@ format:
   letterbox-revealjs: 
     theme: [default, _style.scss]
     slide-number: c/t
-    footer: "[cynthiahqy.quarto.pub/ggplot-helpers-melburn-ssa-2025](https://cynthiahqy.quarto.pub/ggplot-helpers-melburn-ssa-2025)"
+    # footer: "[cynthiahqy.quarto.pub/ggplot-helpers-melburn-ssa-2025](https://cynthiahqy.quarto.pub/ggplot-helpers-melburn-ssa-2025)"
 execute: 
   eval: false
 ---
@@ -22,106 +22,70 @@ library(palmerpenguins)
 
 <!-- PERSONAL vs. GGPLOT -->
 
-## Two years ago...
+## 
 
-Photo from posit::conf(2024)
+::: {.love-container}
+![](assets/headshot-cynthia.jpg){.headshot-circle fig-alt="Headshot of Cynthia Huang"}
 
-## Today
+[❤️]{.love-heart}
 
-- how wanting to package up the calendar I made led to STRONG opinions on helper functions.
-
-# Hasn't someone else already solved the calendar problem?
-
-## ... but I want a monthly layout!
-
-<!-- Convenience vs. flexibility -->
-
-::: {.columns}
-::: {.column}
-
-```{r}
-#| echo: true
-#| eval: true
-#| output-location: fragment
-library(ggweekly)
-ggweek_planner(
-  start_day = "2019-04-01", 
-  end_day = "2019-06-30", 
-)
-```
-:::
-::: {.column .small .fragment}
-
-What about customisation?
-
-```{.r code-line-numbers="|11-13|14-16|18-20|17"}
-ggweekly::ggweek_planner(
-    start_day = lubridate::today(),
-    end_day = start_day +
-        lubridate::weeks(8) - lubridate::days(1),
-    highlight_days = NULL,
-    week_start = c("isoweek", "epiweek"),
-    week_start_label = c("month day", "week", "none"),
-    show_day_numbers = TRUE,
-    show_month_start_day = TRUE,
-    show_month_boundaries = TRUE,
-    highlight_text_size = 2,
-    month_text_size = 4,
-    day_number_text_size = 2,
-    month_color = "#f78154",
-    day_number_color = "grey80",
-    weekend_fill = "#f8f8f8",
-    holidays = ggweekly::us_federal_holidays,
-    font_base_family = "PT Sans",
-    font_label_family = "PT Sans Narrow",
-    font_label_text = NULL
-)
-```
-:::
+![](assets/ggplot2-hex.png){.hex-sticker fig-alt="ggplot2 hex sticker"}
 :::
 
-::: aside
-Example from [`github.com/gadenbuie/ggweekly`](https://github.com/gadenbuie/ggweekly)
+::: {.notes}
+I love ggplot2, and whenever I need to create a data visualisation, it is always the first tool I reach for.
 :::
 
-## Similar function, different wrapper?
+## 
 
-::: {.columns}
-::: {.column .small}
-```{r}
-#| echo: true
-#| eval: true
-#| output-location: default
-library(ggcal)
+![](assets/notability/calendar.jpg)
 
-mydate <- 
-  seq(
-    as.Date("2017-02-01"),
-    as.Date("2017-07-22"),
-    by="1 day")
-myfills <- 
-  rnorm(length(mydate))
-
-print(ggcal(mydate, myfills))
-```
-:::
-::: {.column .big .fragment}
-
-* how many arguments does `ggcal()` have?
-* what format should `dates`, `fills` be?
-
-:::
+::: {.notes}
+So when I wanted to procrasti-plot a calendar of an upcoming research trip across Europe and USA two years ago instead of working on my thesis, I naturally searched for a ggplot2 extension
 :::
 
-::: aside
-Example from [`github.com/jayjacobs/ggcal`](https://github.com/jayjacobs/ggcal/)
+##
+
+![](assets/temp/search-bar.png)
+
+## Existing calendar extensions...
+
+::: {.columns .cal-gallery}
+
+::: {.column width="32%"}
+### `{calendR}` {.smallest}
+
+![](assets/code-blocks/calendR-plot.png){fig-alt="Example calendR plot"}
+
+[Example plot from [package repo](https://github.com/R-CoderDotCom/calendR)]{.smallest}
 :::
 
-## Another helpful calendar maker?
+::: {.column width="32%"}
+### `{ggweekly}` {.smallest}
 
-::: {.columns}
-::: {.column}
-```{.r}
+![](assets/code-blocks/ggweekly-README-year-week-1.png){fig-alt="Example ggweekly plot"}
+
+[Example plot from [package repo](https://github.com/gadenbuie/ggweekly/blob/5197c02cb296aa882377fd8e3424024bbf1eff21/man/figures/README-year-week-1.png)]{.smallest}
+:::
+
+::: {.column width="32%"}
+### `{ggcal}` {.smallest}
+
+![](assets/code-blocks/ggcal-plot.png){fig-alt="Example ggcal plot"}
+
+[Example plot from [package README](https://github.com/jayjacobs/ggcal)]{.smallest}
+:::
+
+:::
+
+## ...their interfaces
+
+::: {.columns .cal-interfaces}
+
+::: {.column width="32%"}
+### `{calendR}` {.smallest}
+
+```r
 calendR(
     year = format(Sys.Date(), "%Y"),
     month = NULL,
@@ -175,20 +139,65 @@ calendR(
     papersize = "A4"
 )
 ```
-:::
-::: {.column .big style="text-align: center"}
-* Is this using ggplot2?
-* What are the inputs?
-* Internal data preparation?
-* ...?
-:::
+
+[[Function reference](https://rdrr.io/cran/calendR/src/R/calendR.R)]{.smallest}
 :::
 
-::: aside
-Example from [`github.com/R-CoderDotCom/calendR`](https://github.com/R-CoderDotCom/calendR)
+::: {.column width="32%"}
+### `{ggweekly}` {.smallest}
+
+```r
+ggweek_planner(
+    start_day = lubridate::today(),
+    end_day = start_day +
+        lubridate::weeks(8) - lubridate::days(1),
+    highlight_days = NULL,
+    week_start = c("isoweek", "epiweek"),
+    week_start_label = c("month day", "week", "none"),
+    show_day_numbers = TRUE,
+    show_month_start_day = TRUE,
+    show_month_boundaries = TRUE,
+    highlight_text_size = 2,
+    month_text_size = 4,
+    day_number_text_size = 2,
+    month_color = "#f78154",
+    day_number_color = "grey80",
+    weekend_fill = "#f8f8f8",
+    holidays = ggweekly::us_federal_holidays,
+    font_base_family = "PT Sans",
+    font_label_family = "PT Sans Narrow",
+    font_label_text = NULL
+)
+```
+
+[[Function reference](https://rdrr.io/github/gadenbuie/ggweekly/man/ggweek_planner.html)]{.smallest}
 :::
 
-## Beware false savings!
+::: {.column width="32%"}
+### `{ggcal}` {.smallest}
+
+```r
+ggcal(dates, fills)
+```
+
+[[Function reference](https://rdrr.io/github/jayjacobs/ggcal/man/ggcal.html)]{.smallest}
+:::
+
+:::
+
+## What makes for a 'good' plot helper?
+
+![](assets/notability/ggplot2-helper-machine-overview.png)
+
+## Another ggplot2 calendar extension?!
+
+![](assets/temp/ggtilecal.png)
+
+::: {.notes}
+naturally, none of these met my exact needs, so I made my own solution -- but they did lead me to wondering
+:::
+
+## Caution: Beware false savings!
 ::: {columns}
 ::: {.column}
 
@@ -207,100 +216,19 @@ turn into
 :::
 :::
 
-## Adding new grammar components? {visibility="hidden"}
 
-::: {.columns}
-::: {.column}
-
-<iframe src="https://mjskay.github.io/ggdist/" width="100%" height="500px" style="border: 1px solid #ccc; border-radius: 8px;"></iframe>
-
-:::
-::: {.column .fragment}
-Special data semantics need special handling:
-
-  * time: `ggweekly`, `ggcal`, `CalendR`... `ggtime` (WIP)
-  * variation & uncertainty: `ggdist`, [`ggdibbler`](https://harriet-mason.github.io/ggdibbler/articles/ggdibbler-vignette.html)
-  * space: `sf`
-:::
-:::
-
-
-# How should I package *my* magical calendar recipe?
-
-<!-- ## But what about ggplot recipes can get long...
-
-::: {.columns}
-::: {.column}
-::: {.smallest}
-```{r}
-#| eval: false
-#| file: assets/example-ggtilecal-initial.R
-#| echo: true
-```
-
-:::
-:::
-::: {.column}
-
-::: {.fa-container}
-{{< fa face-dizzy size=10x >}}
-:::
-
-:::
-:::
-
-
-
-
-<!-- ## What if I just want to tweak it a little?
-
-::: {.image-placeholder}
-insert diff
-::: -->
-
-## Especially for things ggplot2 wasn't designed for... {visibility="hidden"}
-
-![](assets/calendars/image.png)
-
-
-## What's in my ggplot2 recipe?
-
-::: {.columns}
-::: {.column .smallest}
-```{r}
-#| eval: false
-#| file: assets/example-ggtilecal-initial.R
-#| echo: true
-#| filename: very-long-ggplot-script.R
-```
-
-:::
-::: {.column .small .incremental}
-
-- data wrangling:
-    - reshaping via `reframe()`
-    - creating new variables
-    - fill in missing days
-    - calculating facet and layout (e.g. `Month`, `Month_week`)
-- `ggplot2` components:
-    - `scale`, `coord` and `facet` to layout the calendar
-    - `theme` modification to style the plot as a calendar
-    - interactive `geom` from `{ggiraph}`
-
-:::
-:::
-
-
-##  Design goals
+## Reuseable **enough** plot helpers
 ::: {.columns}
 
 ::: {.column}
+
+Ideally, a good helper function is reuse-able **enough**
 
 ::: {.incremental .big}
 * Quick 'autoplotting'
+* Keep ggplot syntax & error messages
+* Play nice with ggplot2 extensions
 * Minimise plot-specific arguments
-* Retain ggplot syntax & error messages
-* Integrate well with other ggplot2 components
 :::
 
 :::
@@ -315,32 +243,169 @@ insert diff
 
 :::
 
-## My solution: Transparent 'Window' Helpers
+## My solution: 'Window' Helpers
 
-![Expose, separate, instruct](assets/notability/ggplot2-helper-design-principles-summary.png)
+![Separate, expose, instruct](assets/notability/ggplot2-helper-design-principles-summary.png)
 
 
-## Expose: Keeping the magic 📊
 
-::: {.smaller}
-![](assets/allisonhorst-ggplot2-eda.png)
+
+
+
+
+## Separate tasks
+
+::: {.columns}
+::: {.column .smallest}
+```{.r code-line-numbers="5-41|43-71|72-104|106-124" filename="very-long-ggplot-script.R"}
+# source(here::here("_utilities/travel_dates_load.R"))
+library(ggplot2)
+library(ggiraph)
+
+## ---- daily-loc-prep ----
+
+## expand dates: https://stackoverflow.com/a/54728153
+
+travel_days <- travel_dates |>
+  mutate(nights = interval(startDate, endDate) / days(1)) |>
+  arrange(startDate, desc(nights)) |>
+  rowid_to_column() |>
+  rowwise() |>
+  reframe(rowid, location, details, nights,
+    date = seq(startDate, endDate, by = "day")
+  ) |>
+  group_by(date) |>
+  slice_min(order_by = nights, n = 1) |>
+  ungroup() |>
+  mutate(country = countrycode::countryname(location, "iso2c"))
+
+away_days <- travel_days |>
+  summarise(
+    startDate = min(date),
+    endDate = max(date)
+  ) |>
+  mutate(rowid = 0, location = "TBC") |>
+  reframe(rowid, location, date = seq(startDate, endDate, by = "day"))
+
+daily_loc <- away_days |>
+  anti_join(travel_days, by = "date") |>
+  bind_rows(travel_days) |>
+  mutate(
+    flag = countrycode::countrycode(country, "iso2c", "unicode.symbol"),
+    continent = countrycode::countrycode(country, "iso2c", "continent")
+  ) |>
+  mutate(flag = case_when(
+    location == "en route" ~ "\u2708",
+    location == "TBC" ~ "❔",
+    TRUE ~ flag
+  ))
+
+## ---- prep-full-calendar-data ----
+
+# based on: https://github.com/nrennie/tidytuesday/blob/9dbe69d696f6c1edad41a72d157a42f3b5a63a81/2023/2023-03-07/20230307.R
+
+# calculate extra months to make plot rectangular
+cal_ncol <- 3
+startMonth <- month(floor_date(min(travel_days$date), "month"))
+endMonth <- month(ceiling_date(max(travel_days$date), "month") - 1)
+n_extra_month <- cal_ncol - ((endMonth - startMonth + 1) %% cal_ncol)
+padding_days <- summarise(
+  travel_days,
+  startDate = floor_date(min(date), "month"),
+  endDate = ceiling_date(max(date) %m+% months(n_extra_month), "month") - 1
+) |>
+  reframe(date = seq(startDate, endDate, by = "day"))
+
+# prepare calendar data
+full_calendar <- padding_days |>
+  anti_join(daily_loc, by = "date") |>
+  bind_rows(daily_loc) |>
+  mutate(
+    Year = year(date),
+    Month = month(date, label = TRUE),
+    Day = wday(date, label = TRUE, week_start = 1),
+    mday = mday(date),
+    Month_week = (5 + day(date) +
+      wday(floor_date(date, "month"), week_start = 1)) %/% 7
+  )
+
+## ---- travel-dates-calendar-display ----
+
+base_data_aes <- full_calendar |>
+  ggplot(aes(x = Day, y = Month_week))
+
+layers_geom_text <- list(
+  geom_text(aes(label = mday), nudge_y = 0.25),
+  geom_text(aes(label = flag), nudge_y = -0.25)
+)
+layers_scale_coord <- list(
+  scale_y_reverse(),
+  coord_fixed(expand = TRUE)
+)
+layers_facet_labs <- list(
+  facet_wrap(vars(Month),
+    ncol = cal_ncol
+  ),
+  labs(y = NULL, x = NULL)
+)
+layers_theme <- list(
+  theme_bw(),
+  theme(
+    plot.margin = margin(0, 0, 0, 0),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    # panel.spacing = unit(0, "lines"),
+    panel.border = element_blank(),
+    axis.ticks = element_blank(),
+    axis.text.y = element_blank(),
+    strip.background = element_rect(fill = "grey95"),
+    strip.text = element_text(hjust = 0)
+  )
+)
+
+## ---- tooltip-travel-calendar ----
+
+p_cal_girafe <- base_data_aes +
+  geom_tile_interactive(
+    aes(
+      tooltip = paste(details, "@", location),
+      data_id = location
+    ),
+    alpha = 0.2,
+    fill = "transparent",
+    colour = "grey80"
+  ) +
+  layers_geom_text +
+  layers_scale_coord +
+  coord_fixed(expand = FALSE) +
+  layers_facet_labs +
+  layers_theme
+
+# girafe(ggobj = p_cal_girafe)
+```
+
+:::
+::: {.column .small .incremental}
+
+screenshot of calendar
+
+:::
 :::
 
-<!-- ## Grammar-based data visualisation
-
-::: {.sketch-container}
-![](assets/notability/ggplot2-helper-machine-overview.png){fig-align="center"}
-::: -->
+::: {.notes}
+- data wrangling:
+    - reshaping via `reframe()`
+    - creating new variables
+    - fill in missing days
+    - calculating facet and layout (e.g. `Month`, `Month_week`)
+- `ggplot2` components:
+    - `scale`, `coord` and `facet` to layout the calendar
+    - `theme` modification to style the plot as a calendar
+    - interactive `geom` from `{ggiraph}`
+:::
 
 ## Expose: lists as default inputs
 
-::: {.columns}
-::: {.column}
-
-<iframe src="https://cynthiahqy.github.io/ggtilecal/index.html" width="100%" height="500px" style="border: 1px solid #ccc; border-radius: 8px;"></iframe>
-
-:::
-::: {.column .fragment}
 ```{.r code-line-numbers="1|1-5|6|6-9|10|10-19|20" filename="function-interface"}
 gg_facet_wrap_months(
   ## --- data ----
@@ -364,18 +429,8 @@ gg_facet_wrap_months(
   .other = list()
 )
 ```
-:::
-:::
 
-## Expose: autoplot
-
-::: {.columns}
-::: {.column}
-
-<iframe src="https://cynthiahqy.github.io/ggtilecal/index.html" width="100%" height="500px" style="border: 1px solid #ccc; border-radius: 8px;"></iframe>
-
-:::
-::: {.column .fragment}
+## Autoplot convenience
 
 ```{r}
 #| output-location: fragment
@@ -390,35 +445,6 @@ gg_facet_wrap_months(
   dates,
   unit_date)
 ```
-
-:::
-:::
-
-
-## Modular: Layered Grammar of Graphics ➕ {visibility="hidden"}
-::: {.columns}
-::: {.column width="60%"}
-![*👩🏻‍🎨: I want my plots to reflect my data auto-magically!*](assets/allisonhorst-ggplot2-datamasterpiece.png)
-
-:::
-::: {.column .small .fragment width="40%"}
-
-```{r}
-#| echo: true
-#| eval: true
-#| code-line-numbers: "2|3-5|6|7|8"
-#| output-location: fragment
-ggplot(
-  data = penguins, 
-  mapping = aes(x = bill_length_mm,
-                y = bill_depth_mm,
-                color = species)) +
-  geom_point() +
-  theme_bw()
-```
-
-:::
-:::
 
 
 ## Modular: inside jobs

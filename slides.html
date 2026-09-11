@@ -6,10 +6,10 @@
 <script src="slides_files/libs/quarto-html/tippy.umd.min.js"></script>
 <link href="slides_files/libs/quarto-html/tippy.css" rel="stylesheet">
 <link href="slides_files/libs/quarto-html/light-border.css" rel="stylesheet">
-<link href="slides_files/libs/quarto-html/quarto-syntax-highlighting-dc55a5b9e770e841cd82e46aadbfb9b0.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="slides_files/libs/quarto-html/quarto-syntax-highlighting-845c23b38eaddc0f92fda52bfe77a8c8.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <link href="slides_files/libs/quarto-contrib/fontawesome6-1.2.0/all.min.css" rel="stylesheet">
 <link href="slides_files/libs/quarto-contrib/fontawesome6-1.2.0/latex-fontsize.css" rel="stylesheet"><meta charset="utf-8">
-  <meta name="generator" content="quarto-1.8.24">
+  <meta name="generator" content="quarto-1.9.36">
 
   <meta name="author" content="Cynthia A. Huang">
   <title>Reusing ‘ggplot2’ code: how to design better plot helper functions</title>
@@ -19,6 +19,9 @@
   <link rel="stylesheet" href="slides_files/libs/revealjs/dist/reset.css">
   <link rel="stylesheet" href="slides_files/libs/revealjs/dist/reveal.css">
   <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
     code{white-space: pre-wrap;}
     span.smallcaps{font-variant: small-caps;}
     div.columns{display: flex; gap: min(4vw, 1.5em);}
@@ -97,7 +100,7 @@
     code span.vs { color: #20794d; } /* VerbatimString */
     code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
   </style>
-  <link rel="stylesheet" href="slides_files/libs/revealjs/dist/theme/quarto-c6fedf687446319a2799f33b84c433a3.css">
+  <link rel="stylesheet" href="slides_files/libs/revealjs/dist/theme/quarto-1a7c0b8751be2808daa0d33d211df5f8.css">
   <link href="slides_files/libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
   <link href="slides_files/libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
   <link href="slides_files/libs/revealjs/plugin/reveal-menu/quarto-menu.css" rel="stylesheet">
@@ -189,15 +192,14 @@
       margin-right: 0; 
     }
   </style>
-  <link href="slides_files/libs/htmltools-fill-0.5.8.1/fill.css" rel="stylesheet">
+  <link href="slides_files/libs/htmltools-fill-0.5.9/fill.css" rel="stylesheet">
   <script src="slides_files/libs/htmlwidgets-1.6.4/htmlwidgets.js"></script>
-  <script src="slides_files/libs/d3-bundle-5.16.0/d3-bundle.min.js"></script>
-  <script src="slides_files/libs/d3-lasso-0.0.5/d3-lasso.min.js"></script>
-  <script src="slides_files/libs/save-svg-as-png-1.4.17/save-svg-as-png.min.js"></script>
-  <script src="slides_files/libs/flatbush-4.4.0/flatbush.min.js"></script>
-  <link href="slides_files/libs/ggiraphjs-0.8.10/ggiraphjs.min.css" rel="stylesheet">
-  <script src="slides_files/libs/ggiraphjs-0.8.10/ggiraphjs.min.js"></script>
-  <script src="slides_files/libs/girafe-binding-0.8.13/girafe.js"></script>
+  <link href="slides_files/libs/ggiraphjs-0.9.4/girafe.css" rel="stylesheet">
+  <script src="slides_files/libs/ggiraphjs-0.9.4/girafe.js"></script>
+  <script src="slides_files/libs/girafe-binding-0.9.6/girafe.js"></script>
+  <link href="slides_files/libs/liberation-sans-0.5.1/css/liberation-sans.css" rel="stylesheet">
+  <link href="slides_files/libs/liberation-serif-0.5.1/css/liberation-serif.css" rel="stylesheet">
+  <link href="slides_files/libs/liberation-mono-0.5.1/css/liberation-mono.css" rel="stylesheet">
 </head>
 <body class="quarto-light">
   <div class="reveal">
@@ -219,45 +221,130 @@ Cynthia A. Huang
 
 <!-- PERSONAL vs. GGPLOT -->
 </section>
-<section id="two-years-ago" class="slide level2">
-<h2>Two years ago…</h2>
-<p>Photo from posit::conf(2024)</p>
-</section>
-<section id="today" class="slide level2">
-<h2>Today</h2>
-<ul>
-<li>how wanting to package up the calendar I made led to STRONG opinions on helper functions.</li>
-</ul>
-</section>
-<section>
-<section id="hasnt-someone-else-already-solved-the-calendar-problem" class="title-slide slide level1 center">
-<h1>Hasn’t someone else already solved the calendar problem?</h1>
+<section id="what-makes-for-a-good-plot-helper" class="slide level2">
+<h2>What makes for a ‘good’ plot helper?</h2>
 
+<img data-src="assets/notability/ggplot2-helper-machine-overview.png" class="r-stretch"></section>
+<section id="section" class="slide level2">
+<h2></h2>
+<div class="love-container">
+<p><img data-src="assets/headshot-cynthia.jpg" class="headshot-circle" alt="Headshot of Cynthia Huang"></p>
+<p><span class="love-heart">❤️</span></p>
+<p><img data-src="assets/ggplot2-hex.png" class="hex-sticker" alt="ggplot2 hex sticker"></p>
+</div>
+<aside class="notes">
+<p>I love ggplot2, and whenever I need to create a data visualisation, it is always the first tool I reach for.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
 </section>
-<section id="but-i-want-a-monthly-layout" class="slide level2">
-<h2>… but I want a monthly layout!</h2>
-<!-- Convenience vs. flexibility -->
-<div class="columns">
-<div class="column">
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href=""></a><span class="fu">library</span>(ggweekly)</span>
-<span id="cb1-2"><a href=""></a><span class="fu">ggweek_planner</span>(</span>
-<span id="cb1-3"><a href=""></a>  <span class="at">start_day =</span> <span class="st">"2019-04-01"</span>, </span>
-<span id="cb1-4"><a href=""></a>  <span class="at">end_day =</span> <span class="st">"2019-06-30"</span>, </span>
-<span id="cb1-5"><a href=""></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<div class="cell fragment">
-<div class="cell-output-display">
-<div>
-<figure>
-<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-2-1.png" width="960"></p>
-</figure>
-</div>
-</div>
-</div>
-</div><div class="column small fragment">
-<p>What about customisation?</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2" data-code-line-numbers="|11-13|14-16|18-20|17"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href=""></a>ggweekly<span class="sc">::</span><span class="fu">ggweek_planner</span>(</span>
+<section id="section-1" class="slide level2">
+<h2></h2>
+
+<img data-src="assets/notability/calendar.jpg" class="r-stretch"><aside class="notes">
+<p>So when I wanted to procrasti-plot a calendar of an upcoming research trip across Europe and USA two years ago instead of working on my thesis, I naturally searched for a ggplot2 extension</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="section-2" class="slide level2">
+<h2></h2>
+
+<img data-src="assets/temp/search-bar.png" class="r-stretch"></section>
+<section id="existing-calendar-extensions" class="slide level2">
+<h2>Existing calendar extensions…</h2>
+<div class="columns cal-gallery">
+<div class="column" style="width:32%;">
+<h3 class="smallest" id="calendr"><code>{calendR}</code></h3>
+<p><img data-src="assets/code-blocks/calendR-plot.png" alt="Example calendR plot"></p>
+<p><span class="smallest">Example plot from <a href="https://github.com/R-CoderDotCom/calendR">package repo</a></span></p>
+</div><div class="column" style="width:32%;">
+<h3 class="smallest" id="ggweekly"><code>{ggweekly}</code></h3>
+<p><img data-src="assets/code-blocks/ggweekly-README-year-week-1.png" alt="Example ggweekly plot"></p>
+<p><span class="smallest">Example plot from <a href="https://github.com/gadenbuie/ggweekly/blob/5197c02cb296aa882377fd8e3424024bbf1eff21/man/figures/README-year-week-1.png">package repo</a></span></p>
+</div><div class="column" style="width:32%;">
+<h3 class="smallest" id="ggcal"><code>{ggcal}</code></h3>
+<p><img data-src="assets/code-blocks/ggcal-plot.png" alt="Example ggcal plot"></p>
+<p><span class="smallest">Example plot from <a href="https://github.com/jayjacobs/ggcal">package README</a></span></p>
+</div></div>
+</section>
+<section id="their-interfaces" class="slide level2">
+<h2>…their interfaces</h2>
+<div class="columns cal-interfaces">
+<div class="column" style="width:32%;">
+<h3 class="smallest" id="calendr-1"><code>{calendR}</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href=""></a><span class="fu">calendR</span>(</span>
+<span id="cb1-2"><a href=""></a>    <span class="at">year =</span> <span class="fu">format</span>(<span class="fu">Sys.Date</span>(), <span class="st">"%Y"</span>),</span>
+<span id="cb1-3"><a href=""></a>    <span class="at">month =</span> <span class="cn">NULL</span>,</span>
+<span id="cb1-4"><a href=""></a>    <span class="at">from =</span> <span class="cn">NULL</span>,</span>
+<span id="cb1-5"><a href=""></a>    <span class="at">to =</span> <span class="cn">NULL</span>,</span>
+<span id="cb1-6"><a href=""></a>    <span class="at">start =</span> <span class="fu">c</span>(<span class="st">"S"</span>, <span class="st">"M"</span>),</span>
+<span id="cb1-7"><a href=""></a>    <span class="at">orientation =</span> <span class="fu">c</span>(<span class="st">"portrait"</span>, <span class="st">"landscape"</span>),</span>
+<span id="cb1-8"><a href=""></a>    title,</span>
+<span id="cb1-9"><a href=""></a>    <span class="at">title.size =</span> <span class="dv">20</span>,</span>
+<span id="cb1-10"><a href=""></a>    <span class="at">title.col =</span> <span class="st">"gray30"</span>,</span>
+<span id="cb1-11"><a href=""></a>    <span class="at">subtitle =</span> <span class="st">""</span>,</span>
+<span id="cb1-12"><a href=""></a>    <span class="at">subtitle.size =</span> <span class="dv">10</span>,</span>
+<span id="cb1-13"><a href=""></a>    <span class="at">subtitle.col =</span> <span class="st">"gray30"</span>,</span>
+<span id="cb1-14"><a href=""></a>    <span class="at">text =</span> <span class="cn">NULL</span>,</span>
+<span id="cb1-15"><a href=""></a>    <span class="at">text.pos =</span> <span class="cn">NULL</span>,</span>
+<span id="cb1-16"><a href=""></a>    <span class="at">text.size =</span> <span class="dv">4</span>,</span>
+<span id="cb1-17"><a href=""></a>    <span class="at">text.col =</span> <span class="st">"gray30"</span>,</span>
+<span id="cb1-18"><a href=""></a>    <span class="at">special.days =</span> <span class="cn">NULL</span>,</span>
+<span id="cb1-19"><a href=""></a>    <span class="at">special.col =</span> <span class="st">"gray90"</span>,</span>
+<span id="cb1-20"><a href=""></a>    <span class="at">gradient =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb1-21"><a href=""></a>    <span class="at">low.col =</span> <span class="st">"white"</span>,</span>
+<span id="cb1-22"><a href=""></a>    <span class="at">col =</span> <span class="st">"gray30"</span>,</span>
+<span id="cb1-23"><a href=""></a>    <span class="at">lwd =</span> <span class="fl">0.5</span>,</span>
+<span id="cb1-24"><a href=""></a>    <span class="at">lty =</span> <span class="dv">1</span>,</span>
+<span id="cb1-25"><a href=""></a>    <span class="at">font.family =</span> <span class="st">"sans"</span>,</span>
+<span id="cb1-26"><a href=""></a>    <span class="at">font.style =</span> <span class="st">"plain"</span>,</span>
+<span id="cb1-27"><a href=""></a>    <span class="at">day.size =</span> <span class="dv">3</span>,</span>
+<span id="cb1-28"><a href=""></a>    <span class="at">days.col =</span> <span class="st">"gray30"</span>,</span>
+<span id="cb1-29"><a href=""></a>    weeknames,</span>
+<span id="cb1-30"><a href=""></a>    <span class="at">weeknames.col =</span> <span class="st">"gray30"</span>,</span>
+<span id="cb1-31"><a href=""></a>    <span class="at">weeknames.size =</span> <span class="fl">4.5</span>,</span>
+<span id="cb1-32"><a href=""></a>    <span class="at">week.number =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb1-33"><a href=""></a>    <span class="at">week.number.col =</span> <span class="st">"gray30"</span>,</span>
+<span id="cb1-34"><a href=""></a>    <span class="at">week.number.size =</span> <span class="dv">8</span>,</span>
+<span id="cb1-35"><a href=""></a>    monthnames,</span>
+<span id="cb1-36"><a href=""></a>    <span class="at">months.size =</span> <span class="dv">10</span>,</span>
+<span id="cb1-37"><a href=""></a>    <span class="at">months.col =</span> <span class="st">"gray30"</span>,</span>
+<span id="cb1-38"><a href=""></a>    <span class="at">months.pos =</span> <span class="fl">0.5</span>,</span>
+<span id="cb1-39"><a href=""></a>    <span class="at">mbg.col =</span> <span class="st">"white"</span>,</span>
+<span id="cb1-40"><a href=""></a>    <span class="at">legend.pos =</span> <span class="st">"none"</span>,</span>
+<span id="cb1-41"><a href=""></a>    <span class="at">legend.title =</span> <span class="st">""</span>,</span>
+<span id="cb1-42"><a href=""></a>    <span class="at">bg.col =</span> <span class="st">"white"</span>,</span>
+<span id="cb1-43"><a href=""></a>    <span class="at">bg.img =</span> <span class="st">""</span>,</span>
+<span id="cb1-44"><a href=""></a>    <span class="at">margin =</span> <span class="dv">1</span>,</span>
+<span id="cb1-45"><a href=""></a>    ncol,</span>
+<span id="cb1-46"><a href=""></a>    <span class="at">lunar =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb1-47"><a href=""></a>    <span class="at">lunar.col =</span> <span class="st">"gray60"</span>,</span>
+<span id="cb1-48"><a href=""></a>    <span class="at">lunar.size =</span> <span class="dv">7</span>,</span>
+<span id="cb1-49"><a href=""></a>    <span class="at">pdf =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb1-50"><a href=""></a>    <span class="at">doc_name =</span> <span class="st">""</span>,</span>
+<span id="cb1-51"><a href=""></a>    <span class="at">papersize =</span> <span class="st">"A4"</span></span>
+<span id="cb1-52"><a href=""></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><span class="smallest"><a href="https://rdrr.io/cran/calendR/src/R/calendR.R">Function reference</a></span></p>
+</div><div class="column" style="width:32%;">
+<h3 class="smallest" id="ggweekly-1"><code>{ggweekly}</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href=""></a><span class="fu">ggweek_planner</span>(</span>
 <span id="cb2-2"><a href=""></a>    <span class="at">start_day =</span> lubridate<span class="sc">::</span><span class="fu">today</span>(),</span>
 <span id="cb2-3"><a href=""></a>    <span class="at">end_day =</span> start_day <span class="sc">+</span></span>
 <span id="cb2-4"><a href=""></a>        lubridate<span class="sc">::</span><span class="fu">weeks</span>(<span class="dv">8</span>) <span class="sc">-</span> lubridate<span class="sc">::</span><span class="fu">days</span>(<span class="dv">1</span>),</span>
@@ -278,115 +365,32 @@ Cynthia A. Huang
 <span id="cb2-19"><a href=""></a>    <span class="at">font_label_family =</span> <span class="st">"PT Sans Narrow"</span>,</span>
 <span id="cb2-20"><a href=""></a>    <span class="at">font_label_text =</span> <span class="cn">NULL</span></span>
 <span id="cb2-21"><a href=""></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><span class="smallest"><a href="https://rdrr.io/github/gadenbuie/ggweekly/man/ggweek_planner.html">Function reference</a></span></p>
+</div><div class="column" style="width:32%;">
+<h3 class="smallest" id="ggcal-1"><code>{ggcal}</code></h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href=""></a><span class="fu">ggcal</span>(dates, fills)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><span class="smallest"><a href="https://rdrr.io/github/jayjacobs/ggcal/man/ggcal.html">Function reference</a></span></p>
 </div></div>
+</section>
+<section id="another-ggplot2-calendar-extension" class="slide level2">
+<h2>Another ggplot2 calendar extension?!</h2>
 
-<aside><div>
-<p>Example from <a href="https://github.com/gadenbuie/ggweekly"><code>github.com/gadenbuie/ggweekly</code></a></p>
-</div></aside></section>
-<section id="similar-function-different-wrapper" class="slide level2">
-<h2>Similar function, different wrapper?</h2>
-<div class="columns">
-<div class="column small">
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href=""></a><span class="fu">library</span>(ggcal)</span>
-<span id="cb3-2"><a href=""></a></span>
-<span id="cb3-3"><a href=""></a>mydate <span class="ot">&lt;-</span> </span>
-<span id="cb3-4"><a href=""></a>  <span class="fu">seq</span>(</span>
-<span id="cb3-5"><a href=""></a>    <span class="fu">as.Date</span>(<span class="st">"2017-02-01"</span>),</span>
-<span id="cb3-6"><a href=""></a>    <span class="fu">as.Date</span>(<span class="st">"2017-07-22"</span>),</span>
-<span id="cb3-7"><a href=""></a>    <span class="at">by=</span><span class="st">"1 day"</span>)</span>
-<span id="cb3-8"><a href=""></a>myfills <span class="ot">&lt;-</span> </span>
-<span id="cb3-9"><a href=""></a>  <span class="fu">rnorm</span>(<span class="fu">length</span>(mydate))</span>
-<span id="cb3-10"><a href=""></a></span>
-<span id="cb3-11"><a href=""></a><span class="fu">print</span>(<span class="fu">ggcal</span>(mydate, myfills))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output-display">
-<div>
-<figure>
-<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-3-1.png" width="960"></p>
-</figure>
-</div>
-</div>
-</div>
-</div><div class="column big fragment">
-<ul>
-<li>how many arguments does <code>ggcal()</code> have?</li>
-<li>what format should <code>dates</code>, <code>fills</code> be?</li>
-</ul>
-</div></div>
-
-<aside><div>
-<p>Example from <a href="https://github.com/jayjacobs/ggcal/"><code>github.com/jayjacobs/ggcal</code></a></p>
-</div></aside></section>
-<section id="another-helpful-calendar-maker" class="slide level2">
-<h2>Another helpful calendar maker?</h2>
-<div class="columns">
-<div class="column">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href=""></a><span class="fu">calendR</span>(</span>
-<span id="cb4-2"><a href=""></a>    <span class="at">year =</span> <span class="fu">format</span>(<span class="fu">Sys.Date</span>(), <span class="st">"%Y"</span>),</span>
-<span id="cb4-3"><a href=""></a>    <span class="at">month =</span> <span class="cn">NULL</span>,</span>
-<span id="cb4-4"><a href=""></a>    <span class="at">from =</span> <span class="cn">NULL</span>,</span>
-<span id="cb4-5"><a href=""></a>    <span class="at">to =</span> <span class="cn">NULL</span>,</span>
-<span id="cb4-6"><a href=""></a>    <span class="at">start =</span> <span class="fu">c</span>(<span class="st">"S"</span>, <span class="st">"M"</span>),</span>
-<span id="cb4-7"><a href=""></a>    <span class="at">orientation =</span> <span class="fu">c</span>(<span class="st">"portrait"</span>, <span class="st">"landscape"</span>),</span>
-<span id="cb4-8"><a href=""></a>    title,</span>
-<span id="cb4-9"><a href=""></a>    <span class="at">title.size =</span> <span class="dv">20</span>,</span>
-<span id="cb4-10"><a href=""></a>    <span class="at">title.col =</span> <span class="st">"gray30"</span>,</span>
-<span id="cb4-11"><a href=""></a>    <span class="at">subtitle =</span> <span class="st">""</span>,</span>
-<span id="cb4-12"><a href=""></a>    <span class="at">subtitle.size =</span> <span class="dv">10</span>,</span>
-<span id="cb4-13"><a href=""></a>    <span class="at">subtitle.col =</span> <span class="st">"gray30"</span>,</span>
-<span id="cb4-14"><a href=""></a>    <span class="at">text =</span> <span class="cn">NULL</span>,</span>
-<span id="cb4-15"><a href=""></a>    <span class="at">text.pos =</span> <span class="cn">NULL</span>,</span>
-<span id="cb4-16"><a href=""></a>    <span class="at">text.size =</span> <span class="dv">4</span>,</span>
-<span id="cb4-17"><a href=""></a>    <span class="at">text.col =</span> <span class="st">"gray30"</span>,</span>
-<span id="cb4-18"><a href=""></a>    <span class="at">special.days =</span> <span class="cn">NULL</span>,</span>
-<span id="cb4-19"><a href=""></a>    <span class="at">special.col =</span> <span class="st">"gray90"</span>,</span>
-<span id="cb4-20"><a href=""></a>    <span class="at">gradient =</span> <span class="cn">FALSE</span>,</span>
-<span id="cb4-21"><a href=""></a>    <span class="at">low.col =</span> <span class="st">"white"</span>,</span>
-<span id="cb4-22"><a href=""></a>    <span class="at">col =</span> <span class="st">"gray30"</span>,</span>
-<span id="cb4-23"><a href=""></a>    <span class="at">lwd =</span> <span class="fl">0.5</span>,</span>
-<span id="cb4-24"><a href=""></a>    <span class="at">lty =</span> <span class="dv">1</span>,</span>
-<span id="cb4-25"><a href=""></a>    <span class="at">font.family =</span> <span class="st">"sans"</span>,</span>
-<span id="cb4-26"><a href=""></a>    <span class="at">font.style =</span> <span class="st">"plain"</span>,</span>
-<span id="cb4-27"><a href=""></a>    <span class="at">day.size =</span> <span class="dv">3</span>,</span>
-<span id="cb4-28"><a href=""></a>    <span class="at">days.col =</span> <span class="st">"gray30"</span>,</span>
-<span id="cb4-29"><a href=""></a>    weeknames,</span>
-<span id="cb4-30"><a href=""></a>    <span class="at">weeknames.col =</span> <span class="st">"gray30"</span>,</span>
-<span id="cb4-31"><a href=""></a>    <span class="at">weeknames.size =</span> <span class="fl">4.5</span>,</span>
-<span id="cb4-32"><a href=""></a>    <span class="at">week.number =</span> <span class="cn">FALSE</span>,</span>
-<span id="cb4-33"><a href=""></a>    <span class="at">week.number.col =</span> <span class="st">"gray30"</span>,</span>
-<span id="cb4-34"><a href=""></a>    <span class="at">week.number.size =</span> <span class="dv">8</span>,</span>
-<span id="cb4-35"><a href=""></a>    monthnames,</span>
-<span id="cb4-36"><a href=""></a>    <span class="at">months.size =</span> <span class="dv">10</span>,</span>
-<span id="cb4-37"><a href=""></a>    <span class="at">months.col =</span> <span class="st">"gray30"</span>,</span>
-<span id="cb4-38"><a href=""></a>    <span class="at">months.pos =</span> <span class="fl">0.5</span>,</span>
-<span id="cb4-39"><a href=""></a>    <span class="at">mbg.col =</span> <span class="st">"white"</span>,</span>
-<span id="cb4-40"><a href=""></a>    <span class="at">legend.pos =</span> <span class="st">"none"</span>,</span>
-<span id="cb4-41"><a href=""></a>    <span class="at">legend.title =</span> <span class="st">""</span>,</span>
-<span id="cb4-42"><a href=""></a>    <span class="at">bg.col =</span> <span class="st">"white"</span>,</span>
-<span id="cb4-43"><a href=""></a>    <span class="at">bg.img =</span> <span class="st">""</span>,</span>
-<span id="cb4-44"><a href=""></a>    <span class="at">margin =</span> <span class="dv">1</span>,</span>
-<span id="cb4-45"><a href=""></a>    ncol,</span>
-<span id="cb4-46"><a href=""></a>    <span class="at">lunar =</span> <span class="cn">FALSE</span>,</span>
-<span id="cb4-47"><a href=""></a>    <span class="at">lunar.col =</span> <span class="st">"gray60"</span>,</span>
-<span id="cb4-48"><a href=""></a>    <span class="at">lunar.size =</span> <span class="dv">7</span>,</span>
-<span id="cb4-49"><a href=""></a>    <span class="at">pdf =</span> <span class="cn">FALSE</span>,</span>
-<span id="cb4-50"><a href=""></a>    <span class="at">doc_name =</span> <span class="st">""</span>,</span>
-<span id="cb4-51"><a href=""></a>    <span class="at">papersize =</span> <span class="st">"A4"</span></span>
-<span id="cb4-52"><a href=""></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div><div class="column big" style="text-align: center">
-<ul>
-<li>Is this using ggplot2?</li>
-<li>What are the inputs?</li>
-<li>Internal data preparation?</li>
-<li>…?</li>
-</ul>
-</div></div>
-
-<aside><div>
-<p>Example from <a href="https://github.com/R-CoderDotCom/calendR"><code>github.com/R-CoderDotCom/calendR</code></a></p>
-</div></aside></section>
-<section id="beware-false-savings" class="slide level2">
-<h2>Beware false savings!</h2>
+<img data-src="assets/temp/ggtilecal.png" class="r-stretch"><aside class="notes">
+<p>naturally, none of these met my exact needs, so I made my own solution – but they did lead me to wondering</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="caution-beware-false-savings" class="slide level2">
+<h2>Caution: Beware false savings!</h2>
 <div class="{columns}">
 <div class="column">
 <div class="sketch-container">
@@ -403,331 +407,17 @@ Cynthia A. Huang
 <p><strong>confusing lists of plot specific arguments</strong></p>
 </div></div>
 </section>
-</section>
-<section>
-<section id="how-should-i-package-my-magical-calendar-recipe" class="title-slide slide level1 center">
-<h1>How should I package <em>my</em> magical calendar recipe?</h1>
-<!-- ## But what about ggplot recipes can get long...
-
-::: {.columns}
-::: {.column}
-::: {.smallest}
-
-::: {.cell}
-
-```{.r .cell-code}
-# source(here::here("_utilities/travel_dates_load.R"))
-library(ggplot2)
-library(ggiraph)
-
-## ---- daily-loc-prep ----
-
-## expand dates: https://stackoverflow.com/a/54728153
-
-travel_days <- travel_dates |>
-  mutate(nights = interval(startDate, endDate) / days(1)) |>
-  arrange(startDate, desc(nights)) |>
-  rowid_to_column() |>
-  rowwise() |>
-  reframe(rowid, location, details, nights,
-    date = seq(startDate, endDate, by = "day")
-  ) |>
-  group_by(date) |>
-  slice_min(order_by = nights, n = 1) |>
-  ungroup() |>
-  mutate(country = countrycode::countryname(location, "iso2c"))
-
-away_days <- travel_days |>
-  summarise(
-    startDate = min(date),
-    endDate = max(date)
-  ) |>
-  mutate(rowid = 0, location = "TBC") |>
-  reframe(rowid, location, date = seq(startDate, endDate, by = "day"))
-
-daily_loc <- away_days |>
-  anti_join(travel_days, by = "date") |>
-  bind_rows(travel_days) |>
-  mutate(
-    flag = countrycode::countrycode(country, "iso2c", "unicode.symbol"),
-    continent = countrycode::countrycode(country, "iso2c", "continent")
-  ) |>
-  mutate(flag = case_when(
-    location == "en route" ~ "\u2708",
-    location == "TBC" ~ "❔",
-    TRUE ~ flag
-  ))
-
-## ---- prep-full-calendar-data ----
-
-# based on: https://github.com/nrennie/tidytuesday/blob/9dbe69d696f6c1edad41a72d157a42f3b5a63a81/2023/2023-03-07/20230307.R
-
-# calculate extra months to make plot rectangular
-cal_ncol <- 3
-startMonth <- month(floor_date(min(travel_days$date), "month"))
-endMonth <- month(ceiling_date(max(travel_days$date), "month") - 1)
-n_extra_month <- cal_ncol - ((endMonth - startMonth + 1) %% cal_ncol)
-padding_days <- summarise(
-  travel_days,
-  startDate = floor_date(min(date), "month"),
-  endDate = ceiling_date(max(date) %m+% months(n_extra_month), "month") - 1
-) |>
-  reframe(date = seq(startDate, endDate, by = "day"))
-
-# prepare calendar data
-full_calendar <- padding_days |>
-  anti_join(daily_loc, by = "date") |>
-  bind_rows(daily_loc) |>
-  mutate(
-    Year = year(date),
-    Month = month(date, label = TRUE),
-    Day = wday(date, label = TRUE, week_start = 1),
-    mday = mday(date),
-    Month_week = (5 + day(date) +
-      wday(floor_date(date, "month"), week_start = 1)) %/% 7
-  )
-
-## ---- travel-dates-calendar-display ----
-
-base_data_aes <- full_calendar |>
-  ggplot(aes(x = Day, y = Month_week))
-
-layers_geom_text <- list(
-  geom_text(aes(label = mday), nudge_y = 0.25),
-  geom_text(aes(label = flag), nudge_y = -0.25)
-)
-layers_scale_coord <- list(
-  scale_y_reverse(),
-  coord_fixed(expand = TRUE)
-)
-layers_facet_labs <- list(
-  facet_wrap(vars(Month),
-    ncol = cal_ncol
-  ),
-  labs(y = NULL, x = NULL)
-)
-layers_theme <- list(
-  theme_bw(),
-  theme(
-    plot.margin = margin(0, 0, 0, 0),
-    panel.grid.major = element_blank(),
-    panel.grid.minor = element_blank(),
-    # panel.spacing = unit(0, "lines"),
-    panel.border = element_blank(),
-    axis.ticks = element_blank(),
-    axis.text.y = element_blank(),
-    strip.background = element_rect(fill = "grey95"),
-    strip.text = element_text(hjust = 0)
-  )
-)
-
-## ---- tooltip-travel-calendar ----
-
-p_cal_girafe <- base_data_aes +
-  geom_tile_interactive(
-    aes(
-      tooltip = paste(details, "@", location),
-      data_id = location
-    ),
-    alpha = 0.2,
-    fill = "transparent",
-    colour = "grey80"
-  ) +
-  layers_geom_text +
-  layers_scale_coord +
-  coord_fixed(expand = FALSE) +
-  layers_facet_labs +
-  layers_theme
-
-# girafe(ggobj = p_cal_girafe)
-```
-:::
-
-
-:::
-:::
-::: {.column}
-
-::: {.fa-container}
-
-:::
-
-:::
-:::
-
-
-
-
-<!-- ## What if I just want to tweak it a little?
-
-::: {.image-placeholder}
-insert diff
-::: -->
-</section>
-
-<section id="whats-in-my-ggplot2-recipe" class="slide level2">
-<h2>What’s in my ggplot2 recipe?</h2>
-<div class="columns">
-<div class="column smallest">
-<div class="cell">
-<div class="code-with-filename">
-<div class="code-with-filename-file">
-<pre><strong>very-long-ggplot-script.R</strong></pre>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href=""></a><span class="co"># source(here::here("_utilities/travel_dates_load.R"))</span></span>
-<span id="cb5-2"><a href=""></a><span class="fu">library</span>(ggplot2)</span>
-<span id="cb5-3"><a href=""></a><span class="fu">library</span>(ggiraph)</span>
-<span id="cb5-4"><a href=""></a></span>
-<span id="cb5-5"><a href=""></a><span class="do">## ---- daily-loc-prep ----</span></span>
-<span id="cb5-6"><a href=""></a></span>
-<span id="cb5-7"><a href=""></a><span class="do">## expand dates: https://stackoverflow.com/a/54728153</span></span>
-<span id="cb5-8"><a href=""></a></span>
-<span id="cb5-9"><a href=""></a>travel_days <span class="ot">&lt;-</span> travel_dates <span class="sc">|&gt;</span></span>
-<span id="cb5-10"><a href=""></a>  <span class="fu">mutate</span>(<span class="at">nights =</span> <span class="fu">interval</span>(startDate, endDate) <span class="sc">/</span> <span class="fu">days</span>(<span class="dv">1</span>)) <span class="sc">|&gt;</span></span>
-<span id="cb5-11"><a href=""></a>  <span class="fu">arrange</span>(startDate, <span class="fu">desc</span>(nights)) <span class="sc">|&gt;</span></span>
-<span id="cb5-12"><a href=""></a>  <span class="fu">rowid_to_column</span>() <span class="sc">|&gt;</span></span>
-<span id="cb5-13"><a href=""></a>  <span class="fu">rowwise</span>() <span class="sc">|&gt;</span></span>
-<span id="cb5-14"><a href=""></a>  <span class="fu">reframe</span>(rowid, location, details, nights,</span>
-<span id="cb5-15"><a href=""></a>    <span class="at">date =</span> <span class="fu">seq</span>(startDate, endDate, <span class="at">by =</span> <span class="st">"day"</span>)</span>
-<span id="cb5-16"><a href=""></a>  ) <span class="sc">|&gt;</span></span>
-<span id="cb5-17"><a href=""></a>  <span class="fu">group_by</span>(date) <span class="sc">|&gt;</span></span>
-<span id="cb5-18"><a href=""></a>  <span class="fu">slice_min</span>(<span class="at">order_by =</span> nights, <span class="at">n =</span> <span class="dv">1</span>) <span class="sc">|&gt;</span></span>
-<span id="cb5-19"><a href=""></a>  <span class="fu">ungroup</span>() <span class="sc">|&gt;</span></span>
-<span id="cb5-20"><a href=""></a>  <span class="fu">mutate</span>(<span class="at">country =</span> countrycode<span class="sc">::</span><span class="fu">countryname</span>(location, <span class="st">"iso2c"</span>))</span>
-<span id="cb5-21"><a href=""></a></span>
-<span id="cb5-22"><a href=""></a>away_days <span class="ot">&lt;-</span> travel_days <span class="sc">|&gt;</span></span>
-<span id="cb5-23"><a href=""></a>  <span class="fu">summarise</span>(</span>
-<span id="cb5-24"><a href=""></a>    <span class="at">startDate =</span> <span class="fu">min</span>(date),</span>
-<span id="cb5-25"><a href=""></a>    <span class="at">endDate =</span> <span class="fu">max</span>(date)</span>
-<span id="cb5-26"><a href=""></a>  ) <span class="sc">|&gt;</span></span>
-<span id="cb5-27"><a href=""></a>  <span class="fu">mutate</span>(<span class="at">rowid =</span> <span class="dv">0</span>, <span class="at">location =</span> <span class="st">"TBC"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb5-28"><a href=""></a>  <span class="fu">reframe</span>(rowid, location, <span class="at">date =</span> <span class="fu">seq</span>(startDate, endDate, <span class="at">by =</span> <span class="st">"day"</span>))</span>
-<span id="cb5-29"><a href=""></a></span>
-<span id="cb5-30"><a href=""></a>daily_loc <span class="ot">&lt;-</span> away_days <span class="sc">|&gt;</span></span>
-<span id="cb5-31"><a href=""></a>  <span class="fu">anti_join</span>(travel_days, <span class="at">by =</span> <span class="st">"date"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb5-32"><a href=""></a>  <span class="fu">bind_rows</span>(travel_days) <span class="sc">|&gt;</span></span>
-<span id="cb5-33"><a href=""></a>  <span class="fu">mutate</span>(</span>
-<span id="cb5-34"><a href=""></a>    <span class="at">flag =</span> countrycode<span class="sc">::</span><span class="fu">countrycode</span>(country, <span class="st">"iso2c"</span>, <span class="st">"unicode.symbol"</span>),</span>
-<span id="cb5-35"><a href=""></a>    <span class="at">continent =</span> countrycode<span class="sc">::</span><span class="fu">countrycode</span>(country, <span class="st">"iso2c"</span>, <span class="st">"continent"</span>)</span>
-<span id="cb5-36"><a href=""></a>  ) <span class="sc">|&gt;</span></span>
-<span id="cb5-37"><a href=""></a>  <span class="fu">mutate</span>(<span class="at">flag =</span> <span class="fu">case_when</span>(</span>
-<span id="cb5-38"><a href=""></a>    location <span class="sc">==</span> <span class="st">"en route"</span> <span class="sc">~</span> <span class="st">"\u2708"</span>,</span>
-<span id="cb5-39"><a href=""></a>    location <span class="sc">==</span> <span class="st">"TBC"</span> <span class="sc">~</span> <span class="st">"❔"</span>,</span>
-<span id="cb5-40"><a href=""></a>    <span class="cn">TRUE</span> <span class="sc">~</span> flag</span>
-<span id="cb5-41"><a href=""></a>  ))</span>
-<span id="cb5-42"><a href=""></a></span>
-<span id="cb5-43"><a href=""></a><span class="do">## ---- prep-full-calendar-data ----</span></span>
-<span id="cb5-44"><a href=""></a></span>
-<span id="cb5-45"><a href=""></a><span class="co"># based on: https://github.com/nrennie/tidytuesday/blob/9dbe69d696f6c1edad41a72d157a42f3b5a63a81/2023/2023-03-07/20230307.R</span></span>
-<span id="cb5-46"><a href=""></a></span>
-<span id="cb5-47"><a href=""></a><span class="co"># calculate extra months to make plot rectangular</span></span>
-<span id="cb5-48"><a href=""></a>cal_ncol <span class="ot">&lt;-</span> <span class="dv">3</span></span>
-<span id="cb5-49"><a href=""></a>startMonth <span class="ot">&lt;-</span> <span class="fu">month</span>(<span class="fu">floor_date</span>(<span class="fu">min</span>(travel_days<span class="sc">$</span>date), <span class="st">"month"</span>))</span>
-<span id="cb5-50"><a href=""></a>endMonth <span class="ot">&lt;-</span> <span class="fu">month</span>(<span class="fu">ceiling_date</span>(<span class="fu">max</span>(travel_days<span class="sc">$</span>date), <span class="st">"month"</span>) <span class="sc">-</span> <span class="dv">1</span>)</span>
-<span id="cb5-51"><a href=""></a>n_extra_month <span class="ot">&lt;-</span> cal_ncol <span class="sc">-</span> ((endMonth <span class="sc">-</span> startMonth <span class="sc">+</span> <span class="dv">1</span>) <span class="sc">%%</span> cal_ncol)</span>
-<span id="cb5-52"><a href=""></a>padding_days <span class="ot">&lt;-</span> <span class="fu">summarise</span>(</span>
-<span id="cb5-53"><a href=""></a>  travel_days,</span>
-<span id="cb5-54"><a href=""></a>  <span class="at">startDate =</span> <span class="fu">floor_date</span>(<span class="fu">min</span>(date), <span class="st">"month"</span>),</span>
-<span id="cb5-55"><a href=""></a>  <span class="at">endDate =</span> <span class="fu">ceiling_date</span>(<span class="fu">max</span>(date) <span class="sc">%m+%</span> <span class="fu">months</span>(n_extra_month), <span class="st">"month"</span>) <span class="sc">-</span> <span class="dv">1</span></span>
-<span id="cb5-56"><a href=""></a>) <span class="sc">|&gt;</span></span>
-<span id="cb5-57"><a href=""></a>  <span class="fu">reframe</span>(<span class="at">date =</span> <span class="fu">seq</span>(startDate, endDate, <span class="at">by =</span> <span class="st">"day"</span>))</span>
-<span id="cb5-58"><a href=""></a></span>
-<span id="cb5-59"><a href=""></a><span class="co"># prepare calendar data</span></span>
-<span id="cb5-60"><a href=""></a>full_calendar <span class="ot">&lt;-</span> padding_days <span class="sc">|&gt;</span></span>
-<span id="cb5-61"><a href=""></a>  <span class="fu">anti_join</span>(daily_loc, <span class="at">by =</span> <span class="st">"date"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb5-62"><a href=""></a>  <span class="fu">bind_rows</span>(daily_loc) <span class="sc">|&gt;</span></span>
-<span id="cb5-63"><a href=""></a>  <span class="fu">mutate</span>(</span>
-<span id="cb5-64"><a href=""></a>    <span class="at">Year =</span> <span class="fu">year</span>(date),</span>
-<span id="cb5-65"><a href=""></a>    <span class="at">Month =</span> <span class="fu">month</span>(date, <span class="at">label =</span> <span class="cn">TRUE</span>),</span>
-<span id="cb5-66"><a href=""></a>    <span class="at">Day =</span> <span class="fu">wday</span>(date, <span class="at">label =</span> <span class="cn">TRUE</span>, <span class="at">week_start =</span> <span class="dv">1</span>),</span>
-<span id="cb5-67"><a href=""></a>    <span class="at">mday =</span> <span class="fu">mday</span>(date),</span>
-<span id="cb5-68"><a href=""></a>    <span class="at">Month_week =</span> (<span class="dv">5</span> <span class="sc">+</span> <span class="fu">day</span>(date) <span class="sc">+</span></span>
-<span id="cb5-69"><a href=""></a>      <span class="fu">wday</span>(<span class="fu">floor_date</span>(date, <span class="st">"month"</span>), <span class="at">week_start =</span> <span class="dv">1</span>)) <span class="sc">%/%</span> <span class="dv">7</span></span>
-<span id="cb5-70"><a href=""></a>  )</span>
-<span id="cb5-71"><a href=""></a></span>
-<span id="cb5-72"><a href=""></a><span class="do">## ---- travel-dates-calendar-display ----</span></span>
-<span id="cb5-73"><a href=""></a></span>
-<span id="cb5-74"><a href=""></a>base_data_aes <span class="ot">&lt;-</span> full_calendar <span class="sc">|&gt;</span></span>
-<span id="cb5-75"><a href=""></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> Day, <span class="at">y =</span> Month_week))</span>
-<span id="cb5-76"><a href=""></a></span>
-<span id="cb5-77"><a href=""></a>layers_geom_text <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
-<span id="cb5-78"><a href=""></a>  <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">label =</span> mday), <span class="at">nudge_y =</span> <span class="fl">0.25</span>),</span>
-<span id="cb5-79"><a href=""></a>  <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">label =</span> flag), <span class="at">nudge_y =</span> <span class="sc">-</span><span class="fl">0.25</span>)</span>
-<span id="cb5-80"><a href=""></a>)</span>
-<span id="cb5-81"><a href=""></a>layers_scale_coord <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
-<span id="cb5-82"><a href=""></a>  <span class="fu">scale_y_reverse</span>(),</span>
-<span id="cb5-83"><a href=""></a>  <span class="fu">coord_fixed</span>(<span class="at">expand =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb5-84"><a href=""></a>)</span>
-<span id="cb5-85"><a href=""></a>layers_facet_labs <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
-<span id="cb5-86"><a href=""></a>  <span class="fu">facet_wrap</span>(<span class="fu">vars</span>(Month),</span>
-<span id="cb5-87"><a href=""></a>    <span class="at">ncol =</span> cal_ncol</span>
-<span id="cb5-88"><a href=""></a>  ),</span>
-<span id="cb5-89"><a href=""></a>  <span class="fu">labs</span>(<span class="at">y =</span> <span class="cn">NULL</span>, <span class="at">x =</span> <span class="cn">NULL</span>)</span>
-<span id="cb5-90"><a href=""></a>)</span>
-<span id="cb5-91"><a href=""></a>layers_theme <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
-<span id="cb5-92"><a href=""></a>  <span class="fu">theme_bw</span>(),</span>
-<span id="cb5-93"><a href=""></a>  <span class="fu">theme</span>(</span>
-<span id="cb5-94"><a href=""></a>    <span class="at">plot.margin =</span> <span class="fu">margin</span>(<span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>),</span>
-<span id="cb5-95"><a href=""></a>    <span class="at">panel.grid.major =</span> <span class="fu">element_blank</span>(),</span>
-<span id="cb5-96"><a href=""></a>    <span class="at">panel.grid.minor =</span> <span class="fu">element_blank</span>(),</span>
-<span id="cb5-97"><a href=""></a>    <span class="co"># panel.spacing = unit(0, "lines"),</span></span>
-<span id="cb5-98"><a href=""></a>    <span class="at">panel.border =</span> <span class="fu">element_blank</span>(),</span>
-<span id="cb5-99"><a href=""></a>    <span class="at">axis.ticks =</span> <span class="fu">element_blank</span>(),</span>
-<span id="cb5-100"><a href=""></a>    <span class="at">axis.text.y =</span> <span class="fu">element_blank</span>(),</span>
-<span id="cb5-101"><a href=""></a>    <span class="at">strip.background =</span> <span class="fu">element_rect</span>(<span class="at">fill =</span> <span class="st">"grey95"</span>),</span>
-<span id="cb5-102"><a href=""></a>    <span class="at">strip.text =</span> <span class="fu">element_text</span>(<span class="at">hjust =</span> <span class="dv">0</span>)</span>
-<span id="cb5-103"><a href=""></a>  )</span>
-<span id="cb5-104"><a href=""></a>)</span>
-<span id="cb5-105"><a href=""></a></span>
-<span id="cb5-106"><a href=""></a><span class="do">## ---- tooltip-travel-calendar ----</span></span>
-<span id="cb5-107"><a href=""></a></span>
-<span id="cb5-108"><a href=""></a>p_cal_girafe <span class="ot">&lt;-</span> base_data_aes <span class="sc">+</span></span>
-<span id="cb5-109"><a href=""></a>  <span class="fu">geom_tile_interactive</span>(</span>
-<span id="cb5-110"><a href=""></a>    <span class="fu">aes</span>(</span>
-<span id="cb5-111"><a href=""></a>      <span class="at">tooltip =</span> <span class="fu">paste</span>(details, <span class="st">"@"</span>, location),</span>
-<span id="cb5-112"><a href=""></a>      <span class="at">data_id =</span> location</span>
-<span id="cb5-113"><a href=""></a>    ),</span>
-<span id="cb5-114"><a href=""></a>    <span class="at">alpha =</span> <span class="fl">0.2</span>,</span>
-<span id="cb5-115"><a href=""></a>    <span class="at">fill =</span> <span class="st">"transparent"</span>,</span>
-<span id="cb5-116"><a href=""></a>    <span class="at">colour =</span> <span class="st">"grey80"</span></span>
-<span id="cb5-117"><a href=""></a>  ) <span class="sc">+</span></span>
-<span id="cb5-118"><a href=""></a>  layers_geom_text <span class="sc">+</span></span>
-<span id="cb5-119"><a href=""></a>  layers_scale_coord <span class="sc">+</span></span>
-<span id="cb5-120"><a href=""></a>  <span class="fu">coord_fixed</span>(<span class="at">expand =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
-<span id="cb5-121"><a href=""></a>  layers_facet_labs <span class="sc">+</span></span>
-<span id="cb5-122"><a href=""></a>  layers_theme</span>
-<span id="cb5-123"><a href=""></a></span>
-<span id="cb5-124"><a href=""></a><span class="co"># girafe(ggobj = p_cal_girafe)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-</div>
-</div><div class="column small">
-<ul>
-<li class="fragment">data wrangling:
-<ul>
-<li class="fragment">reshaping via <code>reframe()</code></li>
-<li class="fragment">creating new variables</li>
-<li class="fragment">fill in missing days</li>
-<li class="fragment">calculating facet and layout (e.g.&nbsp;<code>Month</code>, <code>Month_week</code>)</li>
-</ul></li>
-<li class="fragment"><code>ggplot2</code> components:
-<ul>
-<li class="fragment"><code>scale</code>, <code>coord</code> and <code>facet</code> to layout the calendar</li>
-<li class="fragment"><code>theme</code> modification to style the plot as a calendar</li>
-<li class="fragment">interactive <code>geom</code> from <code>{ggiraph}</code></li>
-</ul></li>
-</ul>
-</div></div>
-</section>
-<section id="design-goals" class="slide level2">
-<h2>Design goals</h2>
+<section id="reuseable-enough-plot-helpers" class="slide level2">
+<h2>Reuseable <strong>enough</strong> plot helpers</h2>
 <div class="columns">
 <div class="column">
+<p>Ideally, a good helper function is reuse-able <strong>enough</strong></p>
 <div class="big">
 <ul>
 <li class="fragment">Quick ‘autoplotting’</li>
+<li class="fragment">Keep ggplot syntax &amp; error messages</li>
+<li class="fragment">Play nice with ggplot2 extensions</li>
 <li class="fragment">Minimise plot-specific arguments</li>
-<li class="fragment">Retain ggplot syntax &amp; error messages</li>
-<li class="fragment">Integrate well with other ggplot2 components</li>
 </ul>
 </div>
 </div><div class="column">
@@ -740,84 +430,224 @@ insert diff
 </div>
 </div></div>
 </section>
-<section id="my-solution-transparent-window-helpers" class="slide level2">
-<h2>My solution: Transparent ‘Window’ Helpers</h2>
+<section id="my-solution-window-helpers" class="slide level2">
+<h2>My solution: ‘Window’ Helpers</h2>
 
-<img data-src="assets/notability/ggplot2-helper-design-principles-summary.png" class="r-stretch quarto-figure-center"><p class="caption">Expose, separate, instruct</p></section>
-<section id="expose-keeping-the-magic" class="slide level2">
-<h2>Expose: Keeping the magic 📊</h2>
-<div class="smaller">
-<p><img data-src="assets/allisonhorst-ggplot2-eda.png"></p>
+<img data-src="assets/notability/ggplot2-helper-design-principles-summary.png" class="r-stretch quarto-figure-center"><p class="caption">Separate, expose, instruct</p></section>
+<section id="separate-tasks" class="slide level2">
+<h2>Separate tasks</h2>
+<div class="columns">
+<div class="column smallest">
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>very-long-ggplot-script.R</strong></pre>
 </div>
-<!-- ## Grammar-based data visualisation
-
-::: {.sketch-container}
-![](assets/notability/ggplot2-helper-machine-overview.png){fig-align="center"}
-::: -->
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4" data-filename="very-long-ggplot-script.R" data-code-line-numbers="5-41|43-71|72-104|106-124"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href=""></a><span class="co"># source(here::here("_utilities/travel_dates_load.R"))</span></span>
+<span id="cb4-2"><a href=""></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb4-3"><a href=""></a><span class="fu">library</span>(ggiraph)</span>
+<span id="cb4-4"><a href=""></a></span>
+<span id="cb4-5"><a href=""></a><span class="do">## ---- daily-loc-prep ----</span></span>
+<span id="cb4-6"><a href=""></a></span>
+<span id="cb4-7"><a href=""></a><span class="do">## expand dates: https://stackoverflow.com/a/54728153</span></span>
+<span id="cb4-8"><a href=""></a></span>
+<span id="cb4-9"><a href=""></a>travel_days <span class="ot">&lt;-</span> travel_dates <span class="sc">|&gt;</span></span>
+<span id="cb4-10"><a href=""></a>  <span class="fu">mutate</span>(<span class="at">nights =</span> <span class="fu">interval</span>(startDate, endDate) <span class="sc">/</span> <span class="fu">days</span>(<span class="dv">1</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb4-11"><a href=""></a>  <span class="fu">arrange</span>(startDate, <span class="fu">desc</span>(nights)) <span class="sc">|&gt;</span></span>
+<span id="cb4-12"><a href=""></a>  <span class="fu">rowid_to_column</span>() <span class="sc">|&gt;</span></span>
+<span id="cb4-13"><a href=""></a>  <span class="fu">rowwise</span>() <span class="sc">|&gt;</span></span>
+<span id="cb4-14"><a href=""></a>  <span class="fu">reframe</span>(rowid, location, details, nights,</span>
+<span id="cb4-15"><a href=""></a>    <span class="at">date =</span> <span class="fu">seq</span>(startDate, endDate, <span class="at">by =</span> <span class="st">"day"</span>)</span>
+<span id="cb4-16"><a href=""></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb4-17"><a href=""></a>  <span class="fu">group_by</span>(date) <span class="sc">|&gt;</span></span>
+<span id="cb4-18"><a href=""></a>  <span class="fu">slice_min</span>(<span class="at">order_by =</span> nights, <span class="at">n =</span> <span class="dv">1</span>) <span class="sc">|&gt;</span></span>
+<span id="cb4-19"><a href=""></a>  <span class="fu">ungroup</span>() <span class="sc">|&gt;</span></span>
+<span id="cb4-20"><a href=""></a>  <span class="fu">mutate</span>(<span class="at">country =</span> countrycode<span class="sc">::</span><span class="fu">countryname</span>(location, <span class="st">"iso2c"</span>))</span>
+<span id="cb4-21"><a href=""></a></span>
+<span id="cb4-22"><a href=""></a>away_days <span class="ot">&lt;-</span> travel_days <span class="sc">|&gt;</span></span>
+<span id="cb4-23"><a href=""></a>  <span class="fu">summarise</span>(</span>
+<span id="cb4-24"><a href=""></a>    <span class="at">startDate =</span> <span class="fu">min</span>(date),</span>
+<span id="cb4-25"><a href=""></a>    <span class="at">endDate =</span> <span class="fu">max</span>(date)</span>
+<span id="cb4-26"><a href=""></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb4-27"><a href=""></a>  <span class="fu">mutate</span>(<span class="at">rowid =</span> <span class="dv">0</span>, <span class="at">location =</span> <span class="st">"TBC"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb4-28"><a href=""></a>  <span class="fu">reframe</span>(rowid, location, <span class="at">date =</span> <span class="fu">seq</span>(startDate, endDate, <span class="at">by =</span> <span class="st">"day"</span>))</span>
+<span id="cb4-29"><a href=""></a></span>
+<span id="cb4-30"><a href=""></a>daily_loc <span class="ot">&lt;-</span> away_days <span class="sc">|&gt;</span></span>
+<span id="cb4-31"><a href=""></a>  <span class="fu">anti_join</span>(travel_days, <span class="at">by =</span> <span class="st">"date"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb4-32"><a href=""></a>  <span class="fu">bind_rows</span>(travel_days) <span class="sc">|&gt;</span></span>
+<span id="cb4-33"><a href=""></a>  <span class="fu">mutate</span>(</span>
+<span id="cb4-34"><a href=""></a>    <span class="at">flag =</span> countrycode<span class="sc">::</span><span class="fu">countrycode</span>(country, <span class="st">"iso2c"</span>, <span class="st">"unicode.symbol"</span>),</span>
+<span id="cb4-35"><a href=""></a>    <span class="at">continent =</span> countrycode<span class="sc">::</span><span class="fu">countrycode</span>(country, <span class="st">"iso2c"</span>, <span class="st">"continent"</span>)</span>
+<span id="cb4-36"><a href=""></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb4-37"><a href=""></a>  <span class="fu">mutate</span>(<span class="at">flag =</span> <span class="fu">case_when</span>(</span>
+<span id="cb4-38"><a href=""></a>    location <span class="sc">==</span> <span class="st">"en route"</span> <span class="sc">~</span> <span class="st">"\u2708"</span>,</span>
+<span id="cb4-39"><a href=""></a>    location <span class="sc">==</span> <span class="st">"TBC"</span> <span class="sc">~</span> <span class="st">"❔"</span>,</span>
+<span id="cb4-40"><a href=""></a>    <span class="cn">TRUE</span> <span class="sc">~</span> flag</span>
+<span id="cb4-41"><a href=""></a>  ))</span>
+<span id="cb4-42"><a href=""></a></span>
+<span id="cb4-43"><a href=""></a><span class="do">## ---- prep-full-calendar-data ----</span></span>
+<span id="cb4-44"><a href=""></a></span>
+<span id="cb4-45"><a href=""></a><span class="co"># based on: https://github.com/nrennie/tidytuesday/blob/9dbe69d696f6c1edad41a72d157a42f3b5a63a81/2023/2023-03-07/20230307.R</span></span>
+<span id="cb4-46"><a href=""></a></span>
+<span id="cb4-47"><a href=""></a><span class="co"># calculate extra months to make plot rectangular</span></span>
+<span id="cb4-48"><a href=""></a>cal_ncol <span class="ot">&lt;-</span> <span class="dv">3</span></span>
+<span id="cb4-49"><a href=""></a>startMonth <span class="ot">&lt;-</span> <span class="fu">month</span>(<span class="fu">floor_date</span>(<span class="fu">min</span>(travel_days<span class="sc">$</span>date), <span class="st">"month"</span>))</span>
+<span id="cb4-50"><a href=""></a>endMonth <span class="ot">&lt;-</span> <span class="fu">month</span>(<span class="fu">ceiling_date</span>(<span class="fu">max</span>(travel_days<span class="sc">$</span>date), <span class="st">"month"</span>) <span class="sc">-</span> <span class="dv">1</span>)</span>
+<span id="cb4-51"><a href=""></a>n_extra_month <span class="ot">&lt;-</span> cal_ncol <span class="sc">-</span> ((endMonth <span class="sc">-</span> startMonth <span class="sc">+</span> <span class="dv">1</span>) <span class="sc">%%</span> cal_ncol)</span>
+<span id="cb4-52"><a href=""></a>padding_days <span class="ot">&lt;-</span> <span class="fu">summarise</span>(</span>
+<span id="cb4-53"><a href=""></a>  travel_days,</span>
+<span id="cb4-54"><a href=""></a>  <span class="at">startDate =</span> <span class="fu">floor_date</span>(<span class="fu">min</span>(date), <span class="st">"month"</span>),</span>
+<span id="cb4-55"><a href=""></a>  <span class="at">endDate =</span> <span class="fu">ceiling_date</span>(<span class="fu">max</span>(date) <span class="sc">%m+%</span> <span class="fu">months</span>(n_extra_month), <span class="st">"month"</span>) <span class="sc">-</span> <span class="dv">1</span></span>
+<span id="cb4-56"><a href=""></a>) <span class="sc">|&gt;</span></span>
+<span id="cb4-57"><a href=""></a>  <span class="fu">reframe</span>(<span class="at">date =</span> <span class="fu">seq</span>(startDate, endDate, <span class="at">by =</span> <span class="st">"day"</span>))</span>
+<span id="cb4-58"><a href=""></a></span>
+<span id="cb4-59"><a href=""></a><span class="co"># prepare calendar data</span></span>
+<span id="cb4-60"><a href=""></a>full_calendar <span class="ot">&lt;-</span> padding_days <span class="sc">|&gt;</span></span>
+<span id="cb4-61"><a href=""></a>  <span class="fu">anti_join</span>(daily_loc, <span class="at">by =</span> <span class="st">"date"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb4-62"><a href=""></a>  <span class="fu">bind_rows</span>(daily_loc) <span class="sc">|&gt;</span></span>
+<span id="cb4-63"><a href=""></a>  <span class="fu">mutate</span>(</span>
+<span id="cb4-64"><a href=""></a>    <span class="at">Year =</span> <span class="fu">year</span>(date),</span>
+<span id="cb4-65"><a href=""></a>    <span class="at">Month =</span> <span class="fu">month</span>(date, <span class="at">label =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb4-66"><a href=""></a>    <span class="at">Day =</span> <span class="fu">wday</span>(date, <span class="at">label =</span> <span class="cn">TRUE</span>, <span class="at">week_start =</span> <span class="dv">1</span>),</span>
+<span id="cb4-67"><a href=""></a>    <span class="at">mday =</span> <span class="fu">mday</span>(date),</span>
+<span id="cb4-68"><a href=""></a>    <span class="at">Month_week =</span> (<span class="dv">5</span> <span class="sc">+</span> <span class="fu">day</span>(date) <span class="sc">+</span></span>
+<span id="cb4-69"><a href=""></a>      <span class="fu">wday</span>(<span class="fu">floor_date</span>(date, <span class="st">"month"</span>), <span class="at">week_start =</span> <span class="dv">1</span>)) <span class="sc">%/%</span> <span class="dv">7</span></span>
+<span id="cb4-70"><a href=""></a>  )</span>
+<span id="cb4-71"><a href=""></a></span>
+<span id="cb4-72"><a href=""></a><span class="do">## ---- travel-dates-calendar-display ----</span></span>
+<span id="cb4-73"><a href=""></a></span>
+<span id="cb4-74"><a href=""></a>base_data_aes <span class="ot">&lt;-</span> full_calendar <span class="sc">|&gt;</span></span>
+<span id="cb4-75"><a href=""></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> Day, <span class="at">y =</span> Month_week))</span>
+<span id="cb4-76"><a href=""></a></span>
+<span id="cb4-77"><a href=""></a>layers_geom_text <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb4-78"><a href=""></a>  <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">label =</span> mday), <span class="at">nudge_y =</span> <span class="fl">0.25</span>),</span>
+<span id="cb4-79"><a href=""></a>  <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">label =</span> flag), <span class="at">nudge_y =</span> <span class="sc">-</span><span class="fl">0.25</span>)</span>
+<span id="cb4-80"><a href=""></a>)</span>
+<span id="cb4-81"><a href=""></a>layers_scale_coord <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb4-82"><a href=""></a>  <span class="fu">scale_y_reverse</span>(),</span>
+<span id="cb4-83"><a href=""></a>  <span class="fu">coord_fixed</span>(<span class="at">expand =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb4-84"><a href=""></a>)</span>
+<span id="cb4-85"><a href=""></a>layers_facet_labs <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb4-86"><a href=""></a>  <span class="fu">facet_wrap</span>(<span class="fu">vars</span>(Month),</span>
+<span id="cb4-87"><a href=""></a>    <span class="at">ncol =</span> cal_ncol</span>
+<span id="cb4-88"><a href=""></a>  ),</span>
+<span id="cb4-89"><a href=""></a>  <span class="fu">labs</span>(<span class="at">y =</span> <span class="cn">NULL</span>, <span class="at">x =</span> <span class="cn">NULL</span>)</span>
+<span id="cb4-90"><a href=""></a>)</span>
+<span id="cb4-91"><a href=""></a>layers_theme <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb4-92"><a href=""></a>  <span class="fu">theme_bw</span>(),</span>
+<span id="cb4-93"><a href=""></a>  <span class="fu">theme</span>(</span>
+<span id="cb4-94"><a href=""></a>    <span class="at">plot.margin =</span> <span class="fu">margin</span>(<span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>),</span>
+<span id="cb4-95"><a href=""></a>    <span class="at">panel.grid.major =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb4-96"><a href=""></a>    <span class="at">panel.grid.minor =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb4-97"><a href=""></a>    <span class="co"># panel.spacing = unit(0, "lines"),</span></span>
+<span id="cb4-98"><a href=""></a>    <span class="at">panel.border =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb4-99"><a href=""></a>    <span class="at">axis.ticks =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb4-100"><a href=""></a>    <span class="at">axis.text.y =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb4-101"><a href=""></a>    <span class="at">strip.background =</span> <span class="fu">element_rect</span>(<span class="at">fill =</span> <span class="st">"grey95"</span>),</span>
+<span id="cb4-102"><a href=""></a>    <span class="at">strip.text =</span> <span class="fu">element_text</span>(<span class="at">hjust =</span> <span class="dv">0</span>)</span>
+<span id="cb4-103"><a href=""></a>  )</span>
+<span id="cb4-104"><a href=""></a>)</span>
+<span id="cb4-105"><a href=""></a></span>
+<span id="cb4-106"><a href=""></a><span class="do">## ---- tooltip-travel-calendar ----</span></span>
+<span id="cb4-107"><a href=""></a></span>
+<span id="cb4-108"><a href=""></a>p_cal_girafe <span class="ot">&lt;-</span> base_data_aes <span class="sc">+</span></span>
+<span id="cb4-109"><a href=""></a>  <span class="fu">geom_tile_interactive</span>(</span>
+<span id="cb4-110"><a href=""></a>    <span class="fu">aes</span>(</span>
+<span id="cb4-111"><a href=""></a>      <span class="at">tooltip =</span> <span class="fu">paste</span>(details, <span class="st">"@"</span>, location),</span>
+<span id="cb4-112"><a href=""></a>      <span class="at">data_id =</span> location</span>
+<span id="cb4-113"><a href=""></a>    ),</span>
+<span id="cb4-114"><a href=""></a>    <span class="at">alpha =</span> <span class="fl">0.2</span>,</span>
+<span id="cb4-115"><a href=""></a>    <span class="at">fill =</span> <span class="st">"transparent"</span>,</span>
+<span id="cb4-116"><a href=""></a>    <span class="at">colour =</span> <span class="st">"grey80"</span></span>
+<span id="cb4-117"><a href=""></a>  ) <span class="sc">+</span></span>
+<span id="cb4-118"><a href=""></a>  layers_geom_text <span class="sc">+</span></span>
+<span id="cb4-119"><a href=""></a>  layers_scale_coord <span class="sc">+</span></span>
+<span id="cb4-120"><a href=""></a>  <span class="fu">coord_fixed</span>(<span class="at">expand =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb4-121"><a href=""></a>  layers_facet_labs <span class="sc">+</span></span>
+<span id="cb4-122"><a href=""></a>  layers_theme</span>
+<span id="cb4-123"><a href=""></a></span>
+<span id="cb4-124"><a href=""></a><span class="co"># girafe(ggobj = p_cal_girafe)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div><div class="column small">
+<p>screenshot of calendar</p>
+</div></div>
+<aside class="notes">
+<ul>
+<li>data wrangling:
+<ul>
+<li>reshaping via <code>reframe()</code></li>
+<li>creating new variables</li>
+<li>fill in missing days</li>
+<li>calculating facet and layout (e.g.&nbsp;<code>Month</code>, <code>Month_week</code>)</li>
+</ul></li>
+<li><code>ggplot2</code> components:
+<ul>
+<li><code>scale</code>, <code>coord</code> and <code>facet</code> to layout the calendar</li>
+<li><code>theme</code> modification to style the plot as a calendar</li>
+<li>interactive <code>geom</code> from <code>{ggiraph}</code></li>
+</ul></li>
+</ul>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
 </section>
 <section id="expose-lists-as-default-inputs" class="slide level2">
 <h2>Expose: lists as default inputs</h2>
-<div class="columns">
-<div class="column">
-<iframe src="https://cynthiahqy.github.io/ggtilecal/index.html" width="100%" height="500px" style="border: 1px solid #ccc; border-radius: 8px;">
-</iframe>
-</div><div class="column fragment">
 <div class="code-with-filename">
 <div class="code-with-filename-file">
 <pre><strong>function-interface</strong></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6" data-filename="function-interface" data-code-line-numbers="1|1-5|6|6-9|10|10-19|20"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href=""></a><span class="fu">gg_facet_wrap_months</span>(</span>
-<span id="cb6-2"><a href=""></a>  <span class="do">## --- data ----</span></span>
-<span id="cb6-3"><a href=""></a>  .events_long, </span>
-<span id="cb6-4"><a href=""></a>  date_col,</span>
-<span id="cb6-5"><a href=""></a>  <span class="at">locale =</span> <span class="cn">NULL</span>,</span>
-<span id="cb6-6"><a href=""></a>  <span class="do">## --- facets / layout ----</span></span>
-<span id="cb6-7"><a href=""></a>  <span class="at">week_start =</span> <span class="cn">NULL</span>, </span>
-<span id="cb6-8"><a href=""></a>  <span class="at">nrow =</span> <span class="cn">NULL</span>, </span>
-<span id="cb6-9"><a href=""></a>  <span class="at">ncol =</span> <span class="cn">NULL</span>,</span>
-<span id="cb6-10"><a href=""></a>  <span class="do">## --- default layers ---</span></span>
-<span id="cb6-11"><a href=""></a>  <span class="at">.geom =</span> <span class="fu">list</span>(</span>
-<span id="cb6-12"><a href=""></a>    <span class="fu">geom_tile</span>(<span class="at">color =</span> <span class="st">"grey70"</span>, <span class="at">fill =</span> <span class="st">"transparent"</span>),</span>
-<span id="cb6-13"><a href=""></a>    <span class="fu">geom_text</span>(<span class="at">nudge_y =</span> <span class="fl">0.25</span>)</span>
-<span id="cb6-14"><a href=""></a>  ),</span>
-<span id="cb6-15"><a href=""></a>  <span class="at">.scale_coord =</span> <span class="fu">list</span>(</span>
-<span id="cb6-16"><a href=""></a>    <span class="fu">scale_y_reverse</span>(),</span>
-<span id="cb6-17"><a href=""></a>    <span class="fu">scale_x_discrete</span>(<span class="at">position =</span> <span class="st">"top"</span>),</span>
-<span id="cb6-18"><a href=""></a>    <span class="fu">coord_fixed</span>(<span class="at">expand =</span> <span class="cn">TRUE</span>)),</span>
-<span id="cb6-19"><a href=""></a>  <span class="at">.theme =</span> <span class="fu">list</span>(<span class="fu">theme_bw_tilecal</span>()),</span>
-<span id="cb6-20"><a href=""></a>  <span class="at">.other =</span> <span class="fu">list</span>()</span>
-<span id="cb6-21"><a href=""></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5" data-filename="function-interface" data-code-line-numbers="1|1-5|6|6-9|10|10-19|20"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href=""></a><span class="fu">gg_facet_wrap_months</span>(</span>
+<span id="cb5-2"><a href=""></a>  <span class="do">## --- data ----</span></span>
+<span id="cb5-3"><a href=""></a>  .events_long, </span>
+<span id="cb5-4"><a href=""></a>  date_col,</span>
+<span id="cb5-5"><a href=""></a>  <span class="at">locale =</span> <span class="cn">NULL</span>,</span>
+<span id="cb5-6"><a href=""></a>  <span class="do">## --- facets / layout ----</span></span>
+<span id="cb5-7"><a href=""></a>  <span class="at">week_start =</span> <span class="cn">NULL</span>, </span>
+<span id="cb5-8"><a href=""></a>  <span class="at">nrow =</span> <span class="cn">NULL</span>, </span>
+<span id="cb5-9"><a href=""></a>  <span class="at">ncol =</span> <span class="cn">NULL</span>,</span>
+<span id="cb5-10"><a href=""></a>  <span class="do">## --- default layers ---</span></span>
+<span id="cb5-11"><a href=""></a>  <span class="at">.geom =</span> <span class="fu">list</span>(</span>
+<span id="cb5-12"><a href=""></a>    <span class="fu">geom_tile</span>(<span class="at">color =</span> <span class="st">"grey70"</span>, <span class="at">fill =</span> <span class="st">"transparent"</span>),</span>
+<span id="cb5-13"><a href=""></a>    <span class="fu">geom_text</span>(<span class="at">nudge_y =</span> <span class="fl">0.25</span>)</span>
+<span id="cb5-14"><a href=""></a>  ),</span>
+<span id="cb5-15"><a href=""></a>  <span class="at">.scale_coord =</span> <span class="fu">list</span>(</span>
+<span id="cb5-16"><a href=""></a>    <span class="fu">scale_y_reverse</span>(),</span>
+<span id="cb5-17"><a href=""></a>    <span class="fu">scale_x_discrete</span>(<span class="at">position =</span> <span class="st">"top"</span>),</span>
+<span id="cb5-18"><a href=""></a>    <span class="fu">coord_fixed</span>(<span class="at">expand =</span> <span class="cn">TRUE</span>)),</span>
+<span id="cb5-19"><a href=""></a>  <span class="at">.theme =</span> <span class="fu">list</span>(<span class="fu">theme_bw_tilecal</span>()),</span>
+<span id="cb5-20"><a href=""></a>  <span class="at">.other =</span> <span class="fu">list</span>()</span>
+<span id="cb5-21"><a href=""></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-</div></div>
 </section>
-<section id="expose-autoplot" class="slide level2">
-<h2>Expose: autoplot</h2>
-<div class="columns">
-<div class="column">
-<iframe src="https://cynthiahqy.github.io/ggtilecal/index.html" width="100%" height="500px" style="border: 1px solid #ccc; border-radius: 8px;">
-</iframe>
-</div><div class="column fragment">
+<section id="autoplot-convenience" class="slide level2">
+<h2>Autoplot convenience</h2>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7" data-code-line-numbers="5-7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href=""></a><span class="fu">library</span>(ggtilecal)</span>
-<span id="cb7-2"><a href=""></a>dates <span class="ot">&lt;-</span> <span class="fu">make_empty_month_days</span>(</span>
-<span id="cb7-3"><a href=""></a>  <span class="fu">c</span>(<span class="st">"2024-01-05"</span>, <span class="st">"2024-06-30"</span>))</span>
-<span id="cb7-4"><a href=""></a></span>
-<span id="cb7-5"><a href=""></a><span class="fu">gg_facet_wrap_months</span>(</span>
-<span id="cb7-6"><a href=""></a>  dates,</span>
-<span id="cb7-7"><a href=""></a>  unit_date)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6" data-code-line-numbers="5-7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href=""></a><span class="fu">library</span>(ggtilecal)</span>
+<span id="cb6-2"><a href=""></a>dates <span class="ot">&lt;-</span> <span class="fu">make_empty_month_days</span>(</span>
+<span id="cb6-3"><a href=""></a>  <span class="fu">c</span>(<span class="st">"2024-01-05"</span>, <span class="st">"2024-06-30"</span>))</span>
+<span id="cb6-4"><a href=""></a></span>
+<span id="cb6-5"><a href=""></a><span class="fu">gg_facet_wrap_months</span>(</span>
+<span id="cb6-6"><a href=""></a>  dates,</span>
+<span id="cb6-7"><a href=""></a>  unit_date)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="cell fragment">
 <div class="cell-output-display">
 <div>
 <figure>
-<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-6-1.png" width="960"></p>
+<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-2-1.png" width="960"></p>
 </figure>
 </div>
 </div>
 </div>
-</div></div>
 </section>
-
 <section id="modular-inside-jobs" class="slide level2">
 <h2>Modular: inside jobs</h2>
 <div class="columns">
@@ -830,28 +660,28 @@ insert diff
 <div class="code-with-filename-file">
 <pre><strong>internals</strong></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9" data-filename="internals" data-code-line-numbers="1|2|2-5|7-8|9-15|16-19|1-22"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href=""></a>gg_facet_wrap_months <span class="ot">&lt;-</span> <span class="cf">function</span>(...){</span>
-<span id="cb9-2"><a href=""></a>  <span class="do">## Data Helpers</span></span>
-<span id="cb9-3"><a href=""></a>  cal_data <span class="ot">&lt;-</span> .events_long <span class="sc">|&gt;</span></span>
-<span id="cb9-4"><a href=""></a>    <span class="fu">fill_missing_units</span>({{ date_col }}) <span class="sc">|&gt;</span></span>
-<span id="cb9-5"><a href=""></a>    <span class="fu">calc_calendar_vars</span>({{ date_col }})</span>
-<span id="cb9-6"><a href=""></a></span>
-<span id="cb9-7"><a href=""></a>  <span class="do">## Plot Construction</span></span>
-<span id="cb9-8"><a href=""></a>  base_plot <span class="ot">&lt;-</span> cal_data <span class="sc">|&gt;</span></span>
-<span id="cb9-9"><a href=""></a>    ggplot2<span class="sc">::</span><span class="fu">ggplot</span>(<span class="at">mapping =</span> <span class="fu">aes_string</span>(</span>
-<span id="cb9-10"><a href=""></a>      <span class="at">x =</span> <span class="st">"TC_wday_label"</span>,</span>
-<span id="cb9-11"><a href=""></a>      <span class="at">y =</span> <span class="st">"TC_month_week"</span>,</span>
-<span id="cb9-12"><a href=""></a>      <span class="at">label =</span> <span class="st">"TC_mday"</span></span>
-<span id="cb9-13"><a href=""></a>    )) <span class="sc">+</span></span>
-<span id="cb9-14"><a href=""></a>    <span class="fu">facet_wrap</span>(<span class="fu">c</span>(<span class="st">"TC_month_label"</span>), <span class="at">axes =</span> <span class="st">"all_x"</span>, <span class="at">nrow =</span> nrow, <span class="at">ncol =</span> ncol) <span class="sc">+</span></span>
-<span id="cb9-15"><a href=""></a>    <span class="fu">labs</span>(<span class="at">y =</span> <span class="cn">NULL</span>, <span class="at">x =</span> <span class="cn">NULL</span>) <span class="sc">+</span></span>
-<span id="cb9-16"><a href=""></a>    .geom <span class="sc">+</span></span>
-<span id="cb9-17"><a href=""></a>    .scale_coord <span class="sc">+</span></span>
-<span id="cb9-18"><a href=""></a>    .theme <span class="sc">+</span></span>
-<span id="cb9-19"><a href=""></a>    .others</span>
-<span id="cb9-20"><a href=""></a></span>
-<span id="cb9-21"><a href=""></a>  base_plot</span>
-<span id="cb9-22"><a href=""></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7" data-filename="internals" data-code-line-numbers="1|2|2-5|7-8|9-15|16-19|1-22"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href=""></a>gg_facet_wrap_months <span class="ot">&lt;-</span> <span class="cf">function</span>(...){</span>
+<span id="cb7-2"><a href=""></a>  <span class="do">## Data Helpers</span></span>
+<span id="cb7-3"><a href=""></a>  cal_data <span class="ot">&lt;-</span> .events_long <span class="sc">|&gt;</span></span>
+<span id="cb7-4"><a href=""></a>    <span class="fu">fill_missing_units</span>({{ date_col }}) <span class="sc">|&gt;</span></span>
+<span id="cb7-5"><a href=""></a>    <span class="fu">calc_calendar_vars</span>({{ date_col }})</span>
+<span id="cb7-6"><a href=""></a></span>
+<span id="cb7-7"><a href=""></a>  <span class="do">## Plot Construction</span></span>
+<span id="cb7-8"><a href=""></a>  base_plot <span class="ot">&lt;-</span> cal_data <span class="sc">|&gt;</span></span>
+<span id="cb7-9"><a href=""></a>    ggplot2<span class="sc">::</span><span class="fu">ggplot</span>(<span class="at">mapping =</span> <span class="fu">aes_string</span>(</span>
+<span id="cb7-10"><a href=""></a>      <span class="at">x =</span> <span class="st">"TC_wday_label"</span>,</span>
+<span id="cb7-11"><a href=""></a>      <span class="at">y =</span> <span class="st">"TC_month_week"</span>,</span>
+<span id="cb7-12"><a href=""></a>      <span class="at">label =</span> <span class="st">"TC_mday"</span></span>
+<span id="cb7-13"><a href=""></a>    )) <span class="sc">+</span></span>
+<span id="cb7-14"><a href=""></a>    <span class="fu">facet_wrap</span>(<span class="fu">c</span>(<span class="st">"TC_month_label"</span>), <span class="at">axes =</span> <span class="st">"all_x"</span>, <span class="at">nrow =</span> nrow, <span class="at">ncol =</span> ncol) <span class="sc">+</span></span>
+<span id="cb7-15"><a href=""></a>    <span class="fu">labs</span>(<span class="at">y =</span> <span class="cn">NULL</span>, <span class="at">x =</span> <span class="cn">NULL</span>) <span class="sc">+</span></span>
+<span id="cb7-16"><a href=""></a>    .geom <span class="sc">+</span></span>
+<span id="cb7-17"><a href=""></a>    .scale_coord <span class="sc">+</span></span>
+<span id="cb7-18"><a href=""></a>    .theme <span class="sc">+</span></span>
+<span id="cb7-19"><a href=""></a>    .others</span>
+<span id="cb7-20"><a href=""></a></span>
+<span id="cb7-21"><a href=""></a>  base_plot</span>
+<span id="cb7-22"><a href=""></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div></div>
 </section>
@@ -873,7 +703,7 @@ insert diff
 - expose as many components of the `ggplot2` recipe as possible
 - minimise the number of plot-specfic arguments by using lists of components to accept ggplot2 customisation options
 - explicitly document the internal workings of the helper function -->
-</section></section>
+</section>
 <section>
 <section id="did-it-pay-off" class="title-slide slide level1 center">
 <h1>Did it pay off?</h1>
@@ -883,13 +713,13 @@ insert diff
 <h2>Customising colours</h2>
 <!-- TODO: get code animation to work -->
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href=""></a><span class="fu">gg_facet_wrap_months</span>(dates, unit_date,</span>
-<span id="cb10-2"><a href=""></a>    <span class="at">.geom =</span> <span class="fu">list</span>(</span>
-<span id="cb10-3"><a href=""></a>      <span class="fu">geom_tile</span>(<span class="at">color =</span> <span class="st">"grey70"</span>, <span class="at">fill =</span> <span class="st">"transparent"</span>),</span>
-<span id="cb10-4"><a href=""></a>      <span class="fu">geom_text</span>(<span class="at">nudge_y =</span> <span class="fl">0.25</span>),</span>
-<span id="cb10-5"><a href=""></a>    <span class="at">.theme =</span> <span class="fu">list</span>(<span class="fu">theme_bw_tilecal</span>())</span>
-<span id="cb10-6"><a href=""></a>    )</span>
-<span id="cb10-7"><a href=""></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href=""></a><span class="fu">gg_facet_wrap_months</span>(dates, unit_date,</span>
+<span id="cb8-2"><a href=""></a>    <span class="at">.geom =</span> <span class="fu">list</span>(</span>
+<span id="cb8-3"><a href=""></a>      <span class="fu">geom_tile</span>(<span class="at">color =</span> <span class="st">"grey70"</span>, <span class="at">fill =</span> <span class="st">"transparent"</span>),</span>
+<span id="cb8-4"><a href=""></a>      <span class="fu">geom_text</span>(<span class="at">nudge_y =</span> <span class="fl">0.25</span>),</span>
+<span id="cb8-5"><a href=""></a>    <span class="at">.theme =</span> <span class="fu">list</span>(<span class="fu">theme_bw_tilecal</span>())</span>
+<span id="cb8-6"><a href=""></a>    )</span>
+<span id="cb8-7"><a href=""></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 
 </section>
@@ -897,22 +727,22 @@ insert diff
 <div class="cell-output-display">
 <div>
 <figure>
-<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-8-1.png" width="960"></p>
+<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-3-1.png" width="960"></p>
 </figure>
 </div>
 </div>
 </div></section><section id="customising-colours-1" class="slide level2">
 <h2>Customising colours</h2>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11" data-code-line-numbers="|5,8"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href=""></a><span class="fu">gg_facet_wrap_months</span>(dates, unit_date,</span>
-<span id="cb11-2"><a href=""></a>    <span class="at">.geom =</span> <span class="fu">list</span>(</span>
-<span id="cb11-3"><a href=""></a>      <span class="fu">geom_tile</span>(<span class="at">color =</span> <span class="st">"grey70"</span>, <span class="at">fill =</span> <span class="st">"transparent"</span>),</span>
-<span id="cb11-4"><a href=""></a>      <span class="fu">geom_text</span>(<span class="at">nudge_y =</span> <span class="fl">0.25</span>,</span>
-<span id="cb11-5"><a href=""></a>                <span class="at">color =</span> <span class="st">"#6a329f"</span>)),</span>
-<span id="cb11-6"><a href=""></a>    <span class="at">.theme =</span> <span class="fu">list</span>(<span class="fu">theme_bw_tilecal</span>(),</span>
-<span id="cb11-7"><a href=""></a>      <span class="fu">theme</span>(</span>
-<span id="cb11-8"><a href=""></a>        <span class="at">strip.background =</span> <span class="fu">element_rect</span>(<span class="at">fill =</span> <span class="st">"#d9d2e9"</span>)))</span>
-<span id="cb11-9"><a href=""></a>    )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9" data-code-line-numbers="|5,8"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href=""></a><span class="fu">gg_facet_wrap_months</span>(dates, unit_date,</span>
+<span id="cb9-2"><a href=""></a>    <span class="at">.geom =</span> <span class="fu">list</span>(</span>
+<span id="cb9-3"><a href=""></a>      <span class="fu">geom_tile</span>(<span class="at">color =</span> <span class="st">"grey70"</span>, <span class="at">fill =</span> <span class="st">"transparent"</span>),</span>
+<span id="cb9-4"><a href=""></a>      <span class="fu">geom_text</span>(<span class="at">nudge_y =</span> <span class="fl">0.25</span>,</span>
+<span id="cb9-5"><a href=""></a>                <span class="at">color =</span> <span class="st">"#6a329f"</span>)),</span>
+<span id="cb9-6"><a href=""></a>    <span class="at">.theme =</span> <span class="fu">list</span>(<span class="fu">theme_bw_tilecal</span>(),</span>
+<span id="cb9-7"><a href=""></a>      <span class="fu">theme</span>(</span>
+<span id="cb9-8"><a href=""></a>        <span class="at">strip.background =</span> <span class="fu">element_rect</span>(<span class="at">fill =</span> <span class="st">"#d9d2e9"</span>)))</span>
+<span id="cb9-9"><a href=""></a>    )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 
 </section>
@@ -920,39 +750,39 @@ insert diff
 <div class="cell-output-display">
 <div>
 <figure>
-<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-9-1.png" width="960"></p>
+<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-4-1.png" width="960"></p>
 </figure>
 </div>
 </div>
 </div></section><section id="adding-interactivity" class="slide level2">
 <h2>Adding interactivity</h2>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12" data-code-line-numbers="2,5-7|1,10|3,11-16"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href=""></a><span class="fu">library</span>(ggplot2)</span>
-<span id="cb12-2"><a href=""></a><span class="fu">library</span>(ggtilecal)</span>
-<span id="cb12-3"><a href=""></a><span class="fu">library</span>(ggiraph)</span>
-<span id="cb12-4"><a href=""></a></span>
-<span id="cb12-5"><a href=""></a>default_plot <span class="ot">&lt;-</span> demo_events_gpt <span class="sc">|&gt;</span></span>
-<span id="cb12-6"><a href=""></a>    <span class="fu">reframe_events</span>(startDate, endDate) <span class="sc">|&gt;</span></span>
-<span id="cb12-7"><a href=""></a>    <span class="fu">gg_facet_wrap_months</span>(unit_date)</span>
-<span id="cb12-8"><a href=""></a></span>
-<span id="cb12-9"><a href=""></a>gi <span class="ot">&lt;-</span> default_plot <span class="sc">+</span></span>
-<span id="cb12-10"><a href=""></a>  <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">label =</span> event_emoji), <span class="at">nudge_y =</span> <span class="sc">-</span><span class="fl">0.25</span>, <span class="at">na.rm =</span> <span class="cn">TRUE</span>) <span class="sc">+</span></span>
-<span id="cb12-11"><a href=""></a>  <span class="fu">geom_tile_interactive</span>(</span>
-<span id="cb12-12"><a href=""></a>    <span class="fu">aes</span>(<span class="at">tooltip =</span> <span class="fu">paste</span>(event_title),</span>
-<span id="cb12-13"><a href=""></a>        <span class="at">data_id =</span> event_id),</span>
-<span id="cb12-14"><a href=""></a>    <span class="at">alpha =</span> <span class="fl">0.2</span>,</span>
-<span id="cb12-15"><a href=""></a>    <span class="at">fill =</span> <span class="st">"transparent"</span>,</span>
-<span id="cb12-16"><a href=""></a>    <span class="at">colour =</span> <span class="st">"grey80"</span></span>
-<span id="cb12-17"><a href=""></a>)</span>
-<span id="cb12-18"><a href=""></a></span>
-<span id="cb12-19"><a href=""></a><span class="fu">girafe</span>(<span class="at">ggobj =</span> gi)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10" data-code-line-numbers="2,5-7|1,10|3,11-16"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href=""></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb10-2"><a href=""></a><span class="fu">library</span>(ggtilecal)</span>
+<span id="cb10-3"><a href=""></a><span class="fu">library</span>(ggiraph)</span>
+<span id="cb10-4"><a href=""></a></span>
+<span id="cb10-5"><a href=""></a>default_plot <span class="ot">&lt;-</span> demo_events_gpt <span class="sc">|&gt;</span></span>
+<span id="cb10-6"><a href=""></a>    <span class="fu">reframe_events</span>(startDate, endDate) <span class="sc">|&gt;</span></span>
+<span id="cb10-7"><a href=""></a>    <span class="fu">gg_facet_wrap_months</span>(unit_date)</span>
+<span id="cb10-8"><a href=""></a></span>
+<span id="cb10-9"><a href=""></a>gi <span class="ot">&lt;-</span> default_plot <span class="sc">+</span></span>
+<span id="cb10-10"><a href=""></a>  <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">label =</span> event_emoji), <span class="at">nudge_y =</span> <span class="sc">-</span><span class="fl">0.25</span>, <span class="at">na.rm =</span> <span class="cn">TRUE</span>) <span class="sc">+</span></span>
+<span id="cb10-11"><a href=""></a>  <span class="fu">geom_tile_interactive</span>(</span>
+<span id="cb10-12"><a href=""></a>    <span class="fu">aes</span>(<span class="at">tooltip =</span> <span class="fu">paste</span>(event_title),</span>
+<span id="cb10-13"><a href=""></a>        <span class="at">data_id =</span> event_id),</span>
+<span id="cb10-14"><a href=""></a>    <span class="at">alpha =</span> <span class="fl">0.2</span>,</span>
+<span id="cb10-15"><a href=""></a>    <span class="at">fill =</span> <span class="st">"transparent"</span>,</span>
+<span id="cb10-16"><a href=""></a>    <span class="at">colour =</span> <span class="st">"grey80"</span></span>
+<span id="cb10-17"><a href=""></a>)</span>
+<span id="cb10-18"><a href=""></a></span>
+<span id="cb10-19"><a href=""></a><span class="fu">girafe</span>(<span class="at">ggobj =</span> gi)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 
 </section>
 <section id="adding-interactivity-output" class="slide level2 output-location-slide"><h2>Adding interactivity</h2><div class="cell output-location-slide">
 <div class="cell-output-display">
-<div class="girafe html-widget html-fill-item" id="htmlwidget-b60a8b9ca16c3b611aad" style="width:960px;height:480px;"></div>
-<script type="application/json" data-for="htmlwidget-b60a8b9ca16c3b611aad">{"x":{"html":"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<svg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' class='ggiraph-svg' role='graphics-document' id='svg_a4aac129_0f21_4db5_96f6_398e19504ceb' viewBox='0 0 720 360'>\n <defs id='svg_a4aac129_0f21_4db5_96f6_398e19504ceb_defs'>\n  <clipPath id='svg_a4aac129_0f21_4db5_96f6_398e19504ceb_c1'>\n   <rect x='0' y='0' width='720' height='360'/>\n  <\/clipPath>\n  <clipPath id='svg_a4aac129_0f21_4db5_96f6_398e19504ceb_c2'>\n   <rect x='0' y='74.62' width='720' height='210.76'/>\n  <\/clipPath>\n  <clipPath id='svg_a4aac129_0f21_4db5_96f6_398e19504ceb_c3'>\n   <rect x='0' y='104.84' width='236.35' height='180.54'/>\n  <\/clipPath>\n  <clipPath id='svg_a4aac129_0f21_4db5_96f6_398e19504ceb_c4'>\n   <rect x='241.83' y='104.84' width='236.35' height='180.54'/>\n  <\/clipPath>\n  <clipPath id='svg_a4aac129_0f21_4db5_96f6_398e19504ceb_c5'>\n   <rect x='483.65' y='104.84' width='236.35' height='180.54'/>\n  <\/clipPath>\n  <clipPath id='svg_a4aac129_0f21_4db5_96f6_398e19504ceb_c6'>\n   <rect x='0' y='74.62' width='236.35' height='17.03'/>\n  <\/clipPath>\n  <clipPath id='svg_a4aac129_0f21_4db5_96f6_398e19504ceb_c7'>\n   <rect x='241.83' y='74.62' width='236.35' height='17.03'/>\n  <\/clipPath>\n  <clipPath id='svg_a4aac129_0f21_4db5_96f6_398e19504ceb_c8'>\n   <rect x='483.65' y='74.62' width='236.35' height='17.03'/>\n  <\/clipPath>\n <\/defs>\n <g id='svg_a4aac129_0f21_4db5_96f6_398e19504ceb_rootg' class='ggiraph-svg-rootg'>\n  <g clip-path='url(#svg_a4aac129_0f21_4db5_96f6_398e19504ceb_c1)'>\n   <rect x='0' y='0' width='720' height='360' fill='#FFFFFF' fill-opacity='1' stroke='#FFFFFF' stroke-opacity='1' stroke-width='0.75' stroke-linejoin='round' stroke-linecap='round' class='ggiraph-svg-bg'/>\n  <\/g>\n  <g clip-path='url(#svg_a4aac129_0f21_4db5_96f6_398e19504ceb_c2)'>\n   <rect x='0' y='74.62' width='720' height='210.76' fill='#FFFFFF' fill-opacity='1' stroke='#FFFFFF' stroke-opacity='1' stroke-width='1.07' stroke-linejoin='round' stroke-linecap='round'/>\n  <\/g>\n  <g clip-path='url(#svg_a4aac129_0f21_4db5_96f6_398e19504ceb_c3)'>\n   <rect x='0' y='104.84' width='236.35' height='180.54' fill='#FFFFFF' fill-opacity='1' stroke='none'/>\n   <rect x='68.93' y='113.04' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='101.76' y='113.04' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='134.59' y='113.04' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='167.41' y='113.04' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='200.24' y='113.04' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='3.28' y='145.87' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='36.11' y='145.87' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='68.93' y='145.87' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='101.76' y='145.87' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='134.59' y='145.87' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='167.41' y='145.87' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='200.24' y='145.87' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='3.28' y='178.69' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='36.11' y='178.69' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='134.59' y='178.69' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='167.41' y='178.69' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='200.24' y='178.69' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='3.28' y='211.52' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='36.11' y='211.52' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='68.93' y='211.52' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='101.76' y='211.52' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='134.59' y='211.52' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='36.11' y='244.35' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='68.93' y='244.35' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='101.76' y='244.35' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='134.59' y='244.35' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='68.93' y='178.69' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='101.76' y='178.69' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='167.41' y='211.52' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='200.24' y='211.52' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='3.28' y='244.35' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <text x='82.29' y='125.19' font-size='8.25pt' font-family='Helvetica'>1<\/text>\n   <text x='115.11' y='125.19' font-size='8.25pt' font-family='Helvetica'>2<\/text>\n   <text x='147.94' y='125.19' font-size='8.25pt' font-family='Helvetica'>3<\/text>\n   <text x='180.77' y='125.19' font-size='8.25pt' font-family='Helvetica'>4<\/text>\n   <text x='213.59' y='125.19' font-size='8.25pt' font-family='Helvetica'>5<\/text>\n   <text x='16.64' y='158.02' font-size='8.25pt' font-family='Helvetica'>6<\/text>\n   <text x='49.46' y='158.02' font-size='8.25pt' font-family='Helvetica'>7<\/text>\n   <text x='82.29' y='158.02' font-size='8.25pt' font-family='Helvetica'>8<\/text>\n   <text x='115.11' y='158.02' font-size='8.25pt' font-family='Helvetica'>9<\/text>\n   <text x='144.88' y='158.02' font-size='8.25pt' font-family='Helvetica'>10<\/text>\n   <text x='177.71' y='158.02' font-size='8.25pt' font-family='Helvetica'>11<\/text>\n   <text x='210.53' y='158.02' font-size='8.25pt' font-family='Helvetica'>12<\/text>\n   <text x='13.58' y='190.85' font-size='8.25pt' font-family='Helvetica'>13<\/text>\n   <text x='46.4' y='190.85' font-size='8.25pt' font-family='Helvetica'>14<\/text>\n   <text x='144.88' y='190.85' font-size='8.25pt' font-family='Helvetica'>17<\/text>\n   <text x='177.71' y='190.85' font-size='8.25pt' font-family='Helvetica'>18<\/text>\n   <text x='210.53' y='190.85' font-size='8.25pt' font-family='Helvetica'>19<\/text>\n   <text x='13.58' y='223.67' font-size='8.25pt' font-family='Helvetica'>20<\/text>\n   <text x='46.4' y='223.67' font-size='8.25pt' font-family='Helvetica'>21<\/text>\n   <text x='79.23' y='223.67' font-size='8.25pt' font-family='Helvetica'>22<\/text>\n   <text x='112.05' y='223.67' font-size='8.25pt' font-family='Helvetica'>23<\/text>\n   <text x='144.88' y='223.67' font-size='8.25pt' font-family='Helvetica'>24<\/text>\n   <text x='46.4' y='256.5' font-size='8.25pt' font-family='Helvetica'>28<\/text>\n   <text x='79.23' y='256.5' font-size='8.25pt' font-family='Helvetica'>29<\/text>\n   <text x='112.05' y='256.5' font-size='8.25pt' font-family='Helvetica'>30<\/text>\n   <text x='144.88' y='256.5' font-size='8.25pt' font-family='Helvetica'>31<\/text>\n   <text x='79.23' y='190.85' font-size='8.25pt' font-family='Helvetica'>15<\/text>\n   <text x='112.05' y='190.85' font-size='8.25pt' font-family='Helvetica'>16<\/text>\n   <text x='177.71' y='223.67' font-size='8.25pt' font-family='Helvetica'>25<\/text>\n   <text x='210.53' y='223.67' font-size='8.25pt' font-family='Helvetica'>26<\/text>\n   <text x='13.58' y='256.5' font-size='8.25pt' font-family='Helvetica'>27<\/text>\n   <text x='81.86' y='207.26' font-size='8.25pt' font-family='Helvetica'>🤖<\/text>\n   <text x='114.69' y='207.26' font-size='8.25pt' font-family='Helvetica'>🤖<\/text>\n   <text x='180.34' y='240.09' font-size='8.25pt' font-family='Helvetica'>🌍<\/text>\n   <text x='213.17' y='240.09' font-size='8.25pt' font-family='Helvetica'>🌍<\/text>\n   <text x='16.21' y='272.91' font-size='8.25pt' font-family='Helvetica'>🌍<\/text>\n  <\/g>\n  <g clip-path='url(#svg_a4aac129_0f21_4db5_96f6_398e19504ceb_c4)'>\n   <rect x='241.83' y='104.84' width='236.35' height='180.54' fill='#FFFFFF' fill-opacity='1' stroke='none'/>\n   <rect x='409.24' y='113.04' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='442.06' y='113.04' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='245.11' y='145.87' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='277.94' y='145.87' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='310.76' y='145.87' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='343.59' y='145.87' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='376.41' y='145.87' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='409.24' y='145.87' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='442.06' y='145.87' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='343.59' y='178.69' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='376.41' y='178.69' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='409.24' y='178.69' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='442.06' y='178.69' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='245.11' y='211.52' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='277.94' y='211.52' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='310.76' y='211.52' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='409.24' y='211.52' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='442.06' y='211.52' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='245.11' y='244.35' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='277.94' y='244.35' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='310.76' y='244.35' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='343.59' y='244.35' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='376.41' y='244.35' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='409.24' y='244.35' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='442.06' y='244.35' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='245.11' y='178.69' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='277.94' y='178.69' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='310.76' y='178.69' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='343.59' y='211.52' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='376.41' y='211.52' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <text x='422.59' y='125.19' font-size='8.25pt' font-family='Helvetica'>1<\/text>\n   <text x='455.42' y='125.19' font-size='8.25pt' font-family='Helvetica'>2<\/text>\n   <text x='258.46' y='158.02' font-size='8.25pt' font-family='Helvetica'>3<\/text>\n   <text x='291.29' y='158.02' font-size='8.25pt' font-family='Helvetica'>4<\/text>\n   <text x='324.11' y='158.02' font-size='8.25pt' font-family='Helvetica'>5<\/text>\n   <text x='356.94' y='158.02' font-size='8.25pt' font-family='Helvetica'>6<\/text>\n   <text x='389.77' y='158.02' font-size='8.25pt' font-family='Helvetica'>7<\/text>\n   <text x='422.59' y='158.02' font-size='8.25pt' font-family='Helvetica'>8<\/text>\n   <text x='455.42' y='158.02' font-size='8.25pt' font-family='Helvetica'>9<\/text>\n   <text x='353.88' y='190.85' font-size='8.25pt' font-family='Helvetica'>13<\/text>\n   <text x='386.71' y='190.85' font-size='8.25pt' font-family='Helvetica'>14<\/text>\n   <text x='419.53' y='190.85' font-size='8.25pt' font-family='Helvetica'>15<\/text>\n   <text x='452.36' y='190.85' font-size='8.25pt' font-family='Helvetica'>16<\/text>\n   <text x='255.4' y='223.67' font-size='8.25pt' font-family='Helvetica'>17<\/text>\n   <text x='288.23' y='223.67' font-size='8.25pt' font-family='Helvetica'>18<\/text>\n   <text x='321.05' y='223.67' font-size='8.25pt' font-family='Helvetica'>19<\/text>\n   <text x='419.53' y='223.67' font-size='8.25pt' font-family='Helvetica'>22<\/text>\n   <text x='452.36' y='223.67' font-size='8.25pt' font-family='Helvetica'>23<\/text>\n   <text x='255.4' y='256.5' font-size='8.25pt' font-family='Helvetica'>24<\/text>\n   <text x='288.23' y='256.5' font-size='8.25pt' font-family='Helvetica'>25<\/text>\n   <text x='321.05' y='256.5' font-size='8.25pt' font-family='Helvetica'>26<\/text>\n   <text x='353.88' y='256.5' font-size='8.25pt' font-family='Helvetica'>27<\/text>\n   <text x='386.71' y='256.5' font-size='8.25pt' font-family='Helvetica'>28<\/text>\n   <text x='419.53' y='256.5' font-size='8.25pt' font-family='Helvetica'>29<\/text>\n   <text x='452.36' y='256.5' font-size='8.25pt' font-family='Helvetica'>30<\/text>\n   <text x='255.4' y='190.85' font-size='8.25pt' font-family='Helvetica'>10<\/text>\n   <text x='288.23' y='190.85' font-size='8.25pt' font-family='Helvetica'>11<\/text>\n   <text x='321.05' y='190.85' font-size='8.25pt' font-family='Helvetica'>12<\/text>\n   <text x='353.88' y='223.67' font-size='8.25pt' font-family='Helvetica'>20<\/text>\n   <text x='386.71' y='223.67' font-size='8.25pt' font-family='Helvetica'>21<\/text>\n   <text x='258.04' y='207.26' font-size='8.25pt' font-family='Helvetica'>🌱<\/text>\n   <text x='290.86' y='207.26' font-size='8.25pt' font-family='Helvetica'>🌱<\/text>\n   <text x='323.69' y='207.26' font-size='8.25pt' font-family='Helvetica'>🌱<\/text>\n   <text x='356.52' y='240.09' font-size='8.25pt' font-family='Helvetica'>💼<\/text>\n   <text x='389.34' y='240.09' font-size='8.25pt' font-family='Helvetica'>💼<\/text>\n  <\/g>\n  <g clip-path='url(#svg_a4aac129_0f21_4db5_96f6_398e19504ceb_c5)'>\n   <rect x='483.65' y='104.84' width='236.35' height='180.54' fill='#FFFFFF' fill-opacity='1' stroke='none'/>\n   <rect x='486.94' y='113.04' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='519.76' y='113.04' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='552.59' y='113.04' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='585.41' y='113.04' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='552.59' y='145.87' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='585.41' y='145.87' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='618.24' y='145.87' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='651.07' y='145.87' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='683.89' y='145.87' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='486.94' y='178.69' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='519.76' y='178.69' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='552.59' y='178.69' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='585.41' y='178.69' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='618.24' y='178.69' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='651.07' y='178.69' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='683.89' y='178.69' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='486.94' y='211.52' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='519.76' y='211.52' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='552.59' y='211.52' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='585.41' y='211.52' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='618.24' y='211.52' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='651.07' y='211.52' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='683.89' y='211.52' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='486.94' y='244.35' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='519.76' y='244.35' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='552.59' y='244.35' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='618.24' y='113.04' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='651.07' y='113.04' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='683.89' y='113.04' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='486.94' y='145.87' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='519.76' y='145.87' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <text x='500.29' y='125.19' font-size='8.25pt' font-family='Helvetica'>1<\/text>\n   <text x='533.11' y='125.19' font-size='8.25pt' font-family='Helvetica'>2<\/text>\n   <text x='565.94' y='125.19' font-size='8.25pt' font-family='Helvetica'>3<\/text>\n   <text x='598.77' y='125.19' font-size='8.25pt' font-family='Helvetica'>4<\/text>\n   <text x='562.88' y='158.02' font-size='8.25pt' font-family='Helvetica'>10<\/text>\n   <text x='595.71' y='158.02' font-size='8.25pt' font-family='Helvetica'>11<\/text>\n   <text x='628.53' y='158.02' font-size='8.25pt' font-family='Helvetica'>12<\/text>\n   <text x='661.36' y='158.02' font-size='8.25pt' font-family='Helvetica'>13<\/text>\n   <text x='694.18' y='158.02' font-size='8.25pt' font-family='Helvetica'>14<\/text>\n   <text x='497.23' y='190.85' font-size='8.25pt' font-family='Helvetica'>15<\/text>\n   <text x='530.05' y='190.85' font-size='8.25pt' font-family='Helvetica'>16<\/text>\n   <text x='562.88' y='190.85' font-size='8.25pt' font-family='Helvetica'>17<\/text>\n   <text x='595.71' y='190.85' font-size='8.25pt' font-family='Helvetica'>18<\/text>\n   <text x='628.53' y='190.85' font-size='8.25pt' font-family='Helvetica'>19<\/text>\n   <text x='661.36' y='190.85' font-size='8.25pt' font-family='Helvetica'>20<\/text>\n   <text x='694.18' y='190.85' font-size='8.25pt' font-family='Helvetica'>21<\/text>\n   <text x='497.23' y='223.67' font-size='8.25pt' font-family='Helvetica'>22<\/text>\n   <text x='530.05' y='223.67' font-size='8.25pt' font-family='Helvetica'>23<\/text>\n   <text x='562.88' y='223.67' font-size='8.25pt' font-family='Helvetica'>24<\/text>\n   <text x='595.71' y='223.67' font-size='8.25pt' font-family='Helvetica'>25<\/text>\n   <text x='628.53' y='223.67' font-size='8.25pt' font-family='Helvetica'>26<\/text>\n   <text x='661.36' y='223.67' font-size='8.25pt' font-family='Helvetica'>27<\/text>\n   <text x='694.18' y='223.67' font-size='8.25pt' font-family='Helvetica'>28<\/text>\n   <text x='497.23' y='256.5' font-size='8.25pt' font-family='Helvetica'>29<\/text>\n   <text x='530.05' y='256.5' font-size='8.25pt' font-family='Helvetica'>30<\/text>\n   <text x='562.88' y='256.5' font-size='8.25pt' font-family='Helvetica'>31<\/text>\n   <text x='631.59' y='125.19' font-size='8.25pt' font-family='Helvetica'>5<\/text>\n   <text x='664.42' y='125.19' font-size='8.25pt' font-family='Helvetica'>6<\/text>\n   <text x='697.24' y='125.19' font-size='8.25pt' font-family='Helvetica'>7<\/text>\n   <text x='500.29' y='158.02' font-size='8.25pt' font-family='Helvetica'>8<\/text>\n   <text x='533.11' y='158.02' font-size='8.25pt' font-family='Helvetica'>9<\/text>\n   <text x='631.17' y='141.61' font-size='8.25pt' font-family='Helvetica'>🚀<\/text>\n   <text x='663.99' y='141.61' font-size='8.25pt' font-family='Helvetica'>🚀<\/text>\n   <text x='696.82' y='141.61' font-size='8.25pt' font-family='Helvetica'>🚀<\/text>\n   <text x='499.86' y='174.43' font-size='8.25pt' font-family='Helvetica'>🚀<\/text>\n   <text x='532.69' y='174.43' font-size='8.25pt' font-family='Helvetica'>🚀<\/text>\n  <\/g>\n  <g clip-path='url(#svg_a4aac129_0f21_4db5_96f6_398e19504ceb_c6)'>\n   <rect x='0' y='74.62' width='236.35' height='17.03' fill='#F2F2F2' fill-opacity='1' stroke='#000000' stroke-opacity='1' stroke-width='1.07' stroke-linejoin='round' stroke-linecap='round'/>\n   <text x='109.86' y='86.29' font-size='6.6pt' font-family='Helvetica' fill='#1A1A1A' fill-opacity='1'>May<\/text>\n  <\/g>\n  <g clip-path='url(#svg_a4aac129_0f21_4db5_96f6_398e19504ceb_c7)'>\n   <rect x='241.83' y='74.62' width='236.35' height='17.03' fill='#F2F2F2' fill-opacity='1' stroke='#000000' stroke-opacity='1' stroke-width='1.07' stroke-linejoin='round' stroke-linecap='round'/>\n   <text x='352.9' y='86.29' font-size='6.6pt' font-family='Helvetica' fill='#1A1A1A' fill-opacity='1'>Jun<\/text>\n  <\/g>\n  <g clip-path='url(#svg_a4aac129_0f21_4db5_96f6_398e19504ceb_c8)'>\n   <rect x='483.65' y='74.62' width='236.35' height='17.03' fill='#F2F2F2' fill-opacity='1' stroke='#000000' stroke-opacity='1' stroke-width='1.07' stroke-linejoin='round' stroke-linecap='round'/>\n   <text x='596.2' y='86.29' font-size='6.6pt' font-family='Helvetica' fill='#1A1A1A' fill-opacity='1'>Jul<\/text>\n  <\/g>\n  <g clip-path='url(#svg_a4aac129_0f21_4db5_96f6_398e19504ceb_c1)'>\n   <text x='11.13' y='102.64' font-size='6.6pt' font-family='Helvetica' fill='#4D4D4D' fill-opacity='1'>Mon<\/text>\n   <text x='44.94' y='102.64' font-size='6.6pt' font-family='Helvetica' fill='#4D4D4D' fill-opacity='1'>Tue<\/text>\n   <text x='76.3' y='102.64' font-size='6.6pt' font-family='Helvetica' fill='#4D4D4D' fill-opacity='1'>Wed<\/text>\n   <text x='110.59' y='102.64' font-size='6.6pt' font-family='Helvetica' fill='#4D4D4D' fill-opacity='1'>Thu<\/text>\n   <text x='145.87' y='102.64' font-size='6.6pt' font-family='Helvetica' fill='#4D4D4D' fill-opacity='1'>Fri<\/text>\n   <text x='177.22' y='102.64' font-size='6.6pt' font-family='Helvetica' fill='#4D4D4D' fill-opacity='1'>Sat<\/text>\n   <text x='208.82' y='102.64' font-size='6.6pt' font-family='Helvetica' fill='#4D4D4D' fill-opacity='1'>Sun<\/text>\n   <text x='252.96' y='102.64' font-size='6.6pt' font-family='Helvetica' fill='#4D4D4D' fill-opacity='1'>Mon<\/text>\n   <text x='286.77' y='102.64' font-size='6.6pt' font-family='Helvetica' fill='#4D4D4D' fill-opacity='1'>Tue<\/text>\n   <text x='318.13' y='102.64' font-size='6.6pt' font-family='Helvetica' fill='#4D4D4D' fill-opacity='1'>Wed<\/text>\n   <text x='352.42' y='102.64' font-size='6.6pt' font-family='Helvetica' fill='#4D4D4D' fill-opacity='1'>Thu<\/text>\n   <text x='387.7' y='102.64' font-size='6.6pt' font-family='Helvetica' fill='#4D4D4D' fill-opacity='1'>Fri<\/text>\n   <text x='419.05' y='102.64' font-size='6.6pt' font-family='Helvetica' fill='#4D4D4D' fill-opacity='1'>Sat<\/text>\n   <text x='450.65' y='102.64' font-size='6.6pt' font-family='Helvetica' fill='#4D4D4D' fill-opacity='1'>Sun<\/text>\n   <text x='494.79' y='102.64' font-size='6.6pt' font-family='Helvetica' fill='#4D4D4D' fill-opacity='1'>Mon<\/text>\n   <text x='528.59' y='102.64' font-size='6.6pt' font-family='Helvetica' fill='#4D4D4D' fill-opacity='1'>Tue<\/text>\n   <text x='559.95' y='102.64' font-size='6.6pt' font-family='Helvetica' fill='#4D4D4D' fill-opacity='1'>Wed<\/text>\n   <text x='594.24' y='102.64' font-size='6.6pt' font-family='Helvetica' fill='#4D4D4D' fill-opacity='1'>Thu<\/text>\n   <text x='629.53' y='102.64' font-size='6.6pt' font-family='Helvetica' fill='#4D4D4D' fill-opacity='1'>Fri<\/text>\n   <text x='660.88' y='102.64' font-size='6.6pt' font-family='Helvetica' fill='#4D4D4D' fill-opacity='1'>Sat<\/text>\n   <text x='692.47' y='102.64' font-size='6.6pt' font-family='Helvetica' fill='#4D4D4D' fill-opacity='1'>Sun<\/text>\n  <\/g>\n <\/g>\n<\/svg>","js":null,"uid":"svg_a4aac129_0f21_4db5_96f6_398e19504ceb","ratio":2,"settings":{"tooltip":{"css":".tooltip_SVGID_ { padding:5px;background:black;color:white;border-radius:2px;text-align:left; ; position:absolute;pointer-events:none;z-index:999;}","placement":"doc","opacity":0.9,"offx":10,"offy":10,"use_cursor_pos":true,"use_fill":false,"use_stroke":false,"delay_over":200,"delay_out":500},"hover":{"css":".hover_data_SVGID_ { fill:orange;stroke:black;cursor:pointer; }\ntext.hover_data_SVGID_ { stroke:none;fill:orange; }\ncircle.hover_data_SVGID_ { fill:orange;stroke:black; }\nline.hover_data_SVGID_, polyline.hover_data_SVGID_ { fill:none;stroke:orange; }\nrect.hover_data_SVGID_, polygon.hover_data_SVGID_, path.hover_data_SVGID_ { fill:orange;stroke:none; }\nimage.hover_data_SVGID_ { stroke:orange; }","reactive":true,"nearest_distance":null},"hover_inv":{"css":""},"hover_key":{"css":".hover_key_SVGID_ { fill:orange;stroke:black;cursor:pointer; }\ntext.hover_key_SVGID_ { stroke:none;fill:orange; }\ncircle.hover_key_SVGID_ { fill:orange;stroke:black; }\nline.hover_key_SVGID_, polyline.hover_key_SVGID_ { fill:none;stroke:orange; }\nrect.hover_key_SVGID_, polygon.hover_key_SVGID_, path.hover_key_SVGID_ { fill:orange;stroke:none; }\nimage.hover_key_SVGID_ { stroke:orange; }","reactive":true},"hover_theme":{"css":".hover_theme_SVGID_ { fill:orange;stroke:black;cursor:pointer; }\ntext.hover_theme_SVGID_ { stroke:none;fill:orange; }\ncircle.hover_theme_SVGID_ { fill:orange;stroke:black; }\nline.hover_theme_SVGID_, polyline.hover_theme_SVGID_ { fill:none;stroke:orange; }\nrect.hover_theme_SVGID_, polygon.hover_theme_SVGID_, path.hover_theme_SVGID_ { fill:orange;stroke:none; }\nimage.hover_theme_SVGID_ { stroke:orange; }","reactive":true},"select":{"css":".select_data_SVGID_ { fill:red;stroke:black;cursor:pointer; }\ntext.select_data_SVGID_ { stroke:none;fill:red; }\ncircle.select_data_SVGID_ { fill:red;stroke:black; }\nline.select_data_SVGID_, polyline.select_data_SVGID_ { fill:none;stroke:red; }\nrect.select_data_SVGID_, polygon.select_data_SVGID_, path.select_data_SVGID_ { fill:red;stroke:none; }\nimage.select_data_SVGID_ { stroke:red; }","type":"multiple","only_shiny":true,"selected":[]},"select_inv":{"css":""},"select_key":{"css":".select_key_SVGID_ { fill:red;stroke:black;cursor:pointer; }\ntext.select_key_SVGID_ { stroke:none;fill:red; }\ncircle.select_key_SVGID_ { fill:red;stroke:black; }\nline.select_key_SVGID_, polyline.select_key_SVGID_ { fill:none;stroke:red; }\nrect.select_key_SVGID_, polygon.select_key_SVGID_, path.select_key_SVGID_ { fill:red;stroke:none; }\nimage.select_key_SVGID_ { stroke:red; }","type":"single","only_shiny":true,"selected":[]},"select_theme":{"css":".select_theme_SVGID_ { fill:red;stroke:black;cursor:pointer; }\ntext.select_theme_SVGID_ { stroke:none;fill:red; }\ncircle.select_theme_SVGID_ { fill:red;stroke:black; }\nline.select_theme_SVGID_, polyline.select_theme_SVGID_ { fill:none;stroke:red; }\nrect.select_theme_SVGID_, polygon.select_theme_SVGID_, path.select_theme_SVGID_ { fill:red;stroke:none; }\nimage.select_theme_SVGID_ { stroke:red; }","type":"single","only_shiny":true,"selected":[]},"zoom":{"min":1,"max":1,"duration":300},"toolbar":{"position":"topright","pngname":"diagram","tooltips":null,"fixed":false,"hidden":[],"delay_over":200,"delay_out":500},"sizing":{"rescale":true,"width":1}}},"evals":[],"jsHooks":[]}</script>
+<div class="girafe html-widget html-fill-item" id="htmlwidget-9bdcd65452a486f30906" style="width:960px;height:480px;"></div>
+<script type="application/json" data-for="htmlwidget-9bdcd65452a486f30906">{"x":{"html":"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<svg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' class='ggiraph-svg' role='graphics-document' id='svg_ac639e33524ad761' viewBox='0 0 720 360'>\n <defs id='svg_ac639e33524ad761_defs'>\n  <clipPath id='svg_ac639e33524ad761_c1'>\n   <rect x='0' y='0' width='720' height='360'/>\n  <\/clipPath>\n  <clipPath id='svg_ac639e33524ad761_c2'>\n   <rect x='0' y='75' width='720' height='210.01'/>\n  <\/clipPath>\n  <clipPath id='svg_ac639e33524ad761_c3'>\n   <rect x='0' y='104.46' width='236.35' height='180.54'/>\n  <\/clipPath>\n  <clipPath id='svg_ac639e33524ad761_c4'>\n   <rect x='241.83' y='104.46' width='236.35' height='180.54'/>\n  <\/clipPath>\n  <clipPath id='svg_ac639e33524ad761_c5'>\n   <rect x='483.65' y='104.46' width='236.35' height='180.54'/>\n  <\/clipPath>\n  <clipPath id='svg_ac639e33524ad761_c6'>\n   <rect x='0' y='75' width='236.35' height='16.65'/>\n  <\/clipPath>\n  <clipPath id='svg_ac639e33524ad761_c7'>\n   <rect x='241.83' y='75' width='236.35' height='16.65'/>\n  <\/clipPath>\n  <clipPath id='svg_ac639e33524ad761_c8'>\n   <rect x='483.65' y='75' width='236.35' height='16.65'/>\n  <\/clipPath>\n <\/defs>\n <g id='svg_ac639e33524ad761_rootg' class='ggiraph-svg-rootg'>\n  <g clip-path='url(#svg_ac639e33524ad761_c1)'>\n   <rect x='0' y='0' width='720' height='360' fill='#FFFFFF' fill-opacity='1' stroke='#FFFFFF' stroke-opacity='1' stroke-width='0.75' stroke-linejoin='round' stroke-linecap='round' class='ggiraph-svg-bg'/>\n  <\/g>\n  <g clip-path='url(#svg_ac639e33524ad761_c2)'>\n   <rect x='0' y='75' width='720' height='210.01' fill='#FFFFFF' fill-opacity='1' stroke='#FFFFFF' stroke-opacity='1' stroke-width='1.07' stroke-linejoin='round' stroke-linecap='round'/>\n  <\/g>\n  <g clip-path='url(#svg_ac639e33524ad761_c3)'>\n   <rect x='0' y='104.46' width='236.35' height='180.54' fill='#FFFFFF' fill-opacity='1' stroke='none'/>\n   <rect x='68.93' y='112.67' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='101.76' y='112.67' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='134.59' y='112.67' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='167.41' y='112.67' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='200.24' y='112.67' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='3.28' y='145.49' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='36.11' y='145.49' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='68.93' y='145.49' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='101.76' y='145.49' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='134.59' y='145.49' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='167.41' y='145.49' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='200.24' y='145.49' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='3.28' y='178.32' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='36.11' y='178.32' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='134.59' y='178.32' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='167.41' y='178.32' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='200.24' y='178.32' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='3.28' y='211.15' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='36.11' y='211.15' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='68.93' y='211.15' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='101.76' y='211.15' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='134.59' y='211.15' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='36.11' y='243.97' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='68.93' y='243.97' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='101.76' y='243.97' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='134.59' y='243.97' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='68.93' y='178.32' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='101.76' y='178.32' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='167.41' y='211.15' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='200.24' y='211.15' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='3.28' y='243.97' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <text x='82.29' y='124.66' font-size='8.25pt' font-family='Liberation Sans'>1<\/text>\n   <text x='115.11' y='124.66' font-size='8.25pt' font-family='Liberation Sans'>2<\/text>\n   <text x='147.94' y='124.66' font-size='8.25pt' font-family='Liberation Sans'>3<\/text>\n   <text x='180.77' y='124.66' font-size='8.25pt' font-family='Liberation Sans'>4<\/text>\n   <text x='213.59' y='124.66' font-size='8.25pt' font-family='Liberation Sans'>5<\/text>\n   <text x='16.64' y='157.48' font-size='8.25pt' font-family='Liberation Sans'>6<\/text>\n   <text x='49.46' y='157.48' font-size='8.25pt' font-family='Liberation Sans'>7<\/text>\n   <text x='82.29' y='157.48' font-size='8.25pt' font-family='Liberation Sans'>8<\/text>\n   <text x='115.11' y='157.48' font-size='8.25pt' font-family='Liberation Sans'>9<\/text>\n   <text x='144.88' y='157.48' font-size='8.25pt' font-family='Liberation Sans'>10<\/text>\n   <text x='178.11' y='157.48' font-size='8.25pt' font-family='Liberation Sans'>11<\/text>\n   <text x='210.53' y='157.48' font-size='8.25pt' font-family='Liberation Sans'>12<\/text>\n   <text x='13.58' y='190.31' font-size='8.25pt' font-family='Liberation Sans'>13<\/text>\n   <text x='46.4' y='190.31' font-size='8.25pt' font-family='Liberation Sans'>14<\/text>\n   <text x='144.88' y='190.31' font-size='8.25pt' font-family='Liberation Sans'>17<\/text>\n   <text x='177.71' y='190.31' font-size='8.25pt' font-family='Liberation Sans'>18<\/text>\n   <text x='210.53' y='190.31' font-size='8.25pt' font-family='Liberation Sans'>19<\/text>\n   <text x='13.58' y='223.14' font-size='8.25pt' font-family='Liberation Sans'>20<\/text>\n   <text x='46.4' y='223.14' font-size='8.25pt' font-family='Liberation Sans'>21<\/text>\n   <text x='79.23' y='223.14' font-size='8.25pt' font-family='Liberation Sans'>22<\/text>\n   <text x='112.05' y='223.14' font-size='8.25pt' font-family='Liberation Sans'>23<\/text>\n   <text x='144.88' y='223.14' font-size='8.25pt' font-family='Liberation Sans'>24<\/text>\n   <text x='46.4' y='255.96' font-size='8.25pt' font-family='Liberation Sans'>28<\/text>\n   <text x='79.23' y='255.96' font-size='8.25pt' font-family='Liberation Sans'>29<\/text>\n   <text x='112.05' y='255.96' font-size='8.25pt' font-family='Liberation Sans'>30<\/text>\n   <text x='144.88' y='255.96' font-size='8.25pt' font-family='Liberation Sans'>31<\/text>\n   <text x='79.23' y='190.31' font-size='8.25pt' font-family='Liberation Sans'>15<\/text>\n   <text x='112.05' y='190.31' font-size='8.25pt' font-family='Liberation Sans'>16<\/text>\n   <text x='177.71' y='223.14' font-size='8.25pt' font-family='Liberation Sans'>25<\/text>\n   <text x='210.53' y='223.14' font-size='8.25pt' font-family='Liberation Sans'>26<\/text>\n   <text x='13.58' y='255.96' font-size='8.25pt' font-family='Liberation Sans'>27<\/text>\n   <text x='81.22' y='206.72' font-size='8.25pt' font-family='Liberation Sans'>🤖<\/text>\n   <text x='114.05' y='206.72' font-size='8.25pt' font-family='Liberation Sans'>🤖<\/text>\n   <text x='179.7' y='239.55' font-size='8.25pt' font-family='Liberation Sans'>🌍<\/text>\n   <text x='212.53' y='239.55' font-size='8.25pt' font-family='Liberation Sans'>🌍<\/text>\n   <text x='15.57' y='272.38' font-size='8.25pt' font-family='Liberation Sans'>🌍<\/text>\n   <rect id='svg_ac639e33524ad761_e1' x='68.93' y='112.67' width='32.83' height='32.83' fill='#FFFFFF' fill-opacity='0.2' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt' title='NA' data-id='NA'/>\n   <rect id='svg_ac639e33524ad761_e2' x='101.76' y='112.67' width='32.83' height='32.83' fill='#FFFFFF' fill-opacity='0.2' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt' title='NA' data-id='NA'/>\n   <rect id='svg_ac639e33524ad761_e3' x='134.59' y='112.67' width='32.83' height='32.83' fill='#FFFFFF' fill-opacity='0.2' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt' title='NA' data-id='NA'/>\n   <rect id='svg_ac639e33524ad761_e4' x='167.41' y='112.67' width='32.83' height='32.83' fill='#FFFFFF' fill-opacity='0.2' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt' title='NA' data-id='NA'/>\n   <rect id='svg_ac639e33524ad761_e5' x='200.24' y='112.67' width='32.83' height='32.83' fill='#FFFFFF' fill-opacity='0.2' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt' title='NA' data-id='NA'/>\n   <rect id='svg_ac639e33524ad761_e6' x='3.28' y='145.49' width='32.83' height='32.83' fill='#FFFFFF' fill-opacity='0.2' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt' title='NA' data-id='NA'/>\n   <rect id='svg_ac639e33524ad761_e7' x='36.11' y='145.49' width='32.83' height='32.83' fill='#FFFFFF' fill-opacity='0.2' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt' title='NA' data-id='NA'/>\n   <rect id='svg_ac639e33524ad761_e8' x='68.93' y='145.49' width='32.83' height='32.83' fill='#FFFFFF' fill-opacity='0.2' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt' title='NA' data-id='NA'/>\n   <rect id='svg_ac639e33524ad761_e9' x='101.76' y='145.49' width='32.83' height='32.83' fill='#FFFFFF' fill-opacity='0.2' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt' title='NA' data-id='NA'/>\n   <rect id='svg_ac639e33524ad761_e10' x='134.59' y='145.49' width='32.83' height='32.83' fill='#FFFFFF' fill-opacity='0.2' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt' title='NA' data-id='NA'/>\n   <rect id='svg_ac639e33524ad761_e11' x='167.41' y='145.49' width='32.83' height='32.83' fill='#FFFFFF' fill-opacity='0.2' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt' title='NA' data-id='NA'/>\n   <rect id='svg_ac639e33524ad761_e12' x='200.24' y='145.49' width='32.83' height='32.83' fill='#FFFFFF' fill-opacity='0.2' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt' title='NA' data-id='NA'/>\n   <rect id='svg_ac639e33524ad761_e13' x='3.28' y='178.32' width='32.83' height='32.83' fill='#FFFFFF' fill-opacity='0.2' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt' title='NA' data-id='NA'/>\n   <rect id='svg_ac639e33524ad761_e14' x='36.11' y='178.32' width='32.83' height='32.83' fill='#FFFFFF' fill-opacity='0.2' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt' title='NA' data-id='NA'/>\n   <rect id='svg_ac639e33524ad761_e15' x='134.59' y='178.32' width='32.83' height='32.83' fill='#FFFFFF' fill-opacity='0.2' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt' title='NA' data-id='NA'/>\n   <rect id='svg_ac639e33524ad761_e16' x='167.41' y='178.32' width='32.83' height='32.83' fill='#FFFFFF' fill-opacity='0.2' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt' title='NA' data-id='NA'/>\n   <rect id='svg_ac639e33524ad761_e17' x='200.24' y='178.32' width='32.83' height='32.83' fill='#FFFFFF' fill-opacity='0.2' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt' title='NA' data-id='NA'/>\n   <rect id='svg_ac639e33524ad761_e18' x='3.28' y='211.15' width='32.83' height='32.83' fill='#FFFFFF' fill-opacity='0.2' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt' title='NA' data-id='NA'/>\n   <rect id='svg_ac639e33524ad761_e19' x='36.11' y='211.15' width='32.83' height='32.83' fill='#FFFFFF' fill-opacity='0.2' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt' title='NA' data-id='NA'/>\n   <rect id='svg_ac639e33524ad761_e20' x='68.93' y='211.15' width='32.83' height='32.83' fill='#FFFFFF' fill-opacity='0.2' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt' title='NA' data-id='NA'/>\n   <rect id='svg_ac639e33524ad761_e21' x='101.76' y='211.15' width='32.83' height='32.83' fill='#FFFFFF' fill-opacity='0.2' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt' title='NA' data-id='NA'/>\n   <rect id='svg_ac639e33524ad761_e22' x='134.59' y='211.15' width='32.83' height='32.83' fill='#FFFFFF' fill-opacity='0.2' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt' title='NA' data-id='NA'/>\n   <rect id='svg_ac639e33524ad761_e23' x='36.11' y='243.97' width='32.83' height='32.83' fill='#FFFFFF' fill-opacity='0.2' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt' title='NA' data-id='NA'/>\n   <rect id='svg_ac639e33524ad761_e24' x='68.93' y='243.97' width='32.83' height='32.83' fill='#FFFFFF' fill-opacity='0.2' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt' title='NA' data-id='NA'/>\n   <rect id='svg_ac639e33524ad761_e25' x='101.76' y='243.97' width='32.83' height='32.83' fill='#FFFFFF' fill-opacity='0.2' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt' title='NA' data-id='NA'/>\n   <rect id='svg_ac639e33524ad761_e26' x='134.59' y='243.97' width='32.83' height='32.83' fill='#FFFFFF' fill-opacity='0.2' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt' title='NA' data-id='NA'/>\n   <rect id='svg_ac639e33524ad761_e27' x='68.93' y='178.32' width='32.83' height='32.83' fill='#FFFFFF' fill-opacity='0.2' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt' title='TechFest 2024' data-id='EVT001'/>\n   <rect id='svg_ac639e33524ad761_e28' x='101.76' y='178.32' width='32.83' height='32.83' fill='#FFFFFF' fill-opacity='0.2' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt' title='TechFest 2024' data-id='EVT001'/>\n   <rect id='svg_ac639e33524ad761_e29' x='167.41' y='211.15' width='32.83' height='32.83' fill='#FFFFFF' fill-opacity='0.2' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt' title='Global Health Summit' data-id='EVT002'/>\n   <rect id='svg_ac639e33524ad761_e30' x='200.24' y='211.15' width='32.83' height='32.83' fill='#FFFFFF' fill-opacity='0.2' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt' title='Global Health Summit' data-id='EVT002'/>\n   <rect id='svg_ac639e33524ad761_e31' x='3.28' y='243.97' width='32.83' height='32.83' fill='#FFFFFF' fill-opacity='0.2' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt' title='Global Health Summit' data-id='EVT002'/>\n  <\/g>\n  <g clip-path='url(#svg_ac639e33524ad761_c4)'>\n   <rect x='241.83' y='104.46' width='236.35' height='180.54' fill='#FFFFFF' fill-opacity='1' stroke='none'/>\n   <rect x='409.24' y='112.67' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='442.06' y='112.67' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='245.11' y='145.49' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='277.94' y='145.49' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='310.76' y='145.49' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='343.59' y='145.49' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='376.41' y='145.49' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='409.24' y='145.49' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='442.06' y='145.49' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='343.59' y='178.32' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='376.41' y='178.32' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='409.24' y='178.32' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='442.06' y='178.32' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='245.11' y='211.15' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='277.94' y='211.15' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='310.76' y='211.15' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='409.24' y='211.15' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='442.06' y='211.15' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='245.11' y='243.97' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='277.94' y='243.97' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='310.76' y='243.97' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='343.59' y='243.97' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='376.41' y='243.97' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='409.24' y='243.97' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='442.06' y='243.97' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='245.11' y='178.32' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='277.94' y='178.32' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='310.76' y='178.32' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='343.59' y='211.15' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='376.41' y='211.15' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <text x='422.59' y='124.66' font-size='8.25pt' font-family='Liberation Sans'>1<\/text>\n   <text x='455.42' y='124.66' font-size='8.25pt' font-family='Liberation Sans'>2<\/text>\n   <text x='258.46' y='157.48' font-size='8.25pt' font-family='Liberation Sans'>3<\/text>\n   <text x='291.29' y='157.48' font-size='8.25pt' font-family='Liberation Sans'>4<\/text>\n   <text x='324.11' y='157.48' font-size='8.25pt' font-family='Liberation Sans'>5<\/text>\n   <text x='356.94' y='157.48' font-size='8.25pt' font-family='Liberation Sans'>6<\/text>\n   <text x='389.77' y='157.48' font-size='8.25pt' font-family='Liberation Sans'>7<\/text>\n   <text x='422.59' y='157.48' font-size='8.25pt' font-family='Liberation Sans'>8<\/text>\n   <text x='455.42' y='157.48' font-size='8.25pt' font-family='Liberation Sans'>9<\/text>\n   <text x='353.88' y='190.31' font-size='8.25pt' font-family='Liberation Sans'>13<\/text>\n   <text x='386.71' y='190.31' font-size='8.25pt' font-family='Liberation Sans'>14<\/text>\n   <text x='419.53' y='190.31' font-size='8.25pt' font-family='Liberation Sans'>15<\/text>\n   <text x='452.36' y='190.31' font-size='8.25pt' font-family='Liberation Sans'>16<\/text>\n   <text x='255.4' y='223.14' font-size='8.25pt' font-family='Liberation Sans'>17<\/text>\n   <text x='288.23' y='223.14' font-size='8.25pt' font-family='Liberation Sans'>18<\/text>\n   <text x='321.05' y='223.14' font-size='8.25pt' font-family='Liberation Sans'>19<\/text>\n   <text x='419.53' y='223.14' font-size='8.25pt' font-family='Liberation Sans'>22<\/text>\n   <text x='452.36' y='223.14' font-size='8.25pt' font-family='Liberation Sans'>23<\/text>\n   <text x='255.4' y='255.96' font-size='8.25pt' font-family='Liberation Sans'>24<\/text>\n   <text x='288.23' y='255.96' font-size='8.25pt' font-family='Liberation Sans'>25<\/text>\n   <text x='321.05' y='255.96' font-size='8.25pt' font-family='Liberation Sans'>26<\/text>\n   <text x='353.88' y='255.96' font-size='8.25pt' font-family='Liberation Sans'>27<\/text>\n   <text x='386.71' y='255.96' font-size='8.25pt' font-family='Liberation Sans'>28<\/text>\n   <text x='419.53' y='255.96' font-size='8.25pt' font-family='Liberation Sans'>29<\/text>\n   <text x='452.36' y='255.96' font-size='8.25pt' font-family='Liberation Sans'>30<\/text>\n   <text x='255.4' y='190.31' font-size='8.25pt' font-family='Liberation Sans'>10<\/text>\n   <text x='288.63' y='190.31' font-size='8.25pt' font-family='Liberation Sans'>11<\/text>\n   <text x='321.05' y='190.31' font-size='8.25pt' font-family='Liberation Sans'>12<\/text>\n   <text x='353.88' y='223.14' font-size='8.25pt' font-family='Liberation Sans'>20<\/text>\n   <text x='386.71' y='223.14' font-size='8.25pt' font-family='Liberation Sans'>21<\/text>\n   <text x='257.4' y='206.72' font-size='8.25pt' font-family='Liberation Sans'>🌱<\/text>\n   <text x='290.22' y='206.72' font-size='8.25pt' font-family='Liberation Sans'>🌱<\/text>\n   <text x='323.05' y='206.72' font-size='8.25pt' font-family='Liberation Sans'>🌱<\/text>\n   <text x='355.87' y='239.55' font-size='8.25pt' font-family='Liberation Sans'>💼<\/text>\n   <text x='388.7' y='239.55' font-size='8.25pt' font-family='Liberation Sans'>💼<\/text>\n   <rect id='svg_ac639e33524ad761_e32' x='409.24' y='112.67' width='32.83' height='32.83' fill='#FFFFFF' fill-opacity='0.2' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt' title='NA' data-id='NA'/>\n   <rect id='svg_ac639e33524ad761_e33' x='442.06' y='112.67' width='32.83' height='32.83' fill='#FFFFFF' fill-opacity='0.2' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt' title='NA' data-id='NA'/>\n   <rect id='svg_ac639e33524ad761_e34' x='245.11' y='145.49' width='32.83' height='32.83' fill='#FFFFFF' fill-opacity='0.2' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt' title='NA' data-id='NA'/>\n   <rect id='svg_ac639e33524ad761_e35' x='277.94' y='145.49' width='32.83' height='32.83' fill='#FFFFFF' fill-opacity='0.2' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt' title='NA' data-id='NA'/>\n   <rect id='svg_ac639e33524ad761_e36' x='310.76' y='145.49' width='32.83' height='32.83' fill='#FFFFFF' fill-opacity='0.2' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt' title='NA' data-id='NA'/>\n   <rect id='svg_ac639e33524ad761_e37' x='343.59' y='145.49' width='32.83' height='32.83' fill='#FFFFFF' fill-opacity='0.2' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt' title='NA' data-id='NA'/>\n   <rect id='svg_ac639e33524ad761_e38' x='376.41' y='145.49' width='32.83' height='32.83' fill='#FFFFFF' fill-opacity='0.2' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt' title='NA' data-id='NA'/>\n   <rect id='svg_ac639e33524ad761_e39' x='409.24' y='145.49' width='32.83' height='32.83' fill='#FFFFFF' fill-opacity='0.2' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt' title='NA' data-id='NA'/>\n   <rect id='svg_ac639e33524ad761_e40' x='442.06' y='145.49' width='32.83' height='32.83' fill='#FFFFFF' fill-opacity='0.2' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt' title='NA' data-id='NA'/>\n   <rect id='svg_ac639e33524ad761_e41' x='343.59' y='178.32' width='32.83' height='32.83' fill='#FFFFFF' fill-opacity='0.2' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt' title='NA' data-id='NA'/>\n   <rect id='svg_ac639e33524ad761_e42' x='376.41' y='178.32' width='32.83' height='32.83' fill='#FFFFFF' fill-opacity='0.2' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt' title='NA' data-id='NA'/>\n   <rect id='svg_ac639e33524ad761_e43' x='409.24' y='178.32' width='32.83' height='32.83' fill='#FFFFFF' fill-opacity='0.2' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt' title='NA' data-id='NA'/>\n   <rect id='svg_ac639e33524ad761_e44' x='442.06' y='178.32' width='32.83' height='32.83' fill='#FFFFFF' fill-opacity='0.2' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt' title='NA' data-id='NA'/>\n   <rect id='svg_ac639e33524ad761_e45' x='245.11' y='211.15' width='32.83' height='32.83' fill='#FFFFFF' fill-opacity='0.2' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt' title='NA' data-id='NA'/>\n   <rect id='svg_ac639e33524ad761_e46' x='277.94' y='211.15' width='32.83' height='32.83' fill='#FFFFFF' fill-opacity='0.2' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt' title='NA' data-id='NA'/>\n   <rect id='svg_ac639e33524ad761_e47' x='310.76' y='211.15' width='32.83' height='32.83' fill='#FFFFFF' fill-opacity='0.2' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt' title='NA' data-id='NA'/>\n   <rect id='svg_ac639e33524ad761_e48' x='409.24' y='211.15' width='32.83' height='32.83' fill='#FFFFFF' fill-opacity='0.2' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt' title='NA' data-id='NA'/>\n   <rect id='svg_ac639e33524ad761_e49' x='442.06' y='211.15' width='32.83' height='32.83' fill='#FFFFFF' fill-opacity='0.2' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt' title='NA' data-id='NA'/>\n   <rect id='svg_ac639e33524ad761_e50' x='245.11' y='243.97' width='32.83' height='32.83' fill='#FFFFFF' fill-opacity='0.2' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt' title='NA' data-id='NA'/>\n   <rect id='svg_ac639e33524ad761_e51' x='277.94' y='243.97' width='32.83' height='32.83' fill='#FFFFFF' fill-opacity='0.2' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt' title='NA' data-id='NA'/>\n   <rect id='svg_ac639e33524ad761_e52' x='310.76' y='243.97' width='32.83' height='32.83' fill='#FFFFFF' fill-opacity='0.2' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt' title='NA' data-id='NA'/>\n   <rect id='svg_ac639e33524ad761_e53' x='343.59' y='243.97' width='32.83' height='32.83' fill='#FFFFFF' fill-opacity='0.2' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt' title='NA' data-id='NA'/>\n   <rect id='svg_ac639e33524ad761_e54' x='376.41' y='243.97' width='32.83' height='32.83' fill='#FFFFFF' fill-opacity='0.2' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt' title='NA' data-id='NA'/>\n   <rect id='svg_ac639e33524ad761_e55' x='409.24' y='243.97' width='32.83' height='32.83' fill='#FFFFFF' fill-opacity='0.2' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt' title='NA' data-id='NA'/>\n   <rect id='svg_ac639e33524ad761_e56' x='442.06' y='243.97' width='32.83' height='32.83' fill='#FFFFFF' fill-opacity='0.2' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt' title='NA' data-id='NA'/>\n   <rect id='svg_ac639e33524ad761_e57' x='245.11' y='178.32' width='32.83' height='32.83' fill='#FFFFFF' fill-opacity='0.2' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt' title='Sustainable Living Expo' data-id='EVT003'/>\n   <rect id='svg_ac639e33524ad761_e58' x='277.94' y='178.32' width='32.83' height='32.83' fill='#FFFFFF' fill-opacity='0.2' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt' title='Sustainable Living Expo' data-id='EVT003'/>\n   <rect id='svg_ac639e33524ad761_e59' x='310.76' y='178.32' width='32.83' height='32.83' fill='#FFFFFF' fill-opacity='0.2' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt' title='Sustainable Living Expo' data-id='EVT003'/>\n   <rect id='svg_ac639e33524ad761_e60' x='343.59' y='211.15' width='32.83' height='32.83' fill='#FFFFFF' fill-opacity='0.2' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt' title='Future of Work Conference' data-id='EVT004'/>\n   <rect id='svg_ac639e33524ad761_e61' x='376.41' y='211.15' width='32.83' height='32.83' fill='#FFFFFF' fill-opacity='0.2' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt' title='Future of Work Conference' data-id='EVT004'/>\n  <\/g>\n  <g clip-path='url(#svg_ac639e33524ad761_c5)'>\n   <rect x='483.65' y='104.46' width='236.35' height='180.54' fill='#FFFFFF' fill-opacity='1' stroke='none'/>\n   <rect x='486.94' y='112.67' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='519.76' y='112.67' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='552.59' y='112.67' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='585.41' y='112.67' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='552.59' y='145.49' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='585.41' y='145.49' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='618.24' y='145.49' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='651.07' y='145.49' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='683.89' y='145.49' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='486.94' y='178.32' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='519.76' y='178.32' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='552.59' y='178.32' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='585.41' y='178.32' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='618.24' y='178.32' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='651.07' y='178.32' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='683.89' y='178.32' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='486.94' y='211.15' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='519.76' y='211.15' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='552.59' y='211.15' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='585.41' y='211.15' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='618.24' y='211.15' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='651.07' y='211.15' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='683.89' y='211.15' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='486.94' y='243.97' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='519.76' y='243.97' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='552.59' y='243.97' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='618.24' y='112.67' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='651.07' y='112.67' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='683.89' y='112.67' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='486.94' y='145.49' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <rect x='519.76' y='145.49' width='32.83' height='32.83' fill='none' stroke='#B3B3B3' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt'/>\n   <text x='500.29' y='124.66' font-size='8.25pt' font-family='Liberation Sans'>1<\/text>\n   <text x='533.11' y='124.66' font-size='8.25pt' font-family='Liberation Sans'>2<\/text>\n   <text x='565.94' y='124.66' font-size='8.25pt' font-family='Liberation Sans'>3<\/text>\n   <text x='598.77' y='124.66' font-size='8.25pt' font-family='Liberation Sans'>4<\/text>\n   <text x='562.88' y='157.48' font-size='8.25pt' font-family='Liberation Sans'>10<\/text>\n   <text x='596.11' y='157.48' font-size='8.25pt' font-family='Liberation Sans'>11<\/text>\n   <text x='628.53' y='157.48' font-size='8.25pt' font-family='Liberation Sans'>12<\/text>\n   <text x='661.36' y='157.48' font-size='8.25pt' font-family='Liberation Sans'>13<\/text>\n   <text x='694.18' y='157.48' font-size='8.25pt' font-family='Liberation Sans'>14<\/text>\n   <text x='497.23' y='190.31' font-size='8.25pt' font-family='Liberation Sans'>15<\/text>\n   <text x='530.05' y='190.31' font-size='8.25pt' font-family='Liberation Sans'>16<\/text>\n   <text x='562.88' y='190.31' font-size='8.25pt' font-family='Liberation Sans'>17<\/text>\n   <text x='595.71' y='190.31' font-size='8.25pt' font-family='Liberation Sans'>18<\/text>\n   <text x='628.53' y='190.31' font-size='8.25pt' font-family='Liberation Sans'>19<\/text>\n   <text x='661.36' y='190.31' font-size='8.25pt' font-family='Liberation Sans'>20<\/text>\n   <text x='694.18' y='190.31' font-size='8.25pt' font-family='Liberation Sans'>21<\/text>\n   <text x='497.23' y='223.14' font-size='8.25pt' font-family='Liberation Sans'>22<\/text>\n   <text x='530.05' y='223.14' font-size='8.25pt' font-family='Liberation Sans'>23<\/text>\n   <text x='562.88' y='223.14' font-size='8.25pt' font-family='Liberation Sans'>24<\/text>\n   <text x='595.71' y='223.14' font-size='8.25pt' font-family='Liberation Sans'>25<\/text>\n   <text x='628.53' y='223.14' font-size='8.25pt' font-family='Liberation Sans'>26<\/text>\n   <text x='661.36' y='223.14' font-size='8.25pt' font-family='Liberation Sans'>27<\/text>\n   <text x='694.18' y='223.14' font-size='8.25pt' font-family='Liberation Sans'>28<\/text>\n   <text x='497.23' y='255.96' font-size='8.25pt' font-family='Liberation Sans'>29<\/text>\n   <text x='530.05' y='255.96' font-size='8.25pt' font-family='Liberation Sans'>30<\/text>\n   <text x='562.88' y='255.96' font-size='8.25pt' font-family='Liberation Sans'>31<\/text>\n   <text x='631.59' y='124.66' font-size='8.25pt' font-family='Liberation Sans'>5<\/text>\n   <text x='664.42' y='124.66' font-size='8.25pt' font-family='Liberation Sans'>6<\/text>\n   <text x='697.24' y='124.66' font-size='8.25pt' font-family='Liberation Sans'>7<\/text>\n   <text x='500.29' y='157.48' font-size='8.25pt' font-family='Liberation Sans'>8<\/text>\n   <text x='533.11' y='157.48' font-size='8.25pt' font-family='Liberation Sans'>9<\/text>\n   <text x='630.53' y='141.07' font-size='8.25pt' font-family='Liberation Sans'>🚀<\/text>\n   <text x='663.35' y='141.07' font-size='8.25pt' font-family='Liberation Sans'>🚀<\/text>\n   <text x='696.18' y='141.07' font-size='8.25pt' font-family='Liberation Sans'>🚀<\/text>\n   <text x='499.22' y='173.9' font-size='8.25pt' font-family='Liberation Sans'>🚀<\/text>\n   <text x='532.05' y='173.9' font-size='8.25pt' font-family='Liberation Sans'>🚀<\/text>\n   <rect id='svg_ac639e33524ad761_e62' x='486.94' y='112.67' width='32.83' height='32.83' fill='#FFFFFF' fill-opacity='0.2' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt' title='NA' data-id='NA'/>\n   <rect id='svg_ac639e33524ad761_e63' x='519.76' y='112.67' width='32.83' height='32.83' fill='#FFFFFF' fill-opacity='0.2' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt' title='NA' data-id='NA'/>\n   <rect id='svg_ac639e33524ad761_e64' x='552.59' y='112.67' width='32.83' height='32.83' fill='#FFFFFF' fill-opacity='0.2' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt' title='NA' data-id='NA'/>\n   <rect id='svg_ac639e33524ad761_e65' x='585.41' y='112.67' width='32.83' height='32.83' fill='#FFFFFF' fill-opacity='0.2' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt' title='NA' data-id='NA'/>\n   <rect id='svg_ac639e33524ad761_e66' x='552.59' y='145.49' width='32.83' height='32.83' fill='#FFFFFF' fill-opacity='0.2' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt' title='NA' data-id='NA'/>\n   <rect id='svg_ac639e33524ad761_e67' x='585.41' y='145.49' width='32.83' height='32.83' fill='#FFFFFF' fill-opacity='0.2' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt' title='NA' data-id='NA'/>\n   <rect id='svg_ac639e33524ad761_e68' x='618.24' y='145.49' width='32.83' height='32.83' fill='#FFFFFF' fill-opacity='0.2' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt' title='NA' data-id='NA'/>\n   <rect id='svg_ac639e33524ad761_e69' x='651.07' y='145.49' width='32.83' height='32.83' fill='#FFFFFF' fill-opacity='0.2' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt' title='NA' data-id='NA'/>\n   <rect id='svg_ac639e33524ad761_e70' x='683.89' y='145.49' width='32.83' height='32.83' fill='#FFFFFF' fill-opacity='0.2' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt' title='NA' data-id='NA'/>\n   <rect id='svg_ac639e33524ad761_e71' x='486.94' y='178.32' width='32.83' height='32.83' fill='#FFFFFF' fill-opacity='0.2' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt' title='NA' data-id='NA'/>\n   <rect id='svg_ac639e33524ad761_e72' x='519.76' y='178.32' width='32.83' height='32.83' fill='#FFFFFF' fill-opacity='0.2' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt' title='NA' data-id='NA'/>\n   <rect id='svg_ac639e33524ad761_e73' x='552.59' y='178.32' width='32.83' height='32.83' fill='#FFFFFF' fill-opacity='0.2' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt' title='NA' data-id='NA'/>\n   <rect id='svg_ac639e33524ad761_e74' x='585.41' y='178.32' width='32.83' height='32.83' fill='#FFFFFF' fill-opacity='0.2' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt' title='NA' data-id='NA'/>\n   <rect id='svg_ac639e33524ad761_e75' x='618.24' y='178.32' width='32.83' height='32.83' fill='#FFFFFF' fill-opacity='0.2' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt' title='NA' data-id='NA'/>\n   <rect id='svg_ac639e33524ad761_e76' x='651.07' y='178.32' width='32.83' height='32.83' fill='#FFFFFF' fill-opacity='0.2' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt' title='NA' data-id='NA'/>\n   <rect id='svg_ac639e33524ad761_e77' x='683.89' y='178.32' width='32.83' height='32.83' fill='#FFFFFF' fill-opacity='0.2' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt' title='NA' data-id='NA'/>\n   <rect id='svg_ac639e33524ad761_e78' x='486.94' y='211.15' width='32.83' height='32.83' fill='#FFFFFF' fill-opacity='0.2' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt' title='NA' data-id='NA'/>\n   <rect id='svg_ac639e33524ad761_e79' x='519.76' y='211.15' width='32.83' height='32.83' fill='#FFFFFF' fill-opacity='0.2' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt' title='NA' data-id='NA'/>\n   <rect id='svg_ac639e33524ad761_e80' x='552.59' y='211.15' width='32.83' height='32.83' fill='#FFFFFF' fill-opacity='0.2' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt' title='NA' data-id='NA'/>\n   <rect id='svg_ac639e33524ad761_e81' x='585.41' y='211.15' width='32.83' height='32.83' fill='#FFFFFF' fill-opacity='0.2' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt' title='NA' data-id='NA'/>\n   <rect id='svg_ac639e33524ad761_e82' x='618.24' y='211.15' width='32.83' height='32.83' fill='#FFFFFF' fill-opacity='0.2' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt' title='NA' data-id='NA'/>\n   <rect id='svg_ac639e33524ad761_e83' x='651.07' y='211.15' width='32.83' height='32.83' fill='#FFFFFF' fill-opacity='0.2' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt' title='NA' data-id='NA'/>\n   <rect id='svg_ac639e33524ad761_e84' x='683.89' y='211.15' width='32.83' height='32.83' fill='#FFFFFF' fill-opacity='0.2' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt' title='NA' data-id='NA'/>\n   <rect id='svg_ac639e33524ad761_e85' x='486.94' y='243.97' width='32.83' height='32.83' fill='#FFFFFF' fill-opacity='0.2' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt' title='NA' data-id='NA'/>\n   <rect id='svg_ac639e33524ad761_e86' x='519.76' y='243.97' width='32.83' height='32.83' fill='#FFFFFF' fill-opacity='0.2' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt' title='NA' data-id='NA'/>\n   <rect id='svg_ac639e33524ad761_e87' x='552.59' y='243.97' width='32.83' height='32.83' fill='#FFFFFF' fill-opacity='0.2' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt' title='NA' data-id='NA'/>\n   <rect id='svg_ac639e33524ad761_e88' x='618.24' y='112.67' width='32.83' height='32.83' fill='#FFFFFF' fill-opacity='0.2' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt' title='Space Exploration Summit' data-id='EVT005'/>\n   <rect id='svg_ac639e33524ad761_e89' x='651.07' y='112.67' width='32.83' height='32.83' fill='#FFFFFF' fill-opacity='0.2' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt' title='Space Exploration Summit' data-id='EVT005'/>\n   <rect id='svg_ac639e33524ad761_e90' x='683.89' y='112.67' width='32.83' height='32.83' fill='#FFFFFF' fill-opacity='0.2' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt' title='Space Exploration Summit' data-id='EVT005'/>\n   <rect id='svg_ac639e33524ad761_e91' x='486.94' y='145.49' width='32.83' height='32.83' fill='#FFFFFF' fill-opacity='0.2' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt' title='Space Exploration Summit' data-id='EVT005'/>\n   <rect id='svg_ac639e33524ad761_e92' x='519.76' y='145.49' width='32.83' height='32.83' fill='#FFFFFF' fill-opacity='0.2' stroke='#CCCCCC' stroke-opacity='1' stroke-width='0.43' stroke-linejoin='miter' stroke-linecap='butt' title='Space Exploration Summit' data-id='EVT005'/>\n  <\/g>\n  <g clip-path='url(#svg_ac639e33524ad761_c6)'>\n   <rect x='0' y='75' width='236.35' height='16.65' fill='#F2F2F2' fill-opacity='1' stroke='#000000' stroke-opacity='1' stroke-width='1.07' stroke-linejoin='round' stroke-linecap='round'/>\n   <text x='109.86' y='86.35' font-size='6.6pt' font-family='Liberation Sans' fill='#1A1A1A' fill-opacity='1'>May<\/text>\n  <\/g>\n  <g clip-path='url(#svg_ac639e33524ad761_c7)'>\n   <rect x='241.83' y='75' width='236.35' height='16.65' fill='#F2F2F2' fill-opacity='1' stroke='#000000' stroke-opacity='1' stroke-width='1.07' stroke-linejoin='round' stroke-linecap='round'/>\n   <text x='352.9' y='86.35' font-size='6.6pt' font-family='Liberation Sans' fill='#1A1A1A' fill-opacity='1'>Jun<\/text>\n  <\/g>\n  <g clip-path='url(#svg_ac639e33524ad761_c8)'>\n   <rect x='483.65' y='75' width='236.35' height='16.65' fill='#F2F2F2' fill-opacity='1' stroke='#000000' stroke-opacity='1' stroke-width='1.07' stroke-linejoin='round' stroke-linecap='round'/>\n   <text x='596.2' y='86.35' font-size='6.6pt' font-family='Liberation Sans' fill='#1A1A1A' fill-opacity='1'>Jul<\/text>\n  <\/g>\n  <g clip-path='url(#svg_ac639e33524ad761_c1)'>\n   <text x='11.13' y='102.27' font-size='6.6pt' font-family='Liberation Sans' fill='#4D4D4D' fill-opacity='1'>Mon<\/text>\n   <text x='45.1' y='102.27' font-size='6.6pt' font-family='Liberation Sans' fill='#4D4D4D' fill-opacity='1'>Tue<\/text>\n   <text x='76.38' y='102.27' font-size='6.6pt' font-family='Liberation Sans' fill='#4D4D4D' fill-opacity='1'>Wed<\/text>\n   <text x='110.59' y='102.27' font-size='6.6pt' font-family='Liberation Sans' fill='#4D4D4D' fill-opacity='1'>Thu<\/text>\n   <text x='145.87' y='102.27' font-size='6.6pt' font-family='Liberation Sans' fill='#4D4D4D' fill-opacity='1'>Fri<\/text>\n   <text x='177.22' y='102.27' font-size='6.6pt' font-family='Liberation Sans' fill='#4D4D4D' fill-opacity='1'>Sat<\/text>\n   <text x='208.82' y='102.27' font-size='6.6pt' font-family='Liberation Sans' fill='#4D4D4D' fill-opacity='1'>Sun<\/text>\n   <text x='252.96' y='102.27' font-size='6.6pt' font-family='Liberation Sans' fill='#4D4D4D' fill-opacity='1'>Mon<\/text>\n   <text x='286.93' y='102.27' font-size='6.6pt' font-family='Liberation Sans' fill='#4D4D4D' fill-opacity='1'>Tue<\/text>\n   <text x='318.21' y='102.27' font-size='6.6pt' font-family='Liberation Sans' fill='#4D4D4D' fill-opacity='1'>Wed<\/text>\n   <text x='352.42' y='102.27' font-size='6.6pt' font-family='Liberation Sans' fill='#4D4D4D' fill-opacity='1'>Thu<\/text>\n   <text x='387.7' y='102.27' font-size='6.6pt' font-family='Liberation Sans' fill='#4D4D4D' fill-opacity='1'>Fri<\/text>\n   <text x='419.05' y='102.27' font-size='6.6pt' font-family='Liberation Sans' fill='#4D4D4D' fill-opacity='1'>Sat<\/text>\n   <text x='450.65' y='102.27' font-size='6.6pt' font-family='Liberation Sans' fill='#4D4D4D' fill-opacity='1'>Sun<\/text>\n   <text x='494.79' y='102.27' font-size='6.6pt' font-family='Liberation Sans' fill='#4D4D4D' fill-opacity='1'>Mon<\/text>\n   <text x='528.75' y='102.27' font-size='6.6pt' font-family='Liberation Sans' fill='#4D4D4D' fill-opacity='1'>Tue<\/text>\n   <text x='560.03' y='102.27' font-size='6.6pt' font-family='Liberation Sans' fill='#4D4D4D' fill-opacity='1'>Wed<\/text>\n   <text x='594.24' y='102.27' font-size='6.6pt' font-family='Liberation Sans' fill='#4D4D4D' fill-opacity='1'>Thu<\/text>\n   <text x='629.53' y='102.27' font-size='6.6pt' font-family='Liberation Sans' fill='#4D4D4D' fill-opacity='1'>Fri<\/text>\n   <text x='660.87' y='102.27' font-size='6.6pt' font-family='Liberation Sans' fill='#4D4D4D' fill-opacity='1'>Sat<\/text>\n   <text x='692.47' y='102.27' font-size='6.6pt' font-family='Liberation Sans' fill='#4D4D4D' fill-opacity='1'>Sun<\/text>\n  <\/g>\n <\/g>\n<\/svg>","js":null,"uid":"svg_ac639e33524ad761","ratio":2,"settings":{"tooltip":{"css":".tooltip_SVGID_ { padding:5px;background:black;color:white;border-radius:2px;text-align:left; ; position:absolute;pointer-events:none;z-index:9999;}","placement":"doc","opacity":0.9,"offx":10,"offy":10,"use_cursor_pos":true,"use_fill":false,"use_stroke":false,"delay_over":200,"delay_out":500},"hover":{"css":".hover_data_SVGID_ { fill:orange;stroke:black;cursor:pointer; }\ntext.hover_data_SVGID_ { stroke:none;fill:orange; }\ncircle.hover_data_SVGID_ { fill:orange;stroke:black; }\nline.hover_data_SVGID_, polyline.hover_data_SVGID_ { fill:none;stroke:orange; }\nrect.hover_data_SVGID_, polygon.hover_data_SVGID_, path.hover_data_SVGID_ { fill:orange;stroke:none; }\nimage.hover_data_SVGID_ { stroke:orange; }","reactive":true,"nearest_distance":null,"linked":false},"hover_inv":{"css":""},"hover_key":{"css":".hover_key_SVGID_ { fill:orange;stroke:black;cursor:pointer; }\ntext.hover_key_SVGID_ { stroke:none;fill:orange; }\ncircle.hover_key_SVGID_ { fill:orange;stroke:black; }\nline.hover_key_SVGID_, polyline.hover_key_SVGID_ { fill:none;stroke:orange; }\nrect.hover_key_SVGID_, polygon.hover_key_SVGID_, path.hover_key_SVGID_ { fill:orange;stroke:none; }\nimage.hover_key_SVGID_ { stroke:orange; }","reactive":true},"hover_theme":{"css":".hover_theme_SVGID_ { fill:orange;stroke:black;cursor:pointer; }\ntext.hover_theme_SVGID_ { stroke:none;fill:orange; }\ncircle.hover_theme_SVGID_ { fill:orange;stroke:black; }\nline.hover_theme_SVGID_, polyline.hover_theme_SVGID_ { fill:none;stroke:orange; }\nrect.hover_theme_SVGID_, polygon.hover_theme_SVGID_, path.hover_theme_SVGID_ { fill:orange;stroke:none; }\nimage.hover_theme_SVGID_ { stroke:orange; }","reactive":true},"select":{"css":".select_data_SVGID_ { fill:red;stroke:black;cursor:pointer; }\ntext.select_data_SVGID_ { stroke:none;fill:red; }\ncircle.select_data_SVGID_ { fill:red;stroke:black; }\nline.select_data_SVGID_, polyline.select_data_SVGID_ { fill:none;stroke:red; }\nrect.select_data_SVGID_, polygon.select_data_SVGID_, path.select_data_SVGID_ { fill:red;stroke:none; }\nimage.select_data_SVGID_ { stroke:red; }","type":"multiple","only_shiny":true,"selected":[],"linked":false},"select_inv":{"css":""},"select_key":{"css":".select_key_SVGID_ { fill:red;stroke:black;cursor:pointer; }\ntext.select_key_SVGID_ { stroke:none;fill:red; }\ncircle.select_key_SVGID_ { fill:red;stroke:black; }\nline.select_key_SVGID_, polyline.select_key_SVGID_ { fill:none;stroke:red; }\nrect.select_key_SVGID_, polygon.select_key_SVGID_, path.select_key_SVGID_ { fill:red;stroke:none; }\nimage.select_key_SVGID_ { stroke:red; }","type":"single","only_shiny":true,"selected":[]},"select_theme":{"css":".select_theme_SVGID_ { fill:red;stroke:black;cursor:pointer; }\ntext.select_theme_SVGID_ { stroke:none;fill:red; }\ncircle.select_theme_SVGID_ { fill:red;stroke:black; }\nline.select_theme_SVGID_, polyline.select_theme_SVGID_ { fill:none;stroke:red; }\nrect.select_theme_SVGID_, polygon.select_theme_SVGID_, path.select_theme_SVGID_ { fill:red;stroke:none; }\nimage.select_theme_SVGID_ { stroke:red; }","type":"single","only_shiny":true,"selected":[]},"zoom":{"min":1,"max":1,"duration":300,"default_on":false},"toolbar":{"position":"topright","pngname":"diagram","tooltips":null,"fixed":false,"hidden":[],"delay_over":200,"delay_out":500},"sizing":{"rescale":true,"width":1}}},"evals":[],"jsHooks":[]}</script>
 </div>
 </div></section><section id="help-improve-these-design-ideas" class="slide level2">
 <h2>Help improve these design ideas!</h2>
@@ -1018,23 +848,23 @@ insert diff
 <div class="columns">
 <div class="column">
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13" data-code-line-numbers="|5,14"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href=""></a><span class="fu">ggplot</span>(</span>
-<span id="cb13-2"><a href=""></a>  <span class="at">data =</span> penguins, </span>
-<span id="cb13-3"><a href=""></a>  <span class="at">mapping =</span> <span class="fu">aes</span>(</span>
-<span id="cb13-4"><a href=""></a>    <span class="at">x =</span> bill_length_mm,</span>
-<span id="cb13-5"><a href=""></a>    <span class="at">y =</span> bill_depth_mm,</span>
-<span id="cb13-6"><a href=""></a>    <span class="at">color =</span> species)) <span class="sc">+</span></span>
-<span id="cb13-7"><a href=""></a>  <span class="fu">geom_point</span>()</span>
-<span id="cb13-8"><a href=""></a></span>
-<span id="cb13-9"><a href=""></a><span class="do">## -- SPOT THE DIFFERENCE --</span></span>
-<span id="cb13-10"><a href=""></a></span>
-<span id="cb13-11"><a href=""></a><span class="fu">ggplot</span>(</span>
-<span id="cb13-12"><a href=""></a>  <span class="at">data =</span> penguins, </span>
-<span id="cb13-13"><a href=""></a>  <span class="at">mapping =</span> <span class="fu">aes</span>(</span>
-<span id="cb13-14"><a href=""></a>    <span class="at">x =</span> bill_length_mm,</span>
-<span id="cb13-15"><a href=""></a>    <span class="at">y =</span> flipper_length_mm,</span>
-<span id="cb13-16"><a href=""></a>    <span class="at">color =</span> species)) <span class="sc">+</span></span>
-<span id="cb13-17"><a href=""></a>  <span class="fu">geom_point</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11" data-code-line-numbers="|5,14"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href=""></a><span class="fu">ggplot</span>(</span>
+<span id="cb11-2"><a href=""></a>  <span class="at">data =</span> penguins, </span>
+<span id="cb11-3"><a href=""></a>  <span class="at">mapping =</span> <span class="fu">aes</span>(</span>
+<span id="cb11-4"><a href=""></a>    <span class="at">x =</span> bill_length_mm,</span>
+<span id="cb11-5"><a href=""></a>    <span class="at">y =</span> bill_depth_mm,</span>
+<span id="cb11-6"><a href=""></a>    <span class="at">color =</span> species)) <span class="sc">+</span></span>
+<span id="cb11-7"><a href=""></a>  <span class="fu">geom_point</span>()</span>
+<span id="cb11-8"><a href=""></a></span>
+<span id="cb11-9"><a href=""></a><span class="do">## -- SPOT THE DIFFERENCE --</span></span>
+<span id="cb11-10"><a href=""></a></span>
+<span id="cb11-11"><a href=""></a><span class="fu">ggplot</span>(</span>
+<span id="cb11-12"><a href=""></a>  <span class="at">data =</span> penguins, </span>
+<span id="cb11-13"><a href=""></a>  <span class="at">mapping =</span> <span class="fu">aes</span>(</span>
+<span id="cb11-14"><a href=""></a>    <span class="at">x =</span> bill_length_mm,</span>
+<span id="cb11-15"><a href=""></a>    <span class="at">y =</span> flipper_length_mm,</span>
+<span id="cb11-16"><a href=""></a>    <span class="at">color =</span> species)) <span class="sc">+</span></span>
+<span id="cb11-17"><a href=""></a>  <span class="fu">geom_point</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div><div class="column">
 <div class="image-placeholder" style="margin: 0;">
@@ -1047,19 +877,19 @@ insert diff
 <p>💡 Useful if components are exactly the same each time!</p>
 <div class="cell columns column-output-location">
 <div class="column">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14" data-code-line-numbers="|3-8"><pre class="sourceCode numberSource r number-lines code-with-copy" data-id="quarto-animate-code"><code class="sourceCode r hljs"><span id="cb14-1" class="hljs-ln-code"><a href=""></a><span class="fu">ggplot</span>(mpg, <span class="fu">aes</span>(cty, hwy)) <span class="sc">+</span> </span>
-<span id="cb14-2" class="hljs-ln-code"><a href=""></a>  <span class="fu">geom_point</span>() <span class="sc">+</span> </span>
-<span id="cb14-3" class="hljs-ln-code"><a href=""></a>  <span class="fu">geom_smooth</span>(</span>
-<span id="cb14-4" class="hljs-ln-code"><a href=""></a>  <span class="at">method =</span> <span class="st">"lm"</span>, </span>
-<span id="cb14-5" class="hljs-ln-code"><a href=""></a>  <span class="at">se =</span> <span class="cn">FALSE</span>, </span>
-<span id="cb14-6" class="hljs-ln-code"><a href=""></a>  <span class="at">colour =</span> <span class="fu">alpha</span>(<span class="st">"steelblue"</span>, <span class="fl">0.5</span>),</span>
-<span id="cb14-7" class="hljs-ln-code"><a href=""></a>  <span class="at">linewidth =</span> <span class="dv">2</span></span>
-<span id="cb14-8" class="hljs-ln-code"><a href=""></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12" data-code-line-numbers="|3-8"><pre class="sourceCode numberSource r number-lines code-with-copy" data-id="quarto-animate-code"><code class="sourceCode r hljs"><span id="cb12-1" class="hljs-ln-code"><a href=""></a><span class="fu">ggplot</span>(mpg, <span class="fu">aes</span>(cty, hwy)) <span class="sc">+</span> </span>
+<span id="cb12-2" class="hljs-ln-code"><a href=""></a>  <span class="fu">geom_point</span>() <span class="sc">+</span> </span>
+<span id="cb12-3" class="hljs-ln-code"><a href=""></a>  <span class="fu">geom_smooth</span>(</span>
+<span id="cb12-4" class="hljs-ln-code"><a href=""></a>  <span class="at">method =</span> <span class="st">"lm"</span>, </span>
+<span id="cb12-5" class="hljs-ln-code"><a href=""></a>  <span class="at">se =</span> <span class="cn">FALSE</span>, </span>
+<span id="cb12-6" class="hljs-ln-code"><a href=""></a>  <span class="at">colour =</span> <span class="fu">alpha</span>(<span class="st">"steelblue"</span>, <span class="fl">0.5</span>),</span>
+<span id="cb12-7" class="hljs-ln-code"><a href=""></a>  <span class="at">linewidth =</span> <span class="dv">2</span></span>
+<span id="cb12-8" class="hljs-ln-code"><a href=""></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div><div class="column">
 <div class="cell-output-display">
 <div>
 <figure>
-<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-12-1.png" width="960"></p>
+<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-7-1.png" width="960"></p>
 </figure>
 </div>
 </div>
@@ -1073,21 +903,21 @@ insert diff
 <p>💡 Useful if components are exactly the same each time!</p>
 <div class="cell columns column-output-location">
 <div class="column">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15" data-code-line-numbers="1-6|10"><pre class="sourceCode numberSource r number-lines code-with-copy" data-id="quarto-animate-code"><code class="sourceCode r hljs"><span id="cb15-1" class="hljs-ln-code"><a href=""></a>bestfit <span class="ot">&lt;-</span> </span>
-<span id="cb15-2" class="hljs-ln-code"><a href=""></a><span class="fu">geom_smooth</span>(</span>
-<span id="cb15-3" class="hljs-ln-code"><a href=""></a>  <span class="at">method =</span> <span class="st">"lm"</span>, </span>
-<span id="cb15-4" class="hljs-ln-code"><a href=""></a>  <span class="at">se =</span> <span class="cn">FALSE</span>, </span>
-<span id="cb15-5" class="hljs-ln-code"><a href=""></a>  <span class="at">colour =</span> <span class="fu">alpha</span>(<span class="st">"steelblue"</span>, <span class="fl">0.5</span>),</span>
-<span id="cb15-6" class="hljs-ln-code"><a href=""></a>  <span class="at">linewidth =</span> <span class="dv">2</span></span>
-<span id="cb15-7" class="hljs-ln-code"><a href=""></a>)</span>
-<span id="cb15-8" class="hljs-ln-code"><a href=""></a><span class="fu">ggplot</span>(mpg, <span class="fu">aes</span>(cty, hwy)) <span class="sc">+</span> </span>
-<span id="cb15-9" class="hljs-ln-code"><a href=""></a>  <span class="fu">geom_point</span>() <span class="sc">+</span> </span>
-<span id="cb15-10" class="hljs-ln-code"><a href=""></a>  bestfit</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13" data-code-line-numbers="1-6|10"><pre class="sourceCode numberSource r number-lines code-with-copy" data-id="quarto-animate-code"><code class="sourceCode r hljs"><span id="cb13-1" class="hljs-ln-code"><a href=""></a>bestfit <span class="ot">&lt;-</span> </span>
+<span id="cb13-2" class="hljs-ln-code"><a href=""></a><span class="fu">geom_smooth</span>(</span>
+<span id="cb13-3" class="hljs-ln-code"><a href=""></a>  <span class="at">method =</span> <span class="st">"lm"</span>, </span>
+<span id="cb13-4" class="hljs-ln-code"><a href=""></a>  <span class="at">se =</span> <span class="cn">FALSE</span>, </span>
+<span id="cb13-5" class="hljs-ln-code"><a href=""></a>  <span class="at">colour =</span> <span class="fu">alpha</span>(<span class="st">"steelblue"</span>, <span class="fl">0.5</span>),</span>
+<span id="cb13-6" class="hljs-ln-code"><a href=""></a>  <span class="at">linewidth =</span> <span class="dv">2</span></span>
+<span id="cb13-7" class="hljs-ln-code"><a href=""></a>)</span>
+<span id="cb13-8" class="hljs-ln-code"><a href=""></a><span class="fu">ggplot</span>(mpg, <span class="fu">aes</span>(cty, hwy)) <span class="sc">+</span> </span>
+<span id="cb13-9" class="hljs-ln-code"><a href=""></a>  <span class="fu">geom_point</span>() <span class="sc">+</span> </span>
+<span id="cb13-10" class="hljs-ln-code"><a href=""></a>  bestfit</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div><div class="column">
 <div class="cell-output-display">
 <div>
 <figure>
-<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-13-1.png" width="960"></p>
+<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-8-1.png" width="960"></p>
 </figure>
 </div>
 </div>
@@ -1101,7 +931,7 @@ insert diff
     </div>
   <div class="quarto-auto-generated-content" style="display: none;">
 <div class="footer footer-default">
-<p><a href="https://cynthiahqy.quarto.pub/ggplot-helpers-melburn-ssa-2025">cynthiahqy.quarto.pub/ggplot-helpers-melburn-ssa-2025</a></p>
+
 </div>
 </div></div>
 

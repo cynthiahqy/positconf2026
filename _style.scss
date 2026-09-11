@@ -66,3 +66,74 @@
   object-fit: contain;
   border: none;
 }
+/* Title slide: headshot ❤️ ggplot2 hex */
+.love-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3rem;
+  min-height: 60vh;
+}
+
+.love-container p {
+  margin: 0;
+}
+
+.headshot-circle {
+  width: 320px;
+  height: 320px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: none;
+  box-shadow: none;
+}
+
+.love-heart {
+  font-size: 4em;
+  line-height: 1;
+}
+
+.hex-sticker {
+  width: 280px;
+  height: auto;
+  border: none;
+  box-shadow: none;
+}
+
+/* Calendar extension comparison slides */
+.cal-gallery, .cal-interfaces {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: flex-start;
+  gap: 1rem;
+
+  .column {
+    box-sizing: border-box;
+    min-width: 0;
+    padding: 0;
+  }
+
+  .column h3 {
+    text-align: center;
+    margin-bottom: 0.5rem;
+  }
+}
+
+.cal-gallery img {
+  max-height: 55vh;
+  width: auto;
+  object-fit: contain;
+  display: block;
+  margin: 0 auto;
+}
+
+.cal-interfaces {
+  pre, code {
+    font-size: 0.32em;
+    line-height: 1.15;
+  }
+  pre {
+    max-height: 62vh;
+    overflow-y: auto;
+  }
+}
