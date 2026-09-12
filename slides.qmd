@@ -243,9 +243,9 @@ Ideally, a good helper function is reuse-able **enough**
 
 :::
 
-## My solution: 'Window' Helpers
+## Transparent 'Window' Helpers
 
-![Separate, expose, instruct](assets/notability/ggplot2-helper-design-principles-summary.png)
+![Separate, expose, document](assets/notability/ggplot2-helper-design-principles-summary.png)
 
 
 
