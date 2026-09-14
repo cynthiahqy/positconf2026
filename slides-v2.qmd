@@ -6,7 +6,11 @@ format:
   letterbox-revealjs: 
     theme: [default, _style.scss]
     slide-number: c/t
+    footer: "🔗[cynthiahqy/positconf2026](https://github.com/cynthiahqy/positconf2026)"
+  pptx: default
 ---
+
+<!--TODO: add file names to all visible code chunks -->
 
 # The Backstory: calendars & ggplot2
 
@@ -27,14 +31,10 @@ format:
 ![](assets/ggplot2-hex.png){.hex-sticker fig-alt="ggplot2 hex sticker"}
 :::
 
-## 
+##
 
-::: {.love-container}
-![](assets/headshot-cynthia.jpg){.headshot-circle fig-alt="Headshot of Cynthia Huang"}
-
-[💭]{.love-heart}
-
-![](assets/notability/calendar.jpg)
+::: {.sketch-container}
+![](assets/notability-v2/travel-calendar-sketch.png){fig-alt="Hand-drawn calendar of June and July travel, with posit::conf 2024 marked"}
 :::
 
 ::: {.notes}
@@ -43,38 +43,25 @@ So when I wanted to procrasti-plot a calendar of an upcoming research trip acros
 
 ##
 
-<!--TODO: update to cynthia;s travel plans -->
-
-![](assets/notability/calendar.jpg)
-
-##
-
-<!--- TODO: make this bigger! -->
-
 :::{.love-container}
-![](assets/temp/search-bar.png)
+![](assets/temp/search-bar.png){.search-bar fig-alt="Searching for a ggplot2 calendar extension"}
 :::
 
 ##
 
-<!-- TODO: center veritcally -->
-
 ::: {.columns .cal-gallery}
 
-::: {.column width="32%"}
+::: {.column width="56%"}
 ### `{calendR}` {.smallest}
 
 ![](assets/code-blocks/calendR-plot.png){fig-alt="Example calendR plot"}
 :::
 
-::: {.column width="32%"}
+::: {.column width="42%" .cal-gallery-stack}
 ### `{ggweekly}` {.smallest}
 
 ![](assets/code-blocks/ggweekly-README-year-week-1.png){fig-alt="Example ggweekly plot"}
 
-:::
-
-::: {.column width="32%"}
 ### `{ggcal}` {.smallest}
 
 ![](assets/code-blocks/ggcal-plot.png){fig-alt="Example ggcal plot"}
@@ -187,7 +174,152 @@ ggcal(dates, fills)
 
 ##
 
- TODO: insert interactive calendar screenshot
+
+::: {.columns}
+
+::: {.column width="60%"}
+
+![](assets/screenshot_travel-calendar.png)
+
+:::
+
+::: {.column  .smallest width="40%"}
+
+```{.r}
+# source(here::here("_utilities/travel_dates_load.R"))
+library(ggplot2)
+library(ggiraph)
+
+## ---- daily-loc-prep ----
+
+## expand dates: https://stackoverflow.com/a/54728153
+
+travel_days <- travel_dates |>
+    mutate(nights = interval(startDate, endDate) / days(1)) |>
+    arrange(startDate, desc(nights)) |>
+    rowid_to_column() |>
+    rowwise() |>
+    reframe(rowid, location, details, nights,
+        date = seq(startDate, endDate, by = "day")
+    ) |>
+    group_by(date) |>
+    slice_min(order_by = nights, n = 1) |>
+    ungroup() |>
+    mutate(country = countrycode::countryname(location, "iso2c"))
+
+away_days <- travel_days |>
+    summarise(
+        startDate = min(date),
+        endDate = max(date)
+    ) |>
+    mutate(rowid = 0, location = "TBC") |>
+    reframe(rowid, location, date = seq(startDate, endDate, by = "day"))
+
+daily_loc <- away_days |>
+    anti_join(travel_days, by = "date") |>
+    bind_rows(travel_days) |>
+    mutate(
+        flag = countrycode::countrycode(country, "iso2c", "unicode.symbol"),
+        continent = countrycode::countrycode(country, "iso2c", "continent")
+    ) |>
+    mutate(flag = case_when(
+        location == "en route" ~ "\u2708",
+        location == "TBC" ~ "❔",
+        TRUE ~ flag
+    ))
+
+## ---- prep-full-calendar-data ----
+
+# based on: https://github.com/nrennie/tidytuesday/blob/9dbe69d696f6c1edad41a72d157a42f3b5a63a81/2023/2023-03-07/20230307.R
+
+# calculate extra months to make plot rectangular
+cal_ncol <- 3
+startMonth <- month(floor_date(min(travel_days$date), "month"))
+endMonth <- month(ceiling_date(max(travel_days$date), "month") - 1)
+n_extra_month <- cal_ncol - ((endMonth - startMonth + 1) %% cal_ncol)
+padding_days <- summarise(
+    travel_days,
+    startDate = floor_date(min(date), "month"),
+    endDate = ceiling_date(max(date) %m+% months(n_extra_month), "month") - 1
+) |>
+    reframe(date = seq(startDate, endDate, by = "day"))
+
+# prepare calendar data
+full_calendar <- padding_days |>
+    anti_join(daily_loc, by = "date") |>
+    bind_rows(daily_loc) |>
+    mutate(
+        Year = year(date),
+        Month = month(date, label = TRUE),
+        Day = wday(date, label = TRUE, week_start = 1),
+        mday = mday(date),
+        Month_week = (5 + day(date) +
+            wday(floor_date(date, "month"), week_start = 1)) %/% 7
+    )
+
+## ---- travel-dates-calendar-display ----
+
+base_data_aes <- full_calendar |>
+    ggplot(aes(x = Day, y = Month_week))
+
+layers_geom_text <- list(
+    geom_text(aes(label = mday), nudge_y = 0.25),
+    geom_text(aes(label = flag), nudge_y = -0.25)
+)
+layers_scale_coord <- list(
+    scale_y_reverse(),
+    coord_fixed(expand = TRUE)
+)
+layers_facet_labs <- list(
+    facet_wrap(vars(Month),
+        ncol = cal_ncol
+    ),
+    labs(y = NULL, x = NULL)
+)
+layers_theme <- list(
+    theme_bw(),
+    theme(
+        plot.margin = margin(0, 0, 0, 0),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        # panel.spacing = unit(0, "lines"),
+        panel.border = element_blank(),
+        axis.ticks = element_blank(),
+        axis.text.y = element_blank(),
+        strip.background = element_rect(fill = "grey95"),
+        strip.text = element_text(hjust = 0)
+    )
+)
+
+## ---- tooltip-travel-calendar ----
+
+p_cal_girafe <- base_data_aes +
+    geom_tile_interactive(
+        aes(
+            tooltip = paste(details, "@", location),
+            data_id = location
+        ),
+        alpha = 0.2,
+        fill = "transparent",
+        colour = "grey80"
+    ) +
+    layers_geom_text +
+    layers_scale_coord +
+    coord_fixed(expand = FALSE) +
+    layers_facet_labs +
+    layers_theme
+
+# girafe(ggobj = p_cal_girafe)
+```
+
+
+:::
+
+:::
+
+
+
+
 
 ::: notes
 so, I did end up procrasti-plotting an interactive calendar, that looks like this
@@ -195,28 +327,12 @@ so, I did end up procrasti-plotting an interactive calendar, that looks like thi
 
 # Down the design rabbit hole...
 
-##
 
- TODO: insert // confusion sketch
-
-## 
-
-TODO: dialogue sketch 1
-
-## 
-
-TODO: dialogue sketch 2 w/ Mitch avatar
 
 ##
 
-::: {.love-container}
-{{< fa solid paste size=5x >}}
-
-<!-- TODO: put box around helper machine to show selection! animate this last-->
-![](assets/notability/ggplot2-helper-machine-grammar.png)
-
-<!-- TODO: replace with ggtime hex stick in greyscale -->
-![](assets/ggplot2-hex.png)
+::: {.sketch-container}
+![](assets/notability-v2/helper-blackbox-questions.png){fig-alt="Arguments for dates, fills and text colour disappearing into an opaque box that hides data prep and plot assembly"}
 :::
 
 ##
@@ -226,15 +342,65 @@ TODO: dialogue sketch 2 w/ Mitch avatar
 
 [🤔]{.love-heart}
 
-![](assets/notability/ggplot2-helper-machine-grammar.png){width="400px"}
+![](assets/notability/ggplot2-helper-replace-vert.png){width="400px"}
 :::
+
+##
+
+::: {.sketch-container .dialogue-stage}
+::: {.dialogue-wrap}
+![](assets/notability-v2/dialogue-elegance-question.png){.dialogue-img fig-alt="Thought bubble asking how to keep the elegance and composition of ggplot2 in my own helper function"}
+:::
+:::
+
+##
+
+::: {.sketch-container .dialogue-stage}
+::: {.dialogue-wrap}
+![](assets/headshot_mitch.png){.avatar-circle fig-alt="Avatar of Mitch"}
+
+![](assets/notability-v2/dialogue-grammar-reply.png){.dialogue-img fig-alt="Reply suggesting to just solve the grammar of temporal graphics"}
+
+
+:::
+:::
+
+##
+
+::: {.love-container}
+{{< fa solid paste size=5x >}}
+
+::: {.r-stack}
+::: {.stack-blank}
+:::
+
+![](assets/notability-v2/separate-prep-and-ggplot.png){.fragment .fade-in-then-out fragment-index=1 fig-alt="Data prep block beside a ggplot() block"}
+
+<!--- TODO: REPLACE THESE TWO BLOCKS WITH A WHITE PLACEHOLDER THE SAME SIZE AS @GGPLOT2-HELPER-WRAPPED; ANIMATION SHOULD GO FROM BLANK -->
+![](assets/notability/ggplot2-helper-wrapped.png){.fragment fragment-index=2 fig-alt="The same two blocks with a box drawn around them to show the selection"}
+:::
+
+![](assets/ggtime-hex-grey.png){.hex-sticker fig-alt="ggtime hex sticker in greyscale"}
+:::
+
+
+
+# From procrasti-plotting to procrasti-packaging
 
 ## 
 ::: {.columns}
 
 ::: {.column}
 
-What would my ideal **reuseable-enough** helper do?
+::: {.sketch-container .fill-column}
+![](assets/temp/ggtilecal.png)
+:::
+
+:::
+
+::: {.column .fragment}
+
+A **reuseable-enough** helper should:
 
 ::: {.incremental }
 * **Convenient** and quick 'autoplotting'
@@ -244,29 +410,13 @@ What would my ideal **reuseable-enough** helper do?
 :::
 
 :::
-
-::: {.column}
-
-::: {.sketch-container}
-<!-- TODO: vertical center this figure -->
-
-![](assets/notability/ggplot2-helper-wrapped.png){fig-align="center" width="70%"}
 :::
-
-:::
-:::
-
-# From procrasti-plotting to procrasti-packaging
 
 ##
 
- TODO: ggtilecal screenshot
-
-## 
-
-TODO: replace with new summary image with SEPARATE, EXPOSE, DOCUMENT
-
-![Separate, expose, document](assets/notability/ggplot2-helper-design-principles-summary.png)
+::: {.sketch-container}
+![](assets/notability-v2/principle-summary-v2-with-text.jpg){fig-alt="Modular internals, an exposed helper signature, and a documentation page shown together"}
+:::
 
 ## SEPARATE
 
@@ -400,9 +550,11 @@ p_cal_girafe <- base_data_aes +
 ```
 
 :::
-::: {.column .small .incremental}
+::: {.column .small}
 
-TODO: insert data prep, ggplot composer
+<!-- ![](assets/notability-v2/pipeline-data-prep-table.png){.sketch-inline fig-alt="Data prep block"} -->
+
+![](assets/notability-v2/pipeline-assembly-inputs.png){.sketch-inline fig-alt="Plot assembly block"}
 
 :::
 :::
@@ -419,26 +571,24 @@ TODO: insert data prep, ggplot composer
     - interactive `geom` from `{ggiraph}`
 :::
 
-## SEPARATE into MODULAR INTERNALS
+## SEPARATE into modular internals
 
 ::: {.columns}
 ::: {.column style="align-items: start;"}
 
 ::: {.sketch-container style="margin: 0; align-items: start;"}
-
-TODO: REPLACE WITH blackbox modular
-![](assets/notability/ggplot2-helper-internals.png)
+![](assets/notability-v2/internals-modular-solid-border.png){fig-alt="Solid box containing data prep and plot assembly blocks, with helper functions and ggplot2 component slots listed inside"}
 :::
 :::
-::: {.column .fragment}
+::: {.column .small .fragment}
 ```{.r code-line-numbers="1|2-5|7-19|1-22" filename="internals"}
 gg_facet_wrap_months <- function(...){
-  ## Data Helpers
+  ## Data Prep
   cal_data <- .events_long |>
     fill_missing_units({{ date_col }}) |>
     calc_calendar_vars({{ date_col }})
 
-  ## Plot Construction
+  ## Plot Assembly
   base_plot <- cal_data |>
     ggplot2::ggplot(mapping = aes_string(
       x = "TC_wday_label",
@@ -460,11 +610,21 @@ gg_facet_wrap_months <- function(...){
 
 ## EXPOSE
 
- TODO: insert image of transparent helper
+<!-- TODO: center align -->
+![](assets/notability-v2/transparent-helper-left.png)
 
-## EXPOSE ggplot2 list defaults
+## EXPOSE defaults as list arguments
 
-```{.r code-line-numbers="1-5|6-9|10-20" filename="function-interface"}
+
+::: {.columns}
+::: {.column style="align-items: start;"}
+
+::: {.sketch-container style="margin: 0; align-items: start;"}
+![](assets/notability-v2/helper-interface-only.png)
+:::
+:::
+::: {.column .small .fragment}
+```{.r code-line-numbers="10-20|1-5|6-9|" filename="function-interface"}
 gg_facet_wrap_months(
   ## --- data ----
   .events_long, 
@@ -487,64 +647,188 @@ gg_facet_wrap_months(
   .other = list()
 )
 ```
-
-## DOCUMENT
-
-TODO: insert image with all three elements
-
-## DOCUMENT customisation pointers
-
-TODO: two column screenshots of documentation
-
-# Reusing ggplot2 happily ever after?
-
-##
-
-TODO: insert recap animation 1
-
-##
-
- TODO: insert recap animation 2
-
-##
-
-TODO: insert recap animation 3 arrow
-
-## 
-
- TODO: insert ggtime summary 
-
-## 
-
-::: notes
-for now, I hope my design for transparent helper functions is useful
 :::
 
- TODO: insert summary slide again
+:::
 
-## Thanks for listening!
+<!-- TODO: animate between next two slides -->
 
+##
+
+```{r}
+#| output-location: column-fragment
+#| echo: true
+#| eval: true
+#| code-line-numbers: "7-9"
+library(ggtilecal)
+library(ggplot2)
+
+dates <- make_empty_month_days(
+  c("2024-01-05", "2024-06-30"))
+
+gg_facet_wrap_months(
+  dates,
+  unit_date)
+```
+
+##
+
+```{r}
+#| echo: true
+#| eval: true
+#| code-line-numbers: "8-14"
+#| output-location: column-fragment
+library(ggtilecal)
+library(ggplot2)
+
+dates <- make_empty_month_days(
+  c("2024-01-05", "2024-06-30"))
+
+gg_facet_wrap_months(dates, unit_date,
+    .geom = list(
+      geom_tile(color = "grey70", fill = "transparent"),
+      geom_text(nudge_y = 0.25,
+                color = "#6a329f")),
+    .theme = list(theme_bw_tilecal(),
+      theme(
+        strip.background = element_rect(fill = "#d9d2e9")))
+    )
+```
+
+## DOCUMENT
 
 ::: {.columns}
 
 ::: {.column}
 
-For more thoughts and ideas about reusing ggplot2 code:
 
- TODO: insert github repo link
-
-* blog post comparing calendar extensions
-* slides for this talk
-* (untested) ggplot2 refactoring skill
-
-:::
-
-::: {.column .fragment}
-
-Please tell me about your ggplot2 reuse experiences!
-
- TODO: insert QR-code
-
+::: {.sketch-container}
+![](assets/notability-v2/document-icon-only.png)
 :::
 
 :::
+
+::: {.column .fragment }
+
+How the ggplot2 recipe works:
+
+::: {.incremental}
+
+* Data preparation steps
+* Fixed variables and aesthetics
+* Customisation via arguments
+:::
+
+:::
+
+:::
+
+
+##
+
+```{r}
+#| eval: false
+#| echo: true
+#| code-line-numbers: "3-15|17-27"
+#' Make Monthly Calendar Facets
+#'
+#' Generates calendar with monthly facets by:
+#' - Padding event list with any missing days via `fill_missing_units()`
+#' - Calculating variables for calendar layout via `calc_calendar_vars()`
+#' - Returning a ggplot object as per Details.
+#'
+#' Returns a ggplot with the following fixed components
+#' using calculated layout variables:
+#' - `aes()` mapping:
+#'    - `x` is day of week,
+#'    - `y` is week in month,
+#'    - `label` is day of month
+#' - `facet_wrap()` by month
+#' - `labs()` to remove axis labels for calculated layout variables
+#'
+#' and default customisable components:
+#' - `geom_tile()`, `geom_text()` to label each day which inherit calculated variables
+#' - `scale_y_reverse()` to order day in month correctly
+#' - `scale_x_discrete()` to position weekday labels
+#' - `coord_fixed()` to square each tile
+#' - `theme_bw_tilecal()` to apply sensible theme defaults
+#' 
+#' for the month facets: 
+#'  - `nrow` the number of month facet rows 
+#'  - or `ncol` the number of month facet columns
+#'  - a labeller function for the monthly facet strip labels, see `label_yearmonth()`
+#'  
+#' To modify components alter the `.geom` and `.scale_coord`,
+#' which inherit the calculate layout mapping by default
+#' (via the ggplot2 `inherit.aes` argument).
+#'
+#' To additional components use the ggplot `+` function as normal,
+#' or pass components to the `.other` argument.
+#' This can be used to add interactive geoms (e.g. from `ggiraph`)
+#'
+#' To modify the theme, use the ggplot `+` function as normal,
+#' or add additional elements to the list in `.theme`.
+#'
+#' To remove any of the optional components, set the argument to any empty `list()`
+#'
+#' @inheritParams ggplot2::facet_wrap
+#' @inheritParams fill_missing_units
+#' @inheritParams calc_calendar_vars
+#' @param labeller A facet labeling function, for the calendar month titles, defaults to `label_yearmonth()`
+#' @param .geom,.scale_coord,.theme,.other
+#'    Customisable lists of ggplot2 components to add to the plot.
+#'    An empty `list()` leaves the plot unmodified.
+#'
+#' @return ggplot
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' library(dplyr)
+#' library(ggplot2)
+#' demo_events_gpt |>
+#'   reframe_events(startDate, endDate) |>
+#'   group_by(unit_date) |>
+#'   slice_min(order_by = duration) |>
+#'   gg_facet_wrap_months(unit_date, 
+#'                        labeller=label_yearmonth("%b %Y")) +
+#'   geom_text(aes(label = event_emoji), nudge_y = -0.25, na.rm = TRUE) } 
+#' @importFrom ggplot2 geom_tile geom_text facet_wrap labs aes
+#'     scale_y_reverse scale_x_discrete coord_fixed vars
+```
+
+# Reusing ggplot2 happily ever after?
+
+##
+
+::: {.sketch-container}
+![](assets/notability-v2/code-to-helper.png)
+:::
+
+
+##
+
+::: {.sketch-container}
+![](assets/notability-v2/code-to-helper-output.png)
+:::
+
+##
+
+::: {.sketch-container}
+![](assets/temp/fig-ggtime-teaser.png)
+:::
+
+##
+
+::: {.sketch-container}
+![](assets/notability-v2/principle-summary-v2-with-text.jpg){fig-alt="Modular internals, an exposed helper signature, and a documentation page shown together"}
+:::
+
+
+
+## Thanks for listening!
+
+
+📣 Please tell me about your ggplot2 reuse experiences!
+
+![cynthiahqy.com/survey](assets/qr-positconf2026.png){.qr-code fig-alt="QR code linking to github.com/cynthiahqy/positconf2026"}

@@ -52,6 +52,7 @@
   padding: 2rem;
   margin: 1rem 0;
   min-height: 200px;
+  height: 100%; /* fill the column so align-items centres the figure */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -136,4 +137,108 @@
     max-height: 62vh;
     overflow-y: auto;
   }
+}
+
+/* Vertically centre the calendar gallery columns */
+.cal-gallery {
+  align-items: center;
+  min-height: 70vh;
+}
+
+/* Search-bar screenshot, sized up */
+.search-bar {
+  width: 90%;
+  max-width: 1100px;
+  height: auto;
+  border: none;
+  box-shadow: none;
+}
+
+/* Sketch blocks used as incremental list items */
+.sketch-inline {
+  max-height: 22vh;
+  width: auto;
+  display: block;
+  margin: 0.75rem auto;
+  border: none;
+  box-shadow: none;
+}
+
+/* Stacked sketch builds */
+.r-stack img {
+  max-width: 100%;
+  max-height: 60vh;
+  object-fit: contain;
+  border: none;
+  box-shadow: none;
+}
+
+/* Blank first item in an .r-stack build, so the stack starts empty
+   without collapsing the slide height */
+.stack-blank {
+  width: 1px;
+  height: 45vh;
+}
+
+/* Dialogue slides: both sketches share a width and are top-anchored, so the
+   question bubble sits in exactly the same place on both slides */
+.dialogue-stage {
+  align-items: flex-start;
+  min-height: 72vh;
+}
+
+.dialogue-wrap {
+  position: relative;
+  width: 72%;
+  max-width: 900px;
+}
+
+.dialogue-wrap p {
+  margin: 0;
+}
+
+img.dialogue-img {
+  width: 100%;
+  height: auto;
+  display: block;
+  border: none;
+  box-shadow: none;
+}
+
+/* Chat-app style avatar beside the reply bubble */
+img.avatar-circle {
+  position: absolute;
+  left: -6%;
+  bottom: 6%;
+  width: 92px;
+  height: 92px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: none;
+  box-shadow: none;
+}
+
+/* Sketch container that should fill and centre within a .columns column */
+.sketch-container.fill-column {
+  min-height: 60vh;
+  height: 100%;
+  align-items: center;
+}
+
+/* Gallery column holding two stacked examples: halve the image height so
+   both fit beside the single large calendR plot */
+.cal-gallery-stack img {
+  max-height: 26vh;
+}
+
+.cal-gallery-stack h3 {
+  margin-top: 0.4rem;
+}
+
+/* QR code on the closing slide */
+img.qr-code {
+  width: 260px;
+  height: auto;
+  border: none;
+  box-shadow: none;
 }
