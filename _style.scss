@@ -180,7 +180,7 @@
   height: 60vh;
   aspect-ratio: 1568 / 1275;
   max-width: 100%;
-  background-color: transparent; /* let the slide background show through */
+  background-color: #ffffff;
 }
 
 /* Dialogue slides: both sketches share a width and are top-anchored, so the
@@ -259,46 +259,4 @@ img.qr-code {
   max-width: 100%;
   max-height: 62vh;
   object-fit: contain;
-}
-
-/* ===== Brand typography ================================================
-   _brand.yml sets Lora as the base family and Cormorant Garamond for
-   headings. Cormorant is a *display* serif — high stroke contrast and
-   light by default. It looks right at title size, but its thin strokes
-   wash out on a projector at ordinary heading sizes.
-
-   So: Cormorant for h1 only (title slide and section dividers, where the
-   type is largest), Lora everywhere else. Never Cormorant at weight 400. */
-
-.reveal h1,
-.reveal .title-slide h1,
-.reveal section.title-slide .title {
-  font-family: "Cormorant Garamond", "Lora", Georgia, serif;
-  font-weight: 700;
-  letter-spacing: 0.01em;
-}
-
-.reveal h2,
-.reveal h3,
-.reveal h4 {
-  font-family: "Lora", Georgia, serif;
-  font-weight: 700;
-}
-
-/* Code in the brand monospace (previously reveal's default mono) */
-.reveal code,
-.reveal pre code,
-.reveal .sourceCode code,
-.reveal .code-with-filename-file {
-  font-family: "Source Code Pro", ui-monospace, SFMono-Regular, Menlo, monospace;
-}
-
-/* ===== Letterbox surround ==============================================
-   The letterbox extension hard-codes #D8D8D3, a cool grey that reads
-   dirty next to the brand's warm white (#F0ECE5). Warm the surround so
-   the frame and the slide belong to the same palette. */
-
-.quarto-light,
-.quarto-dark {
-  background-color: #DED8CF;
 }
