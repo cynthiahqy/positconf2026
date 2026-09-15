@@ -4,7 +4,7 @@ author:
   - name: "Cynthia A. Huang"
 format:
   letterbox-revealjs: 
-    theme: [default, _style.scss]
+    theme: [default, _style.scss, brand]
     slide-number: c/t
     footer: "🔗[github.com/cynthiahqy/positconf2026](https://github.com/cynthiahqy/positconf2026)"
 ---
@@ -400,7 +400,7 @@ A **reuseable-enough** helper should:
 ## Design principles for transparent helpers
 
 ::: {.sketch-container}
-![](assets/notability-v2/principle-summary-v2-with-text.jpg){fig-alt="Modular internals, an exposed helper signature, and a documentation page shown together"}
+![](assets/notability-v2/principle-summary-v2-with-text.png){fig-alt="Modular internals, an exposed helper signature, and a documentation page shown together"}
 :::
 
 ## SEPARATE
@@ -899,7 +899,7 @@ gg_facet_wrap_months(dates_df, date,
 ##  Keep calm, and...
 
 
-![](assets/notability-v2/principle-summary-v2-with-text.jpg){fig-alt="Modular internals, an exposed helper signature, and a documentation page shown together" fig-align="center"}
+![](assets/notability-v2/principle-summary-v2-with-text.png){fig-alt="Modular internals, an exposed helper signature, and a documentation page shown together" fig-align="center"}
 
 
 
