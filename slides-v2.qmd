@@ -638,7 +638,7 @@ gg_facet_wrap_months <- function(...){
     .geom +
     .scale_coord +
     .theme +
-    .others
+    .other
 
   base_plot
 }
