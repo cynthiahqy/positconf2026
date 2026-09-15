@@ -4,21 +4,11 @@ author:
   - name: "Cynthia A. Huang"
 format:
   letterbox-revealjs: 
-    theme: [default, _style.scss]
-    slide-number: c/t
-    footer: "🔗[github.com/cynthiahqy/positconf2026](https://github.com/cynthiahqy/positconf2026)"
+    standalone: true
+    theme: [default, _style.scss, brand]
 ---
 
-# ggplot2 & calendars?
-
-## 
-
-::: {.love-container}
-![](assets/headshot-cynthia.jpg){.headshot-circle fig-alt="Headshot of Cynthia Huang"}
-
-:::
-
-## 
+##
 
 ::: {.love-container}
 ![](assets/headshot-cynthia.jpg){.headshot-circle fig-alt="Headshot of Cynthia Huang"}
@@ -322,7 +312,7 @@ p_cal_girafe <- base_data_aes +
 so, I did end up procrasti-plotting an interactive calendar, that looks like this
 :::
 
-# Down the design rabbit hole...
+# Down the function design rabbit hole...
 
 
 
@@ -406,11 +396,11 @@ A **reuseable-enough** helper should:
 :::
 :::
 
-##
+## Design principles
 
-::: {.sketch-container}
-![](assets/notability-v2/principle-summary-v2-with-text.jpg){fig-alt="Modular internals, an exposed helper signature, and a documentation page shown together"}
-:::
+
+![](assets/notability-v2/principle-summary-v2-with-text.png){fig-alt="Modular internals, an exposed helper signature, and a documentation page shown together" fig-align="center"}
+
 
 ## SEPARATE
 
@@ -577,13 +567,25 @@ p_cal_girafe <- base_data_aes +
 ![](assets/notability-v2/internals-modular-solid-border.png){fig-alt="Solid box containing data prep and plot assembly blocks, with helper functions and ggplot2 component slots listed inside"}
 :::
 :::
-::: {.column .small .fragment}
-```{.r code-line-numbers="1|2-5|7-19|1-22" filename="internals"}
-gg_facet_wrap_months <- function(...){
+::: {.column .smallest .fragment}
+```{.r code-line-numbers="|2-5|7-17|19-31" filename="internals"}
+gg_facet_wrap_months <- function(){
   ## Data Prep
   cal_data <- .events_long |>
     fill_missing_units({{ date_col }}) |>
     calc_calendar_vars({{ date_col }})
+
+  ## Plot Elements
+  .geom = list(
+    geom_tile(color = "grey70", fill = "transparent"),
+    geom_text(nudge_y = 0.25)
+  ),
+  .scale_coord = list(
+    scale_y_reverse(),
+    scale_x_discrete(position = "top"),
+    coord_fixed(expand = TRUE)),
+  .theme = list(theme_bw_tilecal()),
+  .other = list()
 
   ## Plot Assembly
   base_plot <- cal_data |>
@@ -597,7 +599,7 @@ gg_facet_wrap_months <- function(...){
     .geom +
     .scale_coord +
     .theme +
-    .others
+    .other
 
   base_plot
 }
@@ -605,13 +607,7 @@ gg_facet_wrap_months <- function(...){
 :::
 :::
 
-## EXPOSE
-
-
-![](assets/notability-v2/transparent-helper-left.png){fig-alt="A transparent helper function, exposing its underlying ggplot2 components"}
-
-
-## EXPOSE defaults as list arguments
+## EXPOSE list defaults
 
 
 ::: {.columns}
@@ -622,15 +618,15 @@ gg_facet_wrap_months <- function(...){
 :::
 :::
 ::: {.column .small .fragment}
-```{.r code-line-numbers="|10-20" filename="function-interface"}
+```{.r code-line-numbers="1-9|10-20" filename="function-interface"}
 gg_facet_wrap_months(
   ## --- data ----
-  .events_long, 
+  .events_long,
   date_col,
   locale = NULL,
   ## --- facets / layout ----
-  week_start = NULL, 
-  nrow = NULL, 
+  week_start = NULL,
+  nrow = NULL,
   ncol = NULL,
   ## --- default layers ---
   .geom = list(
@@ -649,8 +645,60 @@ gg_facet_wrap_months(
 
 :::
 
+## ...or as chart-type arguments
+
+::: {.columns}
+::: {.column style="align-items: start;"}
+
+::: {.sketch-container style="margin: 0; align-items: start;"}
+![](assets/notability-v2/helper-interface-only.png)
+:::
+:::
+::: {.column .small .fragment}
+```{.r code-line-numbers="|10-21" filename="function-interface"}
+gg_facet_wrap_months(
+  ## --- data ----
+  .events_long,
+  date_col,
+  locale = NULL,
+  ## --- facets / layout ----
+  week_start = NULL,
+  nrow = NULL,
+  ncol = NULL,
+  ## --- chart elements ---
+  .day_tiles = list(
+    geom_tile(color = "grey70", fill = "transparent")
+  ),
+  .day_labels = list(
+    geom_text(nudge_y = 0.25)
+  ),
+  .calendar_layout = list(
+    scale_y_reverse(),
+    scale_x_discrete(position = "top"),
+    coord_fixed(expand = TRUE)),
+  .theme = list(theme_bw_tilecal())
+)
+```
+:::
+
+:::
+
+::: {.notes}
+Same helper, grouped by what the reader of the chart sees rather than by
+ggplot2 component type. Note `.day_labels` merges both geom_text() calls —
+the day number and the flag — because they are one visual idea.
+:::
+
+## EXPOSE
+
+
+![](assets/notability-v2/transparent-helper-left.png){fig-alt="A transparent helper function, exposing its underlying ggplot2 components"}
+
+
 ## From `autoplot()` {auto-animate=true}
 
+
+::: {.small}
 ```{r}
 #| output-location: column-fragment
 #| echo: true
@@ -659,28 +707,31 @@ gg_facet_wrap_months(
 library(ggtilecal)
 library(ggplot2)
 
-dates <- make_empty_month_days(
-  c("2024-01-05", "2024-06-30"))
+dates_df <- make_empty_month_days(
+  c("2024-01-05", "2024-06-30"), dates_to = "date")
 
 gg_facet_wrap_months(
-  dates,
-  unit_date)
+  dates_df,
+  date)
 ```
+
+:::
 
 ## From `autoplot()` to customisation! {auto-animate=true}
 
+::: {.small}
 ```{r}
 #| echo: true
 #| eval: true
-#| code-line-numbers: "8-14"
+#| code-line-numbers: "8-14|11"
 #| output-location: column-fragment
 library(ggtilecal)
 library(ggplot2)
 
-dates <- make_empty_month_days(
-  c("2024-01-05", "2024-06-30"))
+dates_df <- make_empty_month_days(
+  c("2024-01-05", "2024-06-30"), dates_to = "date")
 
-gg_facet_wrap_months(dates, unit_date,
+gg_facet_wrap_months(dates_df, date,
     .geom = list(
       geom_tile(color = "grey70", fill = "transparent"),
       geom_text(nudge_y = 0.25,
@@ -691,16 +742,16 @@ gg_facet_wrap_months(dates, unit_date,
     )
 ```
 
+:::
+
+
 ## DOCUMENT
 
 ::: {.columns}
 
 ::: {.column}
 
-
-::: {.sketch-container}
 ![](assets/notability-v2/document-icon-only.png)
-:::
 
 :::
 
@@ -797,12 +848,12 @@ gg_facet_wrap_months(dates, unit_date,
 ## From custom code...
 
 
-![](assets/notability-v2/code-to-helper-01.png){align="centre"}
+![](assets/notability-v2/code-to-helper-01.png){.nostretch fig-align="center"}
 
 
 ## to transparent helpers...
 
-![](assets/notability-v2/code-to-helper-03.png){align="centre"}
+![](assets/notability-v2/code-to-helper-03.png){.nostretch fig-align="center"}
 
 
 ## and beyond?
@@ -814,14 +865,31 @@ gg_facet_wrap_months(dates, unit_date,
 ##  Keep calm, and...
 
 
-![](assets/notability-v2/principle-summary-v2-with-text.jpg){fig-alt="Modular internals, an exposed helper signature, and a documentation page shown together" fig-align="center"}
+![](assets/notability-v2/principle-summary-v2-with-text.png){fig-alt="Modular internals, an exposed helper signature, and a documentation page shown together" fig-align="center"}
 
 
+##
 
 
-## Thanks for listening!
+::: {.columns}
+
+::: {.column}
+
+![](assets/temp/screenshot-blog.png)
+
+:::
+
+::: {.column .fragment}
+
+::: {.love-container}
+📣 Tell me about your ggplot2 reuse experiences! 
+
+![](assets/qrcode-survey.svg){.qr-code fig-alt="QR code linking to https://www.cynthiahqy.com/survey" fig-align="center"}
+:::
 
 
-📣 Tell me about your ggplot2 reuse experiences!
+:::
 
-![cynthiahqy.com/survey](assets/qrcode-survey.svg){.qr-code fig-alt="QR code linking to https://www.cynthiahqy.com/survey"}
+:::
+
+[🔗 Visit [github.com/cynthiahqy/positconf2026](https://github.com/cynthiahqy/positconf2026) for more!]{.small .fragment}

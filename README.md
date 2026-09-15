@@ -5,6 +5,10 @@
 
 📊 **Slides:** <https://cynthiahqy.github.io/positconf2026/>
 
+📝 **Blog post:** <https://www.cynthiahqy.com/posts/ggplot-helper-design/>
+
+📋 **Related survey:** [How R users turn ggplot2 code into reusable functions](https://www.cynthiahqy.com/survey) (closes 31 December 2026)
+
 ## Reuse your custom ggplot2 with transparent helper functions!
 
 ## Abstract
@@ -55,7 +59,7 @@ The talk builds to three principles for a *transparent* helper function:
 quarto render slides-v2.qmd
 ```
 
-Outputs `slides-v2.html` (reveal.js) and `slides-v2.pptx`.
+Outputs `slides-v2.html` (reveal.js).
 
 ## Publishing
 
@@ -63,6 +67,40 @@ Slides are published to GitHub Pages from the `gh-pages` branch:
 
 ```bash
 quarto publish gh-pages slides-v2.qmd
+```
+
+## PDF backup
+
+Generate a PDF of the rendered deck with
+[decktape](https://github.com/astefanutti/decktape) — useful as an offline
+fallback when presenting:
+
+```bash
+quarto render slides-v2.qmd
+mkdir -p pdf-slides
+decktape --chrome-arg=--allow-file-access-from-files --size 1050x700 \
+  reveal ./slides-v2.html ./pdf-slides/slides-v2.pdf
+```
+
+Two flags worth keeping:
+
+- `--chrome-arg=--allow-file-access-from-files` lets Chrome load the
+  `slides-v2_files/` assets from a local `file://` URL. Without it the deck
+  renders unstyled.
+- `--size 1050x700` matches reveal's configured slide dimensions. Without it
+  decktape defaults to a 1280x720 viewport, and every page picks up grey
+  pillarbox bands from the letterbox theme's surround.
+
+This produces one page per slide (32 pages for 32 slides). Fragments,
+`.r-stack` builds and `code-line-numbers` highlights are flattened to their
+final revealed state rather than stepped through, so the PDF is a static
+fallback, not a recording of the animations.
+
+To capture the published deck instead of a local render, pass the URL and drop
+the file-access flag:
+
+```bash
+decktape reveal https://cynthiahqy.github.io/positconf2026/ ./pdf-slides/slides-v2.pdf
 ```
 
 ## Previous version
