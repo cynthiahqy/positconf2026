@@ -6,13 +6,10 @@ format:
   letterbox-revealjs: 
     theme: [default, _style.scss]
     slide-number: c/t
-    footer: "🔗[cynthiahqy/positconf2026](https://github.com/cynthiahqy/positconf2026)"
-  pptx: default
+    footer: "🔗[github.com/cynthiahqy/positconf2026](https://github.com/cynthiahqy/positconf2026)"
 ---
 
-<!--TODO: add file names to all visible code chunks -->
-
-# The Backstory: calendars & ggplot2
+# ggplot2 & calendars?
 
 ## 
 
@@ -52,17 +49,17 @@ So when I wanted to procrasti-plot a calendar of an upcoming research trip acros
 ::: {.columns .cal-gallery}
 
 ::: {.column width="56%"}
-### `{calendR}` {.smallest}
+`{calendR}`
 
 ![](assets/code-blocks/calendR-plot.png){fig-alt="Example calendR plot"}
 :::
 
 ::: {.column width="42%" .cal-gallery-stack}
-### `{ggweekly}` {.smallest}
+`{ggweekly}`
 
-![](assets/code-blocks/ggweekly-README-year-week-1.png){fig-alt="Example ggweekly plot"}
+![](assets/code-blocks/ggweekly-README-year-week-1-cropped.png){fig-alt="Example ggweekly plot"}
 
-### `{ggcal}` {.smallest}
+`{ggcal}`
 
 ![](assets/code-blocks/ggcal-plot.png){fig-alt="Example ggcal plot"}
 :::
@@ -76,7 +73,7 @@ So when I wanted to procrasti-plot a calendar of an upcoming research trip acros
 ::: {.column width="32%"}
 ### `{calendR}` {.smallest}
 
-```r
+```{.r filename="calendR-interface"}
 calendR(
     year = format(Sys.Date(), "%Y"),
     month = NULL,
@@ -136,7 +133,7 @@ calendR(
 ::: {.column width="32%"}
 ### `{ggweekly}` {.smallest}
 
-```r
+```{.r filename="ggweekly-interface"}
 ggweek_planner(
     start_day = lubridate::today(),
     end_day = start_day +
@@ -164,7 +161,7 @@ ggweek_planner(
 ::: {.column width="32%"}
 ### `{ggcal}` {.smallest}
 
-```r
+```{.r filename="ggcal-interface"}
 ggcal(dates, fills)
 ```
 
@@ -185,7 +182,7 @@ ggcal(dates, fills)
 
 ::: {.column  .smallest width="40%"}
 
-```{.r}
+```{.r filename="very-long-ggplot-script.R"}
 # source(here::here("_utilities/travel_dates_load.R"))
 library(ggplot2)
 library(ggiraph)
@@ -374,10 +371,7 @@ so, I did end up procrasti-plotting an interactive calendar, that looks like thi
 ::: {.stack-blank}
 :::
 
-![](assets/notability-v2/separate-prep-and-ggplot.png){.fragment .fade-in-then-out fragment-index=1 fig-alt="Data prep block beside a ggplot() block"}
-
-<!--- TODO: REPLACE THESE TWO BLOCKS WITH A WHITE PLACEHOLDER THE SAME SIZE AS @GGPLOT2-HELPER-WRAPPED; ANIMATION SHOULD GO FROM BLANK -->
-![](assets/notability/ggplot2-helper-wrapped.png){.fragment fragment-index=2 fig-alt="The same two blocks with a box drawn around them to show the selection"}
+![](assets/notability/ggplot2-helper-wrapped.png){.fragment fragment-index=1 fig-alt="A helper function wrapping the data preparation and plot assembly steps"}
 :::
 
 ![](assets/ggtime-hex-grey.png){.hex-sticker fig-alt="ggtime hex sticker in greyscale"}
@@ -392,9 +386,9 @@ so, I did end up procrasti-plotting an interactive calendar, that looks like thi
 
 ::: {.column}
 
-::: {.sketch-container .fill-column}
-![](assets/temp/ggtilecal.png)
-:::
+
+![](assets/temp/ggtilecal-crop.png)
+
 
 :::
 
@@ -420,9 +414,12 @@ A **reuseable-enough** helper should:
 
 ## SEPARATE
 
+<!-- ```{.r code-line-numbers="5-41|43-71|72-104|106-124" -->
+
 ::: {.columns}
 ::: {.column .smallest}
-```{.r code-line-numbers="5-41|43-71|72-104|106-124" filename="very-long-ggplot-script.R"}
+```{.r code-line-numbers="43-71|72-104"
+ filename="very-long-ggplot-script.R"}
 # source(here::here("_utilities/travel_dates_load.R"))
 library(ggplot2)
 library(ggiraph)
@@ -610,8 +607,9 @@ gg_facet_wrap_months <- function(...){
 
 ## EXPOSE
 
-<!-- TODO: center align -->
-![](assets/notability-v2/transparent-helper-left.png)
+
+![](assets/notability-v2/transparent-helper-left.png){fig-alt="A transparent helper function, exposing its underlying ggplot2 components"}
+
 
 ## EXPOSE defaults as list arguments
 
@@ -624,7 +622,7 @@ gg_facet_wrap_months <- function(...){
 :::
 :::
 ::: {.column .small .fragment}
-```{.r code-line-numbers="10-20|1-5|6-9|" filename="function-interface"}
+```{.r code-line-numbers="|10-20" filename="function-interface"}
 gg_facet_wrap_months(
   ## --- data ----
   .events_long, 
@@ -651,9 +649,7 @@ gg_facet_wrap_months(
 
 :::
 
-<!-- TODO: animate between next two slides -->
-
-##
+## From `autoplot()` {auto-animate=true}
 
 ```{r}
 #| output-location: column-fragment
@@ -671,7 +667,7 @@ gg_facet_wrap_months(
   unit_date)
 ```
 
-##
+## From `autoplot()` to customisation! {auto-animate=true}
 
 ```{r}
 #| echo: true
@@ -710,8 +706,6 @@ gg_facet_wrap_months(dates, unit_date,
 
 ::: {.column .fragment }
 
-How the ggplot2 recipe works:
-
 ::: {.incremental}
 
 * Data preparation steps
@@ -727,6 +721,7 @@ How the ggplot2 recipe works:
 ##
 
 ```{r}
+#| filename: "gg_facet_wrap_months.R"
 #| eval: false
 #| echo: true
 #| code-line-numbers: "3-15|17-27"
@@ -799,36 +794,34 @@ How the ggplot2 recipe works:
 
 # Reusing ggplot2 happily ever after?
 
-##
-
-::: {.sketch-container}
-![](assets/notability-v2/code-to-helper.png)
-:::
+## From custom code...
 
 
-##
+![](assets/notability-v2/code-to-helper-01.png){align="centre"}
 
-::: {.sketch-container}
-![](assets/notability-v2/code-to-helper-output.png)
-:::
 
-##
+## to transparent helpers...
 
-::: {.sketch-container}
+![](assets/notability-v2/code-to-helper-03.png){align="centre"}
+
+
+## and beyond?
+
+
 ![](assets/temp/fig-ggtime-teaser.png)
-:::
 
-##
 
-::: {.sketch-container}
-![](assets/notability-v2/principle-summary-v2-with-text.jpg){fig-alt="Modular internals, an exposed helper signature, and a documentation page shown together"}
-:::
+##  Keep calm, and...
+
+
+![](assets/notability-v2/principle-summary-v2-with-text.jpg){fig-alt="Modular internals, an exposed helper signature, and a documentation page shown together" fig-align="center"}
+
 
 
 
 ## Thanks for listening!
 
 
-📣 Please tell me about your ggplot2 reuse experiences!
+📣 Tell me about your ggplot2 reuse experiences!
 
 ![cynthiahqy.com/survey](assets/qr-positconf2026.png){.qr-code fig-alt="QR code linking to github.com/cynthiahqy/positconf2026"}
