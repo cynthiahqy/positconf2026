@@ -844,12 +844,12 @@ gg_facet_wrap_months(dates_df, date,
 ## From custom code...
 
 
-![](assets/notability-v2/code-to-helper-01.png){align="centre"}
+![](assets/notability-v2/code-to-helper-01.png){fig-align="center"}
 
 
 ## to transparent helpers...
 
-![](assets/notability-v2/code-to-helper-03.png){align="centre"}
+![](assets/notability-v2/code-to-helper-03.png){fig-align="center"}
 
 
 ## and beyond?
