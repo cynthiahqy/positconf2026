@@ -1,7 +1,7 @@
 # Talk, posit::conf(2026)
 
-**Date:** TBC
-**Event:** TBC
+**Date:** 2026-09-16
+**Event:** posit::conf(2026), Houston
 
 📊 **Slides:** <https://cynthiahqy.github.io/positconf2026/>
 
