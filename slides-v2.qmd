@@ -569,10 +569,14 @@ p_cal_girafe <- base_data_aes +
 :::
 :::
 ::: {.column .smallest .fragment}
-```{.r code-line-numbers="|4-13|29-32" filename="internals"}
-gg_facet_wrap_months <- function(
-  .events_long, date_col, locale = NULL,
-  week_start = NULL, nrow = NULL, ncol = NULL,
+```{.r code-line-numbers="|2-5|7-17|28-31" filename="internals"}
+gg_facet_wrap_months <- function(){
+  ## Data Prep
+  cal_data <- .events_long |>
+    fill_missing_units({{ date_col }}) |>
+    calc_calendar_vars({{ date_col }})
+
+  ## Plot Elements
   .geom = list(
     geom_tile(color = "grey70", fill = "transparent"),
     geom_text(nudge_y = 0.25)
@@ -583,48 +587,6 @@ gg_facet_wrap_months <- function(
     coord_fixed(expand = TRUE)),
   .theme = list(theme_bw_tilecal()),
   .other = list()
-){
-  ## Data Prep
-  cal_data <- .events_long |>
-    fill_missing_units({{ date_col }}) |>
-    calc_calendar_vars({{ date_col }})
-
-  ## Plot Assembly
-  base_plot <- cal_data |>
-    ggplot2::ggplot(mapping = aes_string(
-      x = "TC_wday_label",
-      y = "TC_month_week",
-      label = "TC_mday"
-    )) +
-    facet_wrap(c("TC_month_label"), axes = "all_x", nrow = nrow, ncol = ncol) +
-    labs(y = NULL, x = NULL) +
-    .geom +
-    .scale_coord +
-    .theme +
-    .other
-
-  base_plot
-}
-```
-:::
-:::
-
-## SEPARATE into modular internals
-
-::: {.columns}
-::: {.column style="align-items: start;"}
-
-::: {.sketch-container style="margin: 0; align-items: start;"}
-![](assets/notability-v2/internals-modular-solid-border.png){fig-alt="Solid box containing data prep and plot assembly blocks, with helper functions and ggplot2 component slots listed inside"}
-:::
-:::
-::: {.column .small .fragment}
-```{.r code-line-numbers="1|2-5|7-19|1-22" filename="internals"}
-gg_facet_wrap_months <- function(...){
-  ## Data Prep
-  cal_data <- .events_long |>
-    fill_missing_units({{ date_col }}) |>
-    calc_calendar_vars({{ date_col }})
 
   ## Plot Assembly
   base_plot <- cal_data |>
