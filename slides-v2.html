@@ -506,8 +506,8 @@ Cynthia A. Huang
       }</style></aside>
 </section>
 <section>
-<section id="down-the-design-rabbit-hole" class="title-slide slide level1 center">
-<h1>Down the design rabbit hole…</h1>
+<section id="down-the-function-design-rabbit-hole" class="title-slide slide level1 center">
+<h1>Down the function design rabbit hole…</h1>
 
 </section>
 <section id="section-6" class="slide level2">
@@ -756,7 +756,7 @@ Cynthia A. Huang
 <div class="code-with-filename-file">
 <pre><strong>internals</strong></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6" data-filename="internals" data-code-line-numbers="|2-5|7-17|28-31"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href=""></a>gg_facet_wrap_months <span class="ot">&lt;-</span> <span class="cf">function</span>(){</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6" data-filename="internals" data-code-line-numbers="|2-5|7-17|19-31"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href=""></a>gg_facet_wrap_months <span class="ot">&lt;-</span> <span class="cf">function</span>(){</span>
 <span id="cb6-2"><a href=""></a>  <span class="do">## Data Prep</span></span>
 <span id="cb6-3"><a href=""></a>  cal_data <span class="ot">&lt;-</span> .events_long <span class="sc">|&gt;</span></span>
 <span id="cb6-4"><a href=""></a>    <span class="fu">fill_missing_units</span>({{ date_col }}) <span class="sc">|&gt;</span></span>
@@ -805,7 +805,7 @@ Cynthia A. Huang
 <div class="code-with-filename-file">
 <pre><strong>function-interface</strong></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7" data-filename="function-interface" data-code-line-numbers="|10-20"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href=""></a><span class="fu">gg_facet_wrap_months</span>(</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7" data-filename="function-interface" data-code-line-numbers="1-9|10-20"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href=""></a><span class="fu">gg_facet_wrap_months</span>(</span>
 <span id="cb7-2"><a href=""></a>  <span class="do">## --- data ----</span></span>
 <span id="cb7-3"><a href=""></a>  .events_long,</span>
 <span id="cb7-4"><a href=""></a>  date_col,</span>
@@ -883,8 +883,9 @@ Cynthia A. Huang
 <h2>EXPOSE</h2>
 
 <img data-src="assets/notability-v2/transparent-helper-left.png" alt="A transparent helper function, exposing its underlying ggplot2 components" class="r-stretch"></section>
-<section id="from-autoplot" class="slide level2 smallest" data-auto-animate="true">
+<section id="from-autoplot" class="slide level2" data-auto-animate="true">
 <h2 data-id="quarto-animate-title">From <code>autoplot()</code></h2>
+<div class="small">
 <div class="cell columns column-output-location">
 <div class="column">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9" data-code-line-numbers="7-9"><pre class="sourceCode numberSource r number-lines code-with-copy" data-id="quarto-animate-code"><code class="sourceCode r hljs"><span id="cb9-1" class="hljs-ln-code"><a href=""></a><span class="fu">library</span>(ggtilecal)</span>
@@ -905,9 +906,11 @@ Cynthia A. Huang
 </div>
 </div>
 </div></div>
+</div>
 </section>
-<section id="from-autoplot-to-customisation" class="slide level2 smallest" data-auto-animate="true">
+<section id="from-autoplot-to-customisation" class="slide level2" data-auto-animate="true">
 <h2 data-id="quarto-animate-title">From <code>autoplot()</code> to customisation!</h2>
+<div class="small">
 <div class="cell columns column-output-location">
 <div class="column">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10" data-code-line-numbers="8-14|11"><pre class="sourceCode numberSource r number-lines code-with-copy" data-id="quarto-animate-code"><code class="sourceCode r hljs"><span id="cb10-1" class="hljs-ln-code"><a href=""></a><span class="fu">library</span>(ggtilecal)</span>
@@ -934,6 +937,7 @@ Cynthia A. Huang
 </div>
 </div>
 </div></div>
+</div>
 </section>
 <section id="document" class="slide level2">
 <h2>DOCUMENT</h2>
@@ -1052,12 +1056,22 @@ Cynthia A. Huang
 <h2>Keep calm, and…</h2>
 
 <img data-src="assets/notability-v2/principle-summary-v2-with-text.png" class="quarto-figure quarto-figure-center r-stretch" alt="Modular internals, an exposed helper signature, and a documentation page shown together"></section>
-<section id="thanks-for-listening" class="slide level2">
-<h2>Thanks for listening!</h2>
+<section id="section-13" class="slide level2">
+<h2></h2>
+<div class="columns">
+<div class="column">
+<p><img data-src="assets/temp/screenshot-blog.png"></p>
+</div><div class="column">
 <p>📣 Tell me about your ggplot2 reuse experiences!</p>
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="assets/qrcode-survey.svg" class="qr-code quarto-figure quarto-figure-center" alt="QR code linking to https://www.cynthiahqy.com/survey"></p>
+</figure>
+</div>
+<p><a href="cynthiahqy.com/survey">cynthiahqy.com/survey</a></p>
+</div></div>
 
-
-<img data-src="assets/qrcode-survey.svg" class="qr-code r-stretch quarto-figure-center" alt="QR code linking to https://www.cynthiahqy.com/survey"><p class="caption">cynthiahqy.com/survey</p></section></section>
+</section></section>
     </div>
   <div class="quarto-auto-generated-content" style="display: none;">
 <div class="footer footer-default">

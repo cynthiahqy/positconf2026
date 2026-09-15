@@ -314,7 +314,7 @@ p_cal_girafe <- base_data_aes +
 so, I did end up procrasti-plotting an interactive calendar, that looks like this
 :::
 
-# Down the design rabbit hole...
+# Down the function design rabbit hole...
 
 
 
@@ -570,7 +570,7 @@ p_cal_girafe <- base_data_aes +
 :::
 :::
 ::: {.column .smallest .fragment}
-```{.r code-line-numbers="|2-5|7-17|28-31" filename="internals"}
+```{.r code-line-numbers="|2-5|7-17|19-31" filename="internals"}
 gg_facet_wrap_months <- function(){
   ## Data Prep
   cal_data <- .events_long |>
@@ -620,7 +620,7 @@ gg_facet_wrap_months <- function(){
 :::
 :::
 ::: {.column .small .fragment}
-```{.r code-line-numbers="|10-20" filename="function-interface"}
+```{.r code-line-numbers="1-9|10-20" filename="function-interface"}
 gg_facet_wrap_months(
   ## --- data ----
   .events_long,
@@ -697,8 +697,10 @@ the day number and the flag — because they are one visual idea.
 ![](assets/notability-v2/transparent-helper-left.png){fig-alt="A transparent helper function, exposing its underlying ggplot2 components"}
 
 
-## From `autoplot()` {auto-animate=true .smallest}
+## From `autoplot()` {auto-animate=true}
 
+
+::: {.small}
 ```{r}
 #| output-location: column-fragment
 #| echo: true
@@ -715,8 +717,11 @@ gg_facet_wrap_months(
   date)
 ```
 
-## From `autoplot()` to customisation! {auto-animate=true .smallest}
+:::
 
+## From `autoplot()` to customisation! {auto-animate=true}
+
+::: {.small}
 ```{r}
 #| echo: true
 #| eval: true
@@ -738,6 +743,9 @@ gg_facet_wrap_months(dates_df, date,
         strip.background = element_rect(fill = "#d9d2e9")))
     )
 ```
+
+:::
+
 
 ## DOCUMENT
 
@@ -862,11 +870,27 @@ gg_facet_wrap_months(dates_df, date,
 ![](assets/notability-v2/principle-summary-v2-with-text.png){fig-alt="Modular internals, an exposed helper signature, and a documentation page shown together" fig-align="center"}
 
 
+##
 
 
-## Thanks for listening!
+::: {.columns}
+
+::: {.column}
+
+![](assets/temp/screenshot-blog.png)
+
+:::
+
+::: {.column .fragment}
 
 
 📣 Tell me about your ggplot2 reuse experiences!
 
-![cynthiahqy.com/survey](assets/qrcode-survey.svg){.qr-code fig-alt="QR code linking to https://www.cynthiahqy.com/survey"}
+
+![](assets/qrcode-survey.svg){.qr-code fig-alt="QR code linking to https://www.cynthiahqy.com/survey" fig-align="center"}
+
+[cynthiahqy.com/survey](cynthiahqy.com/survey)
+:::
+
+:::
+
