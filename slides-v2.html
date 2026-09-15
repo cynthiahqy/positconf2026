@@ -100,7 +100,7 @@
     code span.vs { color: #20794d; } /* VerbatimString */
     code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
   </style>
-  <link rel="stylesheet" href="slides-v2_files/libs/revealjs/dist/theme/quarto-6882c772088fc1a4fe233fa32989aa62.css">
+  <link rel="stylesheet" href="slides-v2_files/libs/revealjs/dist/theme/quarto-9f00a645a334436bf10e9be9c2d28d97.css">
   <link href="slides-v2_files/libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
   <link href="slides-v2_files/libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
   <link href="slides-v2_files/libs/revealjs/plugin/reveal-menu/quarto-menu.css" rel="stylesheet">
@@ -209,13 +209,9 @@ Cynthia A. Huang
 </div>
 
 </section>
-<section class="slide level2">
-
-<!--TODO: add file names to all visible code chunks -->
-</section>
 <section>
-<section id="the-backstory-calendars-ggplot2" class="title-slide slide level1 center">
-<h1>The Backstory: calendars &amp; ggplot2</h1>
+<section id="ggplot2-calendars" class="title-slide slide level1 center">
+<h1>ggplot2 &amp; calendars?</h1>
 
 </section>
 <section id="section" class="slide level2">
@@ -261,12 +257,12 @@ Cynthia A. Huang
 <h2></h2>
 <div class="columns cal-gallery">
 <div class="column" style="width:56%;">
-<h3 class="smallest" id="calendr"><code>{calendR}</code></h3>
+<p><code>{calendR}</code></p>
 <p><img data-src="assets/code-blocks/calendR-plot.png" alt="Example calendR plot"></p>
 </div><div class="column cal-gallery-stack" style="width:42%;">
-<h3 class="smallest" id="ggweekly"><code>{ggweekly}</code></h3>
-<p><img data-src="assets/code-blocks/ggweekly-README-year-week-1.png" alt="Example ggweekly plot"></p>
-<h3 class="smallest" id="ggcal"><code>{ggcal}</code></h3>
+<p><code>{ggweekly}</code></p>
+<p><img data-src="assets/code-blocks/ggweekly-README-year-week-1-cropped.png" alt="Example ggweekly plot"></p>
+<p><code>{ggcal}</code></p>
 <p><img data-src="assets/code-blocks/ggcal-plot.png" alt="Example ggcal plot"></p>
 </div></div>
 </section>
@@ -274,8 +270,12 @@ Cynthia A. Huang
 <h2></h2>
 <div class="columns cal-interfaces">
 <div class="column" style="width:32%;">
-<h3 class="smallest" id="calendr-1"><code>{calendR}</code></h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href=""></a><span class="fu">calendR</span>(</span>
+<h3 class="smallest" id="calendr"><code>{calendR}</code></h3>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>calendR-interface</strong></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1" data-filename="calendR-interface"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href=""></a><span class="fu">calendR</span>(</span>
 <span id="cb1-2"><a href=""></a>    <span class="at">year =</span> <span class="fu">format</span>(<span class="fu">Sys.Date</span>(), <span class="st">"%Y"</span>),</span>
 <span id="cb1-3"><a href=""></a>    <span class="at">month =</span> <span class="cn">NULL</span>,</span>
 <span id="cb1-4"><a href=""></a>    <span class="at">from =</span> <span class="cn">NULL</span>,</span>
@@ -327,9 +327,14 @@ Cynthia A. Huang
 <span id="cb1-50"><a href=""></a>    <span class="at">doc_name =</span> <span class="st">""</span>,</span>
 <span id="cb1-51"><a href=""></a>    <span class="at">papersize =</span> <span class="st">"A4"</span></span>
 <span id="cb1-52"><a href=""></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
 </div><div class="column" style="width:32%;">
-<h3 class="smallest" id="ggweekly-1"><code>{ggweekly}</code></h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href=""></a><span class="fu">ggweek_planner</span>(</span>
+<h3 class="smallest" id="ggweekly"><code>{ggweekly}</code></h3>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>ggweekly-interface</strong></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2" data-filename="ggweekly-interface"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href=""></a><span class="fu">ggweek_planner</span>(</span>
 <span id="cb2-2"><a href=""></a>    <span class="at">start_day =</span> lubridate<span class="sc">::</span><span class="fu">today</span>(),</span>
 <span id="cb2-3"><a href=""></a>    <span class="at">end_day =</span> start_day <span class="sc">+</span></span>
 <span id="cb2-4"><a href=""></a>        lubridate<span class="sc">::</span><span class="fu">weeks</span>(<span class="dv">8</span>) <span class="sc">-</span> lubridate<span class="sc">::</span><span class="fu">days</span>(<span class="dv">1</span>),</span>
@@ -350,9 +355,15 @@ Cynthia A. Huang
 <span id="cb2-19"><a href=""></a>    <span class="at">font_label_family =</span> <span class="st">"PT Sans Narrow"</span>,</span>
 <span id="cb2-20"><a href=""></a>    <span class="at">font_label_text =</span> <span class="cn">NULL</span></span>
 <span id="cb2-21"><a href=""></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
 </div><div class="column" style="width:32%;">
-<h3 class="smallest" id="ggcal-1"><code>{ggcal}</code></h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href=""></a><span class="fu">ggcal</span>(dates, fills)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<h3 class="smallest" id="ggcal"><code>{ggcal}</code></h3>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>ggcal-interface</strong></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3" data-filename="ggcal-interface"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href=""></a><span class="fu">ggcal</span>(dates, fills)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
 </div></div>
 </section>
 <section id="section-6" class="slide level2">
@@ -361,7 +372,11 @@ Cynthia A. Huang
 <div class="column" style="width:60%;">
 <p><img data-src="assets/screenshot_travel-calendar.png"></p>
 </div><div class="column smallest" style="width:40%;">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href=""></a><span class="co"># source(here::here("_utilities/travel_dates_load.R"))</span></span>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>very-long-ggplot-script.R</strong></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4" data-filename="very-long-ggplot-script.R"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href=""></a><span class="co"># source(here::here("_utilities/travel_dates_load.R"))</span></span>
 <span id="cb4-2"><a href=""></a><span class="fu">library</span>(ggplot2)</span>
 <span id="cb4-3"><a href=""></a><span class="fu">library</span>(ggiraph)</span>
 <span id="cb4-4"><a href=""></a></span>
@@ -485,6 +500,7 @@ Cynthia A. Huang
 <span id="cb4-122"><a href=""></a>    layers_theme</span>
 <span id="cb4-123"><a href=""></a></span>
 <span id="cb4-124"><a href=""></a><span class="co"># girafe(ggobj = p_cal_girafe)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
 </div></div>
 <aside class="notes">
 <p>so, I did end up procrasti-plotting an interactive calendar, that looks like this</p>
@@ -544,9 +560,7 @@ Cynthia A. Huang
 <div class="stack-blank">
 
 </div>
-<p><img data-src="assets/notability-v2/separate-prep-and-ggplot.png" class="fragment fade-in-then-out" data-fragment-index="1" alt="Data prep block beside a ggplot() block"></p>
-<!--- TODO: REPLACE THESE TWO BLOCKS WITH A WHITE PLACEHOLDER THE SAME SIZE AS @GGPLOT2-HELPER-WRAPPED; ANIMATION SHOULD GO FROM BLANK -->
-<p><img data-src="assets/notability/ggplot2-helper-wrapped.png" class="fragment" data-fragment-index="2" alt="The same two blocks with a box drawn around them to show the selection"></p>
+<p><img data-src="assets/notability/ggplot2-helper-wrapped.png" class="fragment" data-fragment-index="1" alt="A helper function wrapping the data preparation and plot assembly steps"></p>
 </div>
 <p><img data-src="assets/ggtime-hex-grey.png" class="hex-sticker" alt="ggtime hex sticker in greyscale"></p>
 </div>
@@ -561,7 +575,7 @@ Cynthia A. Huang
 <div class="columns">
 <div class="column">
 <div class="sketch-container fill-column">
-<p><img data-src="assets/temp/ggtilecal.png"></p>
+<p><img data-src="assets/temp/ggtilecal-crop.png"></p>
 </div>
 </div><div class="column fragment">
 <p>A <strong>reuseable-enough</strong> helper should:</p>
@@ -581,13 +595,14 @@ Cynthia A. Huang
 </section>
 <section id="separate" class="slide level2">
 <h2>SEPARATE</h2>
+<!-- ```{.r code-line-numbers="5-41|43-71|72-104|106-124" -->
 <div class="columns">
 <div class="column smallest">
 <div class="code-with-filename">
 <div class="code-with-filename-file">
 <pre><strong>very-long-ggplot-script.R</strong></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5" data-filename="very-long-ggplot-script.R" data-code-line-numbers="5-41|43-71|72-104|106-124"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href=""></a><span class="co"># source(here::here("_utilities/travel_dates_load.R"))</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5" data-filename="very-long-ggplot-script.R" data-code-line-numbers="43-71|72-104"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href=""></a><span class="co"># source(here::here("_utilities/travel_dates_load.R"))</span></span>
 <span id="cb5-2"><a href=""></a><span class="fu">library</span>(ggplot2)</span>
 <span id="cb5-3"><a href=""></a><span class="fu">library</span>(ggiraph)</span>
 <span id="cb5-4"><a href=""></a></span>
@@ -783,9 +798,8 @@ Cynthia A. Huang
 </section>
 <section id="expose" class="slide level2">
 <h2>EXPOSE</h2>
-<!-- TODO: center align -->
 
-<img data-src="assets/notability-v2/transparent-helper-left.png" class="r-stretch"></section>
+<img data-src="assets/notability-v2/transparent-helper-left.png" alt="A transparent helper function, exposing its underlying ggplot2 components" class="r-stretch"></section>
 <section id="expose-defaults-as-list-arguments" class="slide level2">
 <h2>EXPOSE defaults as list arguments</h2>
 <div class="columns">
@@ -798,7 +812,7 @@ Cynthia A. Huang
 <div class="code-with-filename-file">
 <pre><strong>function-interface</strong></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7" data-filename="function-interface" data-code-line-numbers="10-20|1-5|6-9|"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href=""></a><span class="fu">gg_facet_wrap_months</span>(</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7" data-filename="function-interface" data-code-line-numbers="|10-20"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href=""></a><span class="fu">gg_facet_wrap_months</span>(</span>
 <span id="cb7-2"><a href=""></a>  <span class="do">## --- data ----</span></span>
 <span id="cb7-3"><a href=""></a>  .events_long, </span>
 <span id="cb7-4"><a href=""></a>  date_col,</span>
@@ -821,21 +835,20 @@ Cynthia A. Huang
 <span id="cb7-21"><a href=""></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div></div>
-<!-- TODO: animate between next two slides -->
 </section>
-<section id="section-14" class="slide level2">
-<h2></h2>
+<section id="from-autoplot" class="slide level2" data-auto-animate="true">
+<h2 data-id="quarto-animate-title">From <code>autoplot()</code></h2>
 <div class="cell columns column-output-location">
 <div class="column">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8" data-code-line-numbers="7-9"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href=""></a><span class="fu">library</span>(ggtilecal)</span>
-<span id="cb8-2"><a href=""></a><span class="fu">library</span>(ggplot2)</span>
-<span id="cb8-3"><a href=""></a></span>
-<span id="cb8-4"><a href=""></a>dates <span class="ot">&lt;-</span> <span class="fu">make_empty_month_days</span>(</span>
-<span id="cb8-5"><a href=""></a>  <span class="fu">c</span>(<span class="st">"2024-01-05"</span>, <span class="st">"2024-06-30"</span>))</span>
-<span id="cb8-6"><a href=""></a></span>
-<span id="cb8-7"><a href=""></a><span class="fu">gg_facet_wrap_months</span>(</span>
-<span id="cb8-8"><a href=""></a>  dates,</span>
-<span id="cb8-9"><a href=""></a>  unit_date)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8" data-code-line-numbers="7-9"><pre class="sourceCode numberSource r number-lines code-with-copy" data-id="quarto-animate-code"><code class="sourceCode r hljs"><span id="cb8-1" class="hljs-ln-code"><a href=""></a><span class="fu">library</span>(ggtilecal)</span>
+<span id="cb8-2" class="hljs-ln-code"><a href=""></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb8-3" class="hljs-ln-code"><a href=""></a></span>
+<span id="cb8-4" class="hljs-ln-code"><a href=""></a>dates <span class="ot">&lt;-</span> <span class="fu">make_empty_month_days</span>(</span>
+<span id="cb8-5" class="hljs-ln-code"><a href=""></a>  <span class="fu">c</span>(<span class="st">"2024-01-05"</span>, <span class="st">"2024-06-30"</span>))</span>
+<span id="cb8-6" class="hljs-ln-code"><a href=""></a></span>
+<span id="cb8-7" class="hljs-ln-code"><a href=""></a><span class="fu">gg_facet_wrap_months</span>(</span>
+<span id="cb8-8" class="hljs-ln-code"><a href=""></a>  dates,</span>
+<span id="cb8-9" class="hljs-ln-code"><a href=""></a>  unit_date)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div><div class="column fragment">
 <div class="cell-output-display">
 <div>
@@ -846,25 +859,25 @@ Cynthia A. Huang
 </div>
 </div></div>
 </section>
-<section id="section-15" class="slide level2">
-<h2></h2>
+<section id="from-autoplot-to-customisation" class="slide level2" data-auto-animate="true">
+<h2 data-id="quarto-animate-title">From <code>autoplot()</code> to customisation!</h2>
 <div class="cell columns column-output-location">
 <div class="column">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9" data-code-line-numbers="8-14"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href=""></a><span class="fu">library</span>(ggtilecal)</span>
-<span id="cb9-2"><a href=""></a><span class="fu">library</span>(ggplot2)</span>
-<span id="cb9-3"><a href=""></a></span>
-<span id="cb9-4"><a href=""></a>dates <span class="ot">&lt;-</span> <span class="fu">make_empty_month_days</span>(</span>
-<span id="cb9-5"><a href=""></a>  <span class="fu">c</span>(<span class="st">"2024-01-05"</span>, <span class="st">"2024-06-30"</span>))</span>
-<span id="cb9-6"><a href=""></a></span>
-<span id="cb9-7"><a href=""></a><span class="fu">gg_facet_wrap_months</span>(dates, unit_date,</span>
-<span id="cb9-8"><a href=""></a>    <span class="at">.geom =</span> <span class="fu">list</span>(</span>
-<span id="cb9-9"><a href=""></a>      <span class="fu">geom_tile</span>(<span class="at">color =</span> <span class="st">"grey70"</span>, <span class="at">fill =</span> <span class="st">"transparent"</span>),</span>
-<span id="cb9-10"><a href=""></a>      <span class="fu">geom_text</span>(<span class="at">nudge_y =</span> <span class="fl">0.25</span>,</span>
-<span id="cb9-11"><a href=""></a>                <span class="at">color =</span> <span class="st">"#6a329f"</span>)),</span>
-<span id="cb9-12"><a href=""></a>    <span class="at">.theme =</span> <span class="fu">list</span>(<span class="fu">theme_bw_tilecal</span>(),</span>
-<span id="cb9-13"><a href=""></a>      <span class="fu">theme</span>(</span>
-<span id="cb9-14"><a href=""></a>        <span class="at">strip.background =</span> <span class="fu">element_rect</span>(<span class="at">fill =</span> <span class="st">"#d9d2e9"</span>)))</span>
-<span id="cb9-15"><a href=""></a>    )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9" data-code-line-numbers="8-14"><pre class="sourceCode numberSource r number-lines code-with-copy" data-id="quarto-animate-code"><code class="sourceCode r hljs"><span id="cb9-1" class="hljs-ln-code"><a href=""></a><span class="fu">library</span>(ggtilecal)</span>
+<span id="cb9-2" class="hljs-ln-code"><a href=""></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb9-3" class="hljs-ln-code"><a href=""></a></span>
+<span id="cb9-4" class="hljs-ln-code"><a href=""></a>dates <span class="ot">&lt;-</span> <span class="fu">make_empty_month_days</span>(</span>
+<span id="cb9-5" class="hljs-ln-code"><a href=""></a>  <span class="fu">c</span>(<span class="st">"2024-01-05"</span>, <span class="st">"2024-06-30"</span>))</span>
+<span id="cb9-6" class="hljs-ln-code"><a href=""></a></span>
+<span id="cb9-7" class="hljs-ln-code"><a href=""></a><span class="fu">gg_facet_wrap_months</span>(dates, unit_date,</span>
+<span id="cb9-8" class="hljs-ln-code"><a href=""></a>    <span class="at">.geom =</span> <span class="fu">list</span>(</span>
+<span id="cb9-9" class="hljs-ln-code"><a href=""></a>      <span class="fu">geom_tile</span>(<span class="at">color =</span> <span class="st">"grey70"</span>, <span class="at">fill =</span> <span class="st">"transparent"</span>),</span>
+<span id="cb9-10" class="hljs-ln-code"><a href=""></a>      <span class="fu">geom_text</span>(<span class="at">nudge_y =</span> <span class="fl">0.25</span>,</span>
+<span id="cb9-11" class="hljs-ln-code"><a href=""></a>                <span class="at">color =</span> <span class="st">"#6a329f"</span>)),</span>
+<span id="cb9-12" class="hljs-ln-code"><a href=""></a>    <span class="at">.theme =</span> <span class="fu">list</span>(<span class="fu">theme_bw_tilecal</span>(),</span>
+<span id="cb9-13" class="hljs-ln-code"><a href=""></a>      <span class="fu">theme</span>(</span>
+<span id="cb9-14" class="hljs-ln-code"><a href=""></a>        <span class="at">strip.background =</span> <span class="fu">element_rect</span>(<span class="at">fill =</span> <span class="st">"#d9d2e9"</span>)))</span>
+<span id="cb9-15" class="hljs-ln-code"><a href=""></a>    )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div><div class="column fragment">
 <div class="cell-output-display">
 <div>
@@ -883,7 +896,6 @@ Cynthia A. Huang
 <p><img data-src="assets/notability-v2/document-icon-only.png"></p>
 </div>
 </div><div class="column fragment">
-<p>How the ggplot2 recipe works:</p>
 <ul>
 <li class="fragment">Data preparation steps</li>
 <li class="fragment">Fixed variables and aesthetics</li>
@@ -891,9 +903,13 @@ Cynthia A. Huang
 </ul>
 </div></div>
 </section>
-<section id="section-16" class="slide level2">
+<section id="section-14" class="slide level2">
 <h2></h2>
 <div class="cell">
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>gg_facet_wrap_months.R</strong></pre>
+</div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10" data-code-line-numbers="3-15|17-27"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href=""></a><span class="co">#' Make Monthly Calendar Facets</span></span>
 <span id="cb10-2"><a href=""></a><span class="co">#'</span></span>
 <span id="cb10-3"><a href=""></a><span class="co">#' Generates calendar with monthly facets by:</span></span>
@@ -960,46 +976,39 @@ Cynthia A. Huang
 <span id="cb10-64"><a href=""></a><span class="co">#' @importFrom ggplot2 geom_tile geom_text facet_wrap labs aes</span></span>
 <span id="cb10-65"><a href=""></a><span class="co">#'     scale_y_reverse scale_x_discrete coord_fixed vars</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
+</div>
 </section></section>
 <section>
 <section id="reusing-ggplot2-happily-ever-after" class="title-slide slide level1 center">
 <h1>Reusing ggplot2 happily ever after?</h1>
 
 </section>
-<section id="section-17" class="slide level2">
-<h2></h2>
-<div class="sketch-container">
-<p><img data-src="assets/notability-v2/code-to-helper.png"></p>
-</div>
-</section>
-<section id="section-18" class="slide level2">
-<h2></h2>
-<div class="sketch-container">
-<p><img data-src="assets/notability-v2/code-to-helper-output.png"></p>
-</div>
-</section>
-<section id="section-19" class="slide level2">
-<h2></h2>
-<div class="sketch-container">
-<p><img data-src="assets/temp/fig-ggtime-teaser.png"></p>
-</div>
-</section>
-<section id="section-20" class="slide level2">
-<h2></h2>
-<div class="sketch-container">
-<p><img data-src="assets/notability-v2/principle-summary-v2-with-text.jpg" alt="Modular internals, an exposed helper signature, and a documentation page shown together"></p>
-</div>
-</section>
+<section id="from-custom-code" class="slide level2">
+<h2>From custom code…</h2>
+
+<img data-src="assets/notability-v2/code-to-helper-01.png" data-align="centre" class="r-stretch"></section>
+<section id="to-transparent-helpers" class="slide level2">
+<h2>to transparent helpers…</h2>
+
+<img data-src="assets/notability-v2/code-to-helper-03.png" data-align="centre" class="r-stretch"></section>
+<section id="and-beyond" class="slide level2">
+<h2>and beyond?</h2>
+
+<img data-src="assets/temp/fig-ggtime-teaser.png" class="r-stretch"></section>
+<section id="keep-calm-and" class="slide level2">
+<h2>Keep calm, and…</h2>
+
+<img data-src="assets/notability-v2/principle-summary-v2-with-text.jpg" class="quarto-figure quarto-figure-center r-stretch" alt="Modular internals, an exposed helper signature, and a documentation page shown together"></section>
 <section id="thanks-for-listening" class="slide level2">
 <h2>Thanks for listening!</h2>
-<p>📣 Please tell me about your ggplot2 reuse experiences!</p>
+<p>📣 Tell me about your ggplot2 reuse experiences!</p>
 
 
 <img data-src="assets/qr-positconf2026.png" class="qr-code r-stretch quarto-figure-center" alt="QR code linking to github.com/cynthiahqy/positconf2026"><p class="caption">cynthiahqy.com/survey</p></section></section>
     </div>
   <div class="quarto-auto-generated-content" style="display: none;">
 <div class="footer footer-default">
-<p>🔗<a href="https://github.com/cynthiahqy/positconf2026">cynthiahqy/positconf2026</a></p>
+<p>🔗<a href="https://github.com/cynthiahqy/positconf2026">github.com/cynthiahqy/positconf2026</a></p>
 </div>
 </div></div>
 
