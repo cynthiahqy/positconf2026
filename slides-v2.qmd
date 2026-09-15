@@ -387,9 +387,9 @@ so, I did end up procrasti-plotting an interactive calendar, that looks like thi
 
 ::: {.column}
 
-::: {.sketch-container .fill-column}
+
 ![](assets/temp/ggtilecal-crop.png)
-:::
+
 
 :::
 
