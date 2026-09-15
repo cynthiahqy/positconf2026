@@ -824,4 +824,4 @@ gg_facet_wrap_months(dates, unit_date,
 
 📣 Tell me about your ggplot2 reuse experiences!
 
-![cynthiahqy.com/survey](assets/qrcode-survey.png){.qr-code fig-alt="QR code linking to cynthiahqy.com/survey"}
+![cynthiahqy.com/survey](assets/qrcode-survey.svg){.qr-code fig-alt="QR code linking to https://www.cynthiahqy.com/survey"}
