@@ -4,6 +4,7 @@ author:
   - name: "Cynthia A. Huang"
 format:
   letterbox-revealjs: 
+    standalone: true
     theme: [default, _style.scss, brand]
     slide-number: c/t
     footer: "🔗[github.com/cynthiahqy/positconf2026](https://github.com/cynthiahqy/positconf2026)"
@@ -399,9 +400,9 @@ A **reuseable-enough** helper should:
 
 ## Design principles
 
-::: {.sketch-container}
-![](assets/notability-v2/principle-summary-v2-with-text.png){fig-alt="Modular internals, an exposed helper signature, and a documentation page shown together"}
-:::
+
+![](assets/notability-v2/principle-summary-v2-with-text.png){fig-alt="Modular internals, an exposed helper signature, and a documentation page shown together" fig-align="center"}
+
 
 ## SEPARATE
 
@@ -608,7 +609,7 @@ gg_facet_wrap_months <- function(){
 :::
 :::
 
-## EXPOSE defaults as list arguments
+## EXPOSE list defaults
 
 
 ::: {.columns}
@@ -744,10 +745,7 @@ gg_facet_wrap_months(dates_df, date,
 
 ::: {.column}
 
-
-::: {.sketch-container}
 ![](assets/notability-v2/document-icon-only.png)
-:::
 
 :::
 
@@ -844,12 +842,12 @@ gg_facet_wrap_months(dates_df, date,
 ## From custom code...
 
 
-![](assets/notability-v2/code-to-helper-01.png){fig-align="center"}
+![](assets/notability-v2/code-to-helper-01.png){.nostretch fig-align="center"}
 
 
 ## to transparent helpers...
 
-![](assets/notability-v2/code-to-helper-03.png){fig-align="center"}
+![](assets/notability-v2/code-to-helper-03.png){.nostretch fig-align="center"}
 
 
 ## and beyond?
