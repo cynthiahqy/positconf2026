@@ -397,7 +397,7 @@ A **reuseable-enough** helper should:
 :::
 :::
 
-## Design principles for transparent helpers
+## Design principles
 
 ::: {.sketch-container}
 ![](assets/notability-v2/principle-summary-v2-with-text.png){fig-alt="Modular internals, an exposed helper signature, and a documentation page shown together"}
