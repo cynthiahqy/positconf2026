@@ -7,7 +7,6 @@ format:
     theme: [default, _style.scss]
     slide-number: c/t
     footer: "🔗[github.com/cynthiahqy/positconf2026](https://github.com/cynthiahqy/positconf2026)"
-  pptx: default
 ---
 
 # ggplot2 & calendars?
