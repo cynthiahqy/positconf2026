@@ -5,6 +5,8 @@
 
 📊 **Slides:** <https://cynthiahqy.github.io/positconf2026/>
 
+📋 **Related survey:** [How R users turn ggplot2 code into reusable functions](https://www.cynthiahqy.com/survey) (closes 31 December 2026)
+
 ## Reuse your custom ggplot2 with transparent helper functions!
 
 ## Abstract
