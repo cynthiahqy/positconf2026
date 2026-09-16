@@ -7,6 +7,8 @@
 
 📝 **Blog post:** <https://www.cynthiahqy.com/posts/ggplot-helper-design/>
 
+🤖 **Refactoring skill**: <https://github.com/cynthiahqy/ggplot2-refactor-skill>
+
 📋 **Related survey:** [How R users turn ggplot2 code into reusable functions](https://www.cynthiahqy.com/survey) (closes 31 December 2026)
 
 ## Reuse your custom ggplot2 with transparent helper functions!
@@ -42,6 +44,21 @@ The talk builds to three principles for a *transparent* helper function:
    behind plot-specific arguments.
 3. **DOCUMENT** the customisation pointers, so users know which seams they can
    reach into.
+
+## Refactoring skill
+
+The three principles above are packaged as a Claude Code skill, so you can apply
+them to your own plot code:
+
+```bash
+claude plugin marketplace add cynthiahqy/ggplot2-refactor-skill
+claude plugin install ggplot2-refactor
+```
+
+Then ask for a refactor — "turn this plot into a reusable function". The skill
+elicits the design decisions, proposes a signature, and only rewrites your code
+once you approve. Source:
+<https://github.com/cynthiahqy/ggplot2-refactor-skill>
 
 ## Repository contents
 
@@ -91,7 +108,7 @@ Two flags worth keeping:
   decktape defaults to a 1280x720 viewport, and every page picks up grey
   pillarbox bands from the letterbox theme's surround.
 
-This produces one page per slide (32 pages for 32 slides). Fragments,
+This produces one page per slide (31 pages for 31 slides). Fragments,
 `.r-stack` builds and `code-line-numbers` highlights are flattened to their
 final revealed state rather than stepped through, so the PDF is a static
 fallback, not a recording of the animations.

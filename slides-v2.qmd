@@ -875,7 +875,7 @@ gg_facet_wrap_months(dates_df, date,
 
 ::: {.column}
 
-![](assets/temp/screenshot-blog.png)
+![](assets/temp/screenshot-skill.png)
 
 :::
 
