@@ -2,7 +2,3 @@
   gh-pages:
     - id: gh-pages
       url: 'https://cynthiahqy.github.io/positconf2026/'
-- source: slides.qmd
-  quarto-pub:
-    - id: 5476bb10-57c2-46bb-ae8b-2fe0597293c7
-      url: https://cynthiahqy.quarto.pub/ggplot-helpers-melburn-ssa-2025

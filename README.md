@@ -70,7 +70,6 @@ once you approve. Source:
 | `_style.scss` | Custom slide styling (see the class reference below) |
 | `assets/notability-v2/` | Hand-drawn sketches, trimmed and made transparent |
 | `assets/code-blocks/` | Example plots from the calendar extensions compared |
-| `slides.qmd` | Earlier version of this talk, given at MelbURN/SSA (2025-08-05) |
 
 ## Building
 
@@ -126,4 +125,5 @@ decktape reveal https://cynthiahqy.github.io/positconf2026/ ./pdf-slides/slides-
 
 This talk was previously given as an invited talk at MelbURN/SSA on 2025-08-05,
 under the title *Reusing 'ggplot2' code: how to design better plot helper
-functions* — <https://www.statsoc.org.au/event-6260056>
+functions* — <https://www.statsoc.org.au/event-6260056>. Its source,
+`slides.qmd`, is preserved at the `presented-talk-20250806` tag.
