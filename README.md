@@ -7,6 +7,8 @@
 
 📝 **Blog post:** <https://www.cynthiahqy.com/posts/ggplot-helper-design/>
 
+📦 **ggtilecal Package** <https://github.com/cynthiahqy/ggtilecal>
+
 🤖 **Refactoring skill**: <https://github.com/cynthiahqy/ggplot2-refactor-skill>
 
 📋 **Related survey:** [How R users turn ggplot2 code into reusable functions](https://www.cynthiahqy.com/survey) (closes 31 December 2026)
