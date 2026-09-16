@@ -110,7 +110,7 @@ Two flags worth keeping:
   decktape defaults to a 1280x720 viewport, and every page picks up grey
   pillarbox bands from the letterbox theme's surround.
 
-This produces one page per slide (31 pages for 31 slides). Fragments,
+This produces one page per slide (30 pages for 30 slides). Fragments,
 `.r-stack` builds and `code-line-numbers` highlights are flattened to their
 final revealed state rather than stepped through, so the PDF is a static
 fallback, not a recording of the animations.

@@ -63,7 +63,7 @@ So when I wanted to procrasti-plot a calendar of an upcoming research trip acros
 ::: {.column width="32%"}
 ### `{calendR}` {.smallest}
 
-```{.r filename="calendR-interface"}
+```{.r filename="calendR-interface" code-line-numbers="|18-19"}
 calendR(
     year = format(Sys.Date(), "%Y"),
     month = NULL,
@@ -123,7 +123,7 @@ calendR(
 ::: {.column width="32%"}
 ### `{ggweekly}` {.smallest}
 
-```{.r filename="ggweekly-interface"}
+```{.r filename="ggweekly-interface" code-line-numbers="|8-10"}
 ggweek_planner(
     start_day = lubridate::today(),
     end_day = start_day +
@@ -172,7 +172,7 @@ ggcal(dates, fills)
 
 ::: {.column  .smallest width="40%"}
 
-```{.r filename="very-long-ggplot-script.R"}
+```{.r filename="very-long-ggplot-script.R" code-line-numbers="|5-41|43-71|72-104|106-124"}
 # source(here::here("_utilities/travel_dates_load.R"))
 library(ggplot2)
 library(ggiraph)
@@ -296,7 +296,7 @@ p_cal_girafe <- base_data_aes +
     layers_facet_labs +
     layers_theme
 
-# girafe(ggobj = p_cal_girafe)
+girafe(ggobj = p_cal_girafe)
 ```
 
 
@@ -312,15 +312,6 @@ p_cal_girafe <- base_data_aes +
 so, I did end up procrasti-plotting an interactive calendar, that looks like this
 :::
 
-# Down the function design rabbit hole...
-
-
-
-##
-
-::: {.sketch-container}
-![](assets/notability-v2/helper-blackbox-questions.png){fig-alt="Arguments for dates, fills and text colour disappearing into an opaque box that hides data prep and plot assembly"}
-:::
 
 ##
 
@@ -331,6 +322,9 @@ so, I did end up procrasti-plotting an interactive calendar, that looks like thi
 
 ![](assets/notability/ggplot2-helper-replace-vert.png){width="400px"}
 :::
+
+
+# Down the function design rabbit hole...
 
 ##
 
@@ -655,7 +649,7 @@ gg_facet_wrap_months(
 :::
 :::
 ::: {.column .small .fragment}
-```{.r code-line-numbers="|10-21" filename="function-interface"}
+```{.r code-line-numbers="10-21" filename="function-interface"}
 gg_facet_wrap_months(
   ## --- data ----
   .events_long,
@@ -843,7 +837,7 @@ gg_facet_wrap_months(dates_df, date,
 #'     scale_y_reverse scale_x_discrete coord_fixed vars
 ```
 
-# Reusing ggplot2 happily ever after?
+# Reusing happily ever after?
 
 ## From custom code...
 
@@ -858,8 +852,17 @@ gg_facet_wrap_months(dates_df, date,
 
 ## and beyond?
 
+::: callout-caution
+## Danger
 
-![](assets/temp/fig-ggtime-teaser.png)
+Time is complicated, so is torturing ggplot2 to care about time.
+
+Stay away if you value your sanity.
+:::
+
+::: {.fragment}
+![](assets/temp/fig-ggtime-teaser.png){fig-align="center"}
+:::
 
 
 ##  Keep calm, and...
@@ -882,16 +885,16 @@ gg_facet_wrap_months(dates_df, date,
 
 :::
 
-::: {.column .fragment}
-
-::: {.sketch-container}
-📣 Tell me about your ggplot2 reuse experiences! 
-
-![](assets/qrcode-survey.svg){.qr-code fig-alt="QR code linking to https://www.cynthiahqy.com/survey" fig-align="center"}
-:::
+::: {.column}
 
 ::: {.sketch-container}
 [🔗 Slides, links, skill & more: [github.com/cynthiahqy/positconf2026](https://github.com/cynthiahqy/positconf2026)]{.small}
+:::
+
+::: {.sketch-container .fragment}
+📣 Tell me about your ggplot2 reuse experiences! 
+
+![](assets/qrcode-survey.svg){.qr-code fig-alt="QR code linking to https://www.cynthiahqy.com/survey" fig-align="center"}
 :::
 
 :::

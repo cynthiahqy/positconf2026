@@ -217,3 +217,9 @@ ggplot(
 
 :::
 :::
+
+## {.visibility="hidden"}
+
+::: {.sketch-container}
+![](assets/notability-v2/helper-blackbox-questions.png){fig-alt="Arguments for dates, fills and text colour disappearing into an opaque box that hides data prep and plot assembly"}
+:::
