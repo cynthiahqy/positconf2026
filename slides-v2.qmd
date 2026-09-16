@@ -868,7 +868,8 @@ gg_facet_wrap_months(dates_df, date,
 ![](assets/notability-v2/principle-summary-v2-with-text.png){fig-alt="Modular internals, an exposed helper signature, and a documentation page shown together" fig-align="center"}
 
 
-##
+## Thanks for listening!
+
 
 
 ::: {.columns}
@@ -877,19 +878,24 @@ gg_facet_wrap_months(dates_df, date,
 
 ![](assets/temp/screenshot-skill.png)
 
+
+
 :::
 
 ::: {.column .fragment}
 
-::: {.love-container}
+::: {.sketch-container}
 📣 Tell me about your ggplot2 reuse experiences! 
 
 ![](assets/qrcode-survey.svg){.qr-code fig-alt="QR code linking to https://www.cynthiahqy.com/survey" fig-align="center"}
 :::
 
-
+::: {.sketch-container}
+[🔗 Slides, links, skill & more: [github.com/cynthiahqy/positconf2026](https://github.com/cynthiahqy/positconf2026)]{.small}
 :::
 
 :::
 
-[🔗 Visit [github.com/cynthiahqy/positconf2026](https://github.com/cynthiahqy/positconf2026) for more!]{.small .fragment}
+:::
+
+
