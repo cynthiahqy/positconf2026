@@ -10,6 +10,14 @@ format:
 
 ##
 
+::: {.notes}
+So naturally I reached for ggplot2, when I was overcome with the urge to do some procrasti-plotting.
+
+Two years ago, I was lucky enough to get to go on a multi-month research trip including speaking at posit::conf(2024). Travelling to new pplaces, meeting new people? That's fun. Planning a trip and booking flights and hotels. Less fun. 
+
+So I thought, what I really need to do is make an interactive overview of my trip. I had some dates sets, but there were days in between that were not yet accounted for. What better excuse to pull out R, do some calculations and wrap it all up in a nice pretty plot?
+:::
+
 ::: {.love-container}
 ![](assets/headshot-cynthia.jpg){.headshot-circle fig-alt="Headshot of Cynthia Huang"}
 
@@ -24,15 +32,13 @@ format:
 ![](assets/notability-v2/travel-calendar-sketch.png){fig-alt="Hand-drawn calendar of June and July travel, with posit::conf 2024 marked"}
 :::
 
-::: {.notes}
-So when I wanted to procrasti-plot a calendar of an upcoming research trip across Europe and USA two years ago instead of working on my thesis, I naturally searched for a ggplot2 extension
-:::
-
 ##
 
 :::{.love-container}
 ![](assets/temp/search-bar.png){.search-bar fig-alt="Searching for a ggplot2 calendar extension"}
 :::
+
+
 
 ##
 
@@ -396,13 +402,13 @@ A **reuseable-enough** helper should:
 ![](assets/notability-v2/principle-summary-v2-with-text.png){fig-alt="Modular internals, an exposed helper signature, and a documentation page shown together" fig-align="center"}
 
 
-## SEPARATE
+## SEPARATE {auto-animate=true}
 
 <!-- ```{.r code-line-numbers="5-41|43-71|72-104|106-124" -->
 
 ::: {.columns}
 ::: {.column .smallest}
-```{.r code-line-numbers="43-71|72-104"
+```{.r code-line-numbers="43-71"
  filename="very-long-ggplot-script.R"}
 # source(here::here("_utilities/travel_dates_load.R"))
 library(ggplot2)
@@ -550,6 +556,44 @@ p_cal_girafe <- base_data_aes +
     - `scale`, `coord` and `facet` to layout the calendar
     - `theme` modification to style the plot as a calendar
     - interactive `geom` from `{ggiraph}`
+:::
+
+## SEPARATE {auto-animate=true}
+
+<!-- ```{.r code-line-numbers="5-41|43-71|72-104|106-124" -->
+
+::: {.columns}
+::: {.column .smallest}
+```{.r code-line-numbers="43-71" filename="data-prep.R"}
+calc_calendar_vars <- function(.data, date_col,
+                               locale = Sys.getlocale("LC_TIME"),
+                               week_start = 1) {
+  .data |> dplyr::mutate(
+    TC_year = year({{ date_col }}),
+    TC_month_label = tsibble::yearmonth({{ date_col }}),
+    TC_mday = mday({{ date_col }}),
+    TC_wday_label = wday({{ date_col }},
+      label = TRUE,
+      locale = locale,
+      week_start = week_start
+    ),
+    TC_wday = wday({{ date_col }}, week_start = week_start),
+    TC_month_week = (5 + day({{ date_col }}) +
+      wday(floor_date({{ date_col }}, "month"), week_start = week_start)) %/% 7,
+    TC_is_weekend =
+      ifelse(wday({{ date_col }}, week_start = 1) %in% c(6, 7), TRUE, FALSE)
+  )
+}
+```
+
+:::
+::: {.column .small}
+
+<!-- ![](assets/notability-v2/pipeline-data-prep-table.png){.sketch-inline fig-alt="Data prep block"} -->
+
+![](assets/notability-v2/pipeline-assembly-inputs.png){.sketch-inline fig-alt="Plot assembly block"}
+
+:::
 :::
 
 ## SEPARATE into modular internals

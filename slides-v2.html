@@ -211,19 +211,10 @@ Cynthia A. Huang
 </section>
 <section id="section" class="slide level2">
 <h2></h2>
-<div class="love-container">
-<p><img data-src="assets/headshot-cynthia.jpg" class="headshot-circle" alt="Headshot of Cynthia Huang"></p>
-<p><span class="love-heart">❤️</span></p>
-<p><img data-src="assets/ggplot2-hex.png" class="hex-sticker" alt="ggplot2 hex sticker"></p>
-</div>
-</section>
-<section id="section-1" class="slide level2">
-<h2></h2>
-<div class="sketch-container">
-<p><img data-src="assets/notability-v2/travel-calendar-sketch.png" alt="Hand-drawn calendar of June and July travel, with posit::conf 2024 marked"></p>
-</div>
 <aside class="notes">
-<p>So when I wanted to procrasti-plot a calendar of an upcoming research trip across Europe and USA two years ago instead of working on my thesis, I naturally searched for a ggplot2 extension</p>
+<p>So naturally I reached for ggplot2, when I was overcome with the urge to do some procrasti-plotting.</p>
+<p>Two years ago, I was lucky enough to get to go on a multi-month research trip including speaking at posit::conf(2024). Travelling to new pplaces, meeting new people? That’s fun. Planning a trip and booking flights and hotels. Less fun.</p>
+<p>So I thought, what I really need to do is make an interactive overview of my trip. I had some dates sets, but there were days in between that were not yet accounted for. What better excuse to pull out R, do some calculations and wrap it all up in a nice pretty plot?</p>
 <style type="text/css">
         span.MJX_Assistive_MathML {
           position:absolute!important;
@@ -235,6 +226,17 @@ Cynthia A. Huang
           overflow: hidden!important;
           display:block!important;
       }</style></aside>
+<div class="love-container">
+<p><img data-src="assets/headshot-cynthia.jpg" class="headshot-circle" alt="Headshot of Cynthia Huang"></p>
+<p><span class="love-heart">❤️</span></p>
+<p><img data-src="assets/ggplot2-hex.png" class="hex-sticker" alt="ggplot2 hex sticker"></p>
+</div>
+</section>
+<section id="section-1" class="slide level2">
+<h2></h2>
+<div class="sketch-container">
+<p><img data-src="assets/notability-v2/travel-calendar-sketch.png" alt="Hand-drawn calendar of June and July travel, with posit::conf 2024 marked"></p>
+</div>
 </section>
 <section id="section-2" class="slide level2">
 <h2></h2>
@@ -572,8 +574,8 @@ Cynthia A. Huang
 <h2>Design principles</h2>
 
 <img data-src="assets/notability-v2/principle-summary-v2-with-text.png" class="quarto-figure quarto-figure-center r-stretch" alt="Modular internals, an exposed helper signature, and a documentation page shown together"></section>
-<section id="separate" class="slide level2">
-<h2>SEPARATE</h2>
+<section id="separate" class="slide level2" data-auto-animate="true">
+<h2 data-id="quarto-animate-title">SEPARATE</h2>
 <!-- ```{.r code-line-numbers="5-41|43-71|72-104|106-124" -->
 <div class="columns">
 <div class="column smallest">
@@ -581,130 +583,130 @@ Cynthia A. Huang
 <div class="code-with-filename-file">
 <pre><strong>very-long-ggplot-script.R</strong></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5" data-filename="very-long-ggplot-script.R" data-code-line-numbers="43-71|72-104"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href=""></a><span class="co"># source(here::here("_utilities/travel_dates_load.R"))</span></span>
-<span id="cb5-2"><a href=""></a><span class="fu">library</span>(ggplot2)</span>
-<span id="cb5-3"><a href=""></a><span class="fu">library</span>(ggiraph)</span>
-<span id="cb5-4"><a href=""></a></span>
-<span id="cb5-5"><a href=""></a><span class="do">## ---- daily-loc-prep ----</span></span>
-<span id="cb5-6"><a href=""></a></span>
-<span id="cb5-7"><a href=""></a><span class="do">## expand dates: https://stackoverflow.com/a/54728153</span></span>
-<span id="cb5-8"><a href=""></a></span>
-<span id="cb5-9"><a href=""></a>travel_days <span class="ot">&lt;-</span> travel_dates <span class="sc">|&gt;</span></span>
-<span id="cb5-10"><a href=""></a>  <span class="fu">mutate</span>(<span class="at">nights =</span> <span class="fu">interval</span>(startDate, endDate) <span class="sc">/</span> <span class="fu">days</span>(<span class="dv">1</span>)) <span class="sc">|&gt;</span></span>
-<span id="cb5-11"><a href=""></a>  <span class="fu">arrange</span>(startDate, <span class="fu">desc</span>(nights)) <span class="sc">|&gt;</span></span>
-<span id="cb5-12"><a href=""></a>  <span class="fu">rowid_to_column</span>() <span class="sc">|&gt;</span></span>
-<span id="cb5-13"><a href=""></a>  <span class="fu">rowwise</span>() <span class="sc">|&gt;</span></span>
-<span id="cb5-14"><a href=""></a>  <span class="fu">reframe</span>(rowid, location, details, nights,</span>
-<span id="cb5-15"><a href=""></a>    <span class="at">date =</span> <span class="fu">seq</span>(startDate, endDate, <span class="at">by =</span> <span class="st">"day"</span>)</span>
-<span id="cb5-16"><a href=""></a>  ) <span class="sc">|&gt;</span></span>
-<span id="cb5-17"><a href=""></a>  <span class="fu">group_by</span>(date) <span class="sc">|&gt;</span></span>
-<span id="cb5-18"><a href=""></a>  <span class="fu">slice_min</span>(<span class="at">order_by =</span> nights, <span class="at">n =</span> <span class="dv">1</span>) <span class="sc">|&gt;</span></span>
-<span id="cb5-19"><a href=""></a>  <span class="fu">ungroup</span>() <span class="sc">|&gt;</span></span>
-<span id="cb5-20"><a href=""></a>  <span class="fu">mutate</span>(<span class="at">country =</span> countrycode<span class="sc">::</span><span class="fu">countryname</span>(location, <span class="st">"iso2c"</span>))</span>
-<span id="cb5-21"><a href=""></a></span>
-<span id="cb5-22"><a href=""></a>away_days <span class="ot">&lt;-</span> travel_days <span class="sc">|&gt;</span></span>
-<span id="cb5-23"><a href=""></a>  <span class="fu">summarise</span>(</span>
-<span id="cb5-24"><a href=""></a>    <span class="at">startDate =</span> <span class="fu">min</span>(date),</span>
-<span id="cb5-25"><a href=""></a>    <span class="at">endDate =</span> <span class="fu">max</span>(date)</span>
-<span id="cb5-26"><a href=""></a>  ) <span class="sc">|&gt;</span></span>
-<span id="cb5-27"><a href=""></a>  <span class="fu">mutate</span>(<span class="at">rowid =</span> <span class="dv">0</span>, <span class="at">location =</span> <span class="st">"TBC"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb5-28"><a href=""></a>  <span class="fu">reframe</span>(rowid, location, <span class="at">date =</span> <span class="fu">seq</span>(startDate, endDate, <span class="at">by =</span> <span class="st">"day"</span>))</span>
-<span id="cb5-29"><a href=""></a></span>
-<span id="cb5-30"><a href=""></a>daily_loc <span class="ot">&lt;-</span> away_days <span class="sc">|&gt;</span></span>
-<span id="cb5-31"><a href=""></a>  <span class="fu">anti_join</span>(travel_days, <span class="at">by =</span> <span class="st">"date"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb5-32"><a href=""></a>  <span class="fu">bind_rows</span>(travel_days) <span class="sc">|&gt;</span></span>
-<span id="cb5-33"><a href=""></a>  <span class="fu">mutate</span>(</span>
-<span id="cb5-34"><a href=""></a>    <span class="at">flag =</span> countrycode<span class="sc">::</span><span class="fu">countrycode</span>(country, <span class="st">"iso2c"</span>, <span class="st">"unicode.symbol"</span>),</span>
-<span id="cb5-35"><a href=""></a>    <span class="at">continent =</span> countrycode<span class="sc">::</span><span class="fu">countrycode</span>(country, <span class="st">"iso2c"</span>, <span class="st">"continent"</span>)</span>
-<span id="cb5-36"><a href=""></a>  ) <span class="sc">|&gt;</span></span>
-<span id="cb5-37"><a href=""></a>  <span class="fu">mutate</span>(<span class="at">flag =</span> <span class="fu">case_when</span>(</span>
-<span id="cb5-38"><a href=""></a>    location <span class="sc">==</span> <span class="st">"en route"</span> <span class="sc">~</span> <span class="st">"\u2708"</span>,</span>
-<span id="cb5-39"><a href=""></a>    location <span class="sc">==</span> <span class="st">"TBC"</span> <span class="sc">~</span> <span class="st">"❔"</span>,</span>
-<span id="cb5-40"><a href=""></a>    <span class="cn">TRUE</span> <span class="sc">~</span> flag</span>
-<span id="cb5-41"><a href=""></a>  ))</span>
-<span id="cb5-42"><a href=""></a></span>
-<span id="cb5-43"><a href=""></a><span class="do">## ---- prep-full-calendar-data ----</span></span>
-<span id="cb5-44"><a href=""></a></span>
-<span id="cb5-45"><a href=""></a><span class="co"># based on: https://github.com/nrennie/tidytuesday/blob/9dbe69d696f6c1edad41a72d157a42f3b5a63a81/2023/2023-03-07/20230307.R</span></span>
-<span id="cb5-46"><a href=""></a></span>
-<span id="cb5-47"><a href=""></a><span class="co"># calculate extra months to make plot rectangular</span></span>
-<span id="cb5-48"><a href=""></a>cal_ncol <span class="ot">&lt;-</span> <span class="dv">3</span></span>
-<span id="cb5-49"><a href=""></a>startMonth <span class="ot">&lt;-</span> <span class="fu">month</span>(<span class="fu">floor_date</span>(<span class="fu">min</span>(travel_days<span class="sc">$</span>date), <span class="st">"month"</span>))</span>
-<span id="cb5-50"><a href=""></a>endMonth <span class="ot">&lt;-</span> <span class="fu">month</span>(<span class="fu">ceiling_date</span>(<span class="fu">max</span>(travel_days<span class="sc">$</span>date), <span class="st">"month"</span>) <span class="sc">-</span> <span class="dv">1</span>)</span>
-<span id="cb5-51"><a href=""></a>n_extra_month <span class="ot">&lt;-</span> cal_ncol <span class="sc">-</span> ((endMonth <span class="sc">-</span> startMonth <span class="sc">+</span> <span class="dv">1</span>) <span class="sc">%%</span> cal_ncol)</span>
-<span id="cb5-52"><a href=""></a>padding_days <span class="ot">&lt;-</span> <span class="fu">summarise</span>(</span>
-<span id="cb5-53"><a href=""></a>  travel_days,</span>
-<span id="cb5-54"><a href=""></a>  <span class="at">startDate =</span> <span class="fu">floor_date</span>(<span class="fu">min</span>(date), <span class="st">"month"</span>),</span>
-<span id="cb5-55"><a href=""></a>  <span class="at">endDate =</span> <span class="fu">ceiling_date</span>(<span class="fu">max</span>(date) <span class="sc">%m+%</span> <span class="fu">months</span>(n_extra_month), <span class="st">"month"</span>) <span class="sc">-</span> <span class="dv">1</span></span>
-<span id="cb5-56"><a href=""></a>) <span class="sc">|&gt;</span></span>
-<span id="cb5-57"><a href=""></a>  <span class="fu">reframe</span>(<span class="at">date =</span> <span class="fu">seq</span>(startDate, endDate, <span class="at">by =</span> <span class="st">"day"</span>))</span>
-<span id="cb5-58"><a href=""></a></span>
-<span id="cb5-59"><a href=""></a><span class="co"># prepare calendar data</span></span>
-<span id="cb5-60"><a href=""></a>full_calendar <span class="ot">&lt;-</span> padding_days <span class="sc">|&gt;</span></span>
-<span id="cb5-61"><a href=""></a>  <span class="fu">anti_join</span>(daily_loc, <span class="at">by =</span> <span class="st">"date"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb5-62"><a href=""></a>  <span class="fu">bind_rows</span>(daily_loc) <span class="sc">|&gt;</span></span>
-<span id="cb5-63"><a href=""></a>  <span class="fu">mutate</span>(</span>
-<span id="cb5-64"><a href=""></a>    <span class="at">Year =</span> <span class="fu">year</span>(date),</span>
-<span id="cb5-65"><a href=""></a>    <span class="at">Month =</span> <span class="fu">month</span>(date, <span class="at">label =</span> <span class="cn">TRUE</span>),</span>
-<span id="cb5-66"><a href=""></a>    <span class="at">Day =</span> <span class="fu">wday</span>(date, <span class="at">label =</span> <span class="cn">TRUE</span>, <span class="at">week_start =</span> <span class="dv">1</span>),</span>
-<span id="cb5-67"><a href=""></a>    <span class="at">mday =</span> <span class="fu">mday</span>(date),</span>
-<span id="cb5-68"><a href=""></a>    <span class="at">Month_week =</span> (<span class="dv">5</span> <span class="sc">+</span> <span class="fu">day</span>(date) <span class="sc">+</span></span>
-<span id="cb5-69"><a href=""></a>      <span class="fu">wday</span>(<span class="fu">floor_date</span>(date, <span class="st">"month"</span>), <span class="at">week_start =</span> <span class="dv">1</span>)) <span class="sc">%/%</span> <span class="dv">7</span></span>
-<span id="cb5-70"><a href=""></a>  )</span>
-<span id="cb5-71"><a href=""></a></span>
-<span id="cb5-72"><a href=""></a><span class="do">## ---- travel-dates-calendar-display ----</span></span>
-<span id="cb5-73"><a href=""></a></span>
-<span id="cb5-74"><a href=""></a>base_data_aes <span class="ot">&lt;-</span> full_calendar <span class="sc">|&gt;</span></span>
-<span id="cb5-75"><a href=""></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> Day, <span class="at">y =</span> Month_week))</span>
-<span id="cb5-76"><a href=""></a></span>
-<span id="cb5-77"><a href=""></a>layers_geom_text <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
-<span id="cb5-78"><a href=""></a>  <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">label =</span> mday), <span class="at">nudge_y =</span> <span class="fl">0.25</span>),</span>
-<span id="cb5-79"><a href=""></a>  <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">label =</span> flag), <span class="at">nudge_y =</span> <span class="sc">-</span><span class="fl">0.25</span>)</span>
-<span id="cb5-80"><a href=""></a>)</span>
-<span id="cb5-81"><a href=""></a>layers_scale_coord <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
-<span id="cb5-82"><a href=""></a>  <span class="fu">scale_y_reverse</span>(),</span>
-<span id="cb5-83"><a href=""></a>  <span class="fu">coord_fixed</span>(<span class="at">expand =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb5-84"><a href=""></a>)</span>
-<span id="cb5-85"><a href=""></a>layers_facet_labs <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
-<span id="cb5-86"><a href=""></a>  <span class="fu">facet_wrap</span>(<span class="fu">vars</span>(Month),</span>
-<span id="cb5-87"><a href=""></a>    <span class="at">ncol =</span> cal_ncol</span>
-<span id="cb5-88"><a href=""></a>  ),</span>
-<span id="cb5-89"><a href=""></a>  <span class="fu">labs</span>(<span class="at">y =</span> <span class="cn">NULL</span>, <span class="at">x =</span> <span class="cn">NULL</span>)</span>
-<span id="cb5-90"><a href=""></a>)</span>
-<span id="cb5-91"><a href=""></a>layers_theme <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
-<span id="cb5-92"><a href=""></a>  <span class="fu">theme_bw</span>(),</span>
-<span id="cb5-93"><a href=""></a>  <span class="fu">theme</span>(</span>
-<span id="cb5-94"><a href=""></a>    <span class="at">plot.margin =</span> <span class="fu">margin</span>(<span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>),</span>
-<span id="cb5-95"><a href=""></a>    <span class="at">panel.grid.major =</span> <span class="fu">element_blank</span>(),</span>
-<span id="cb5-96"><a href=""></a>    <span class="at">panel.grid.minor =</span> <span class="fu">element_blank</span>(),</span>
-<span id="cb5-97"><a href=""></a>    <span class="co"># panel.spacing = unit(0, "lines"),</span></span>
-<span id="cb5-98"><a href=""></a>    <span class="at">panel.border =</span> <span class="fu">element_blank</span>(),</span>
-<span id="cb5-99"><a href=""></a>    <span class="at">axis.ticks =</span> <span class="fu">element_blank</span>(),</span>
-<span id="cb5-100"><a href=""></a>    <span class="at">axis.text.y =</span> <span class="fu">element_blank</span>(),</span>
-<span id="cb5-101"><a href=""></a>    <span class="at">strip.background =</span> <span class="fu">element_rect</span>(<span class="at">fill =</span> <span class="st">"grey95"</span>),</span>
-<span id="cb5-102"><a href=""></a>    <span class="at">strip.text =</span> <span class="fu">element_text</span>(<span class="at">hjust =</span> <span class="dv">0</span>)</span>
-<span id="cb5-103"><a href=""></a>  )</span>
-<span id="cb5-104"><a href=""></a>)</span>
-<span id="cb5-105"><a href=""></a></span>
-<span id="cb5-106"><a href=""></a><span class="do">## ---- tooltip-travel-calendar ----</span></span>
-<span id="cb5-107"><a href=""></a></span>
-<span id="cb5-108"><a href=""></a>p_cal_girafe <span class="ot">&lt;-</span> base_data_aes <span class="sc">+</span></span>
-<span id="cb5-109"><a href=""></a>  <span class="fu">geom_tile_interactive</span>(</span>
-<span id="cb5-110"><a href=""></a>    <span class="fu">aes</span>(</span>
-<span id="cb5-111"><a href=""></a>      <span class="at">tooltip =</span> <span class="fu">paste</span>(details, <span class="st">"@"</span>, location),</span>
-<span id="cb5-112"><a href=""></a>      <span class="at">data_id =</span> location</span>
-<span id="cb5-113"><a href=""></a>    ),</span>
-<span id="cb5-114"><a href=""></a>    <span class="at">alpha =</span> <span class="fl">0.2</span>,</span>
-<span id="cb5-115"><a href=""></a>    <span class="at">fill =</span> <span class="st">"transparent"</span>,</span>
-<span id="cb5-116"><a href=""></a>    <span class="at">colour =</span> <span class="st">"grey80"</span></span>
-<span id="cb5-117"><a href=""></a>  ) <span class="sc">+</span></span>
-<span id="cb5-118"><a href=""></a>  layers_geom_text <span class="sc">+</span></span>
-<span id="cb5-119"><a href=""></a>  layers_scale_coord <span class="sc">+</span></span>
-<span id="cb5-120"><a href=""></a>  <span class="fu">coord_fixed</span>(<span class="at">expand =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
-<span id="cb5-121"><a href=""></a>  layers_facet_labs <span class="sc">+</span></span>
-<span id="cb5-122"><a href=""></a>  layers_theme</span>
-<span id="cb5-123"><a href=""></a></span>
-<span id="cb5-124"><a href=""></a><span class="co"># girafe(ggobj = p_cal_girafe)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5" data-filename="very-long-ggplot-script.R" data-code-line-numbers="43-71"><pre class="sourceCode numberSource r number-lines code-with-copy" data-id="quarto-animate-code"><code class="sourceCode r hljs"><span id="cb5-1" class="hljs-ln-code"><a href=""></a><span class="co"># source(here::here("_utilities/travel_dates_load.R"))</span></span>
+<span id="cb5-2" class="hljs-ln-code"><a href=""></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb5-3" class="hljs-ln-code"><a href=""></a><span class="fu">library</span>(ggiraph)</span>
+<span id="cb5-4" class="hljs-ln-code"><a href=""></a></span>
+<span id="cb5-5" class="hljs-ln-code"><a href=""></a><span class="do">## ---- daily-loc-prep ----</span></span>
+<span id="cb5-6" class="hljs-ln-code"><a href=""></a></span>
+<span id="cb5-7" class="hljs-ln-code"><a href=""></a><span class="do">## expand dates: https://stackoverflow.com/a/54728153</span></span>
+<span id="cb5-8" class="hljs-ln-code"><a href=""></a></span>
+<span id="cb5-9" class="hljs-ln-code"><a href=""></a>travel_days <span class="ot">&lt;-</span> travel_dates <span class="sc">|&gt;</span></span>
+<span id="cb5-10" class="hljs-ln-code"><a href=""></a>  <span class="fu">mutate</span>(<span class="at">nights =</span> <span class="fu">interval</span>(startDate, endDate) <span class="sc">/</span> <span class="fu">days</span>(<span class="dv">1</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb5-11" class="hljs-ln-code"><a href=""></a>  <span class="fu">arrange</span>(startDate, <span class="fu">desc</span>(nights)) <span class="sc">|&gt;</span></span>
+<span id="cb5-12" class="hljs-ln-code"><a href=""></a>  <span class="fu">rowid_to_column</span>() <span class="sc">|&gt;</span></span>
+<span id="cb5-13" class="hljs-ln-code"><a href=""></a>  <span class="fu">rowwise</span>() <span class="sc">|&gt;</span></span>
+<span id="cb5-14" class="hljs-ln-code"><a href=""></a>  <span class="fu">reframe</span>(rowid, location, details, nights,</span>
+<span id="cb5-15" class="hljs-ln-code"><a href=""></a>    <span class="at">date =</span> <span class="fu">seq</span>(startDate, endDate, <span class="at">by =</span> <span class="st">"day"</span>)</span>
+<span id="cb5-16" class="hljs-ln-code"><a href=""></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb5-17" class="hljs-ln-code"><a href=""></a>  <span class="fu">group_by</span>(date) <span class="sc">|&gt;</span></span>
+<span id="cb5-18" class="hljs-ln-code"><a href=""></a>  <span class="fu">slice_min</span>(<span class="at">order_by =</span> nights, <span class="at">n =</span> <span class="dv">1</span>) <span class="sc">|&gt;</span></span>
+<span id="cb5-19" class="hljs-ln-code"><a href=""></a>  <span class="fu">ungroup</span>() <span class="sc">|&gt;</span></span>
+<span id="cb5-20" class="hljs-ln-code"><a href=""></a>  <span class="fu">mutate</span>(<span class="at">country =</span> countrycode<span class="sc">::</span><span class="fu">countryname</span>(location, <span class="st">"iso2c"</span>))</span>
+<span id="cb5-21" class="hljs-ln-code"><a href=""></a></span>
+<span id="cb5-22" class="hljs-ln-code"><a href=""></a>away_days <span class="ot">&lt;-</span> travel_days <span class="sc">|&gt;</span></span>
+<span id="cb5-23" class="hljs-ln-code"><a href=""></a>  <span class="fu">summarise</span>(</span>
+<span id="cb5-24" class="hljs-ln-code"><a href=""></a>    <span class="at">startDate =</span> <span class="fu">min</span>(date),</span>
+<span id="cb5-25" class="hljs-ln-code"><a href=""></a>    <span class="at">endDate =</span> <span class="fu">max</span>(date)</span>
+<span id="cb5-26" class="hljs-ln-code"><a href=""></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb5-27" class="hljs-ln-code"><a href=""></a>  <span class="fu">mutate</span>(<span class="at">rowid =</span> <span class="dv">0</span>, <span class="at">location =</span> <span class="st">"TBC"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb5-28" class="hljs-ln-code"><a href=""></a>  <span class="fu">reframe</span>(rowid, location, <span class="at">date =</span> <span class="fu">seq</span>(startDate, endDate, <span class="at">by =</span> <span class="st">"day"</span>))</span>
+<span id="cb5-29" class="hljs-ln-code"><a href=""></a></span>
+<span id="cb5-30" class="hljs-ln-code"><a href=""></a>daily_loc <span class="ot">&lt;-</span> away_days <span class="sc">|&gt;</span></span>
+<span id="cb5-31" class="hljs-ln-code"><a href=""></a>  <span class="fu">anti_join</span>(travel_days, <span class="at">by =</span> <span class="st">"date"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb5-32" class="hljs-ln-code"><a href=""></a>  <span class="fu">bind_rows</span>(travel_days) <span class="sc">|&gt;</span></span>
+<span id="cb5-33" class="hljs-ln-code"><a href=""></a>  <span class="fu">mutate</span>(</span>
+<span id="cb5-34" class="hljs-ln-code"><a href=""></a>    <span class="at">flag =</span> countrycode<span class="sc">::</span><span class="fu">countrycode</span>(country, <span class="st">"iso2c"</span>, <span class="st">"unicode.symbol"</span>),</span>
+<span id="cb5-35" class="hljs-ln-code"><a href=""></a>    <span class="at">continent =</span> countrycode<span class="sc">::</span><span class="fu">countrycode</span>(country, <span class="st">"iso2c"</span>, <span class="st">"continent"</span>)</span>
+<span id="cb5-36" class="hljs-ln-code"><a href=""></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb5-37" class="hljs-ln-code"><a href=""></a>  <span class="fu">mutate</span>(<span class="at">flag =</span> <span class="fu">case_when</span>(</span>
+<span id="cb5-38" class="hljs-ln-code"><a href=""></a>    location <span class="sc">==</span> <span class="st">"en route"</span> <span class="sc">~</span> <span class="st">"\u2708"</span>,</span>
+<span id="cb5-39" class="hljs-ln-code"><a href=""></a>    location <span class="sc">==</span> <span class="st">"TBC"</span> <span class="sc">~</span> <span class="st">"❔"</span>,</span>
+<span id="cb5-40" class="hljs-ln-code"><a href=""></a>    <span class="cn">TRUE</span> <span class="sc">~</span> flag</span>
+<span id="cb5-41" class="hljs-ln-code"><a href=""></a>  ))</span>
+<span id="cb5-42" class="hljs-ln-code"><a href=""></a></span>
+<span id="cb5-43" class="hljs-ln-code"><a href=""></a><span class="do">## ---- prep-full-calendar-data ----</span></span>
+<span id="cb5-44" class="hljs-ln-code"><a href=""></a></span>
+<span id="cb5-45" class="hljs-ln-code"><a href=""></a><span class="co"># based on: https://github.com/nrennie/tidytuesday/blob/9dbe69d696f6c1edad41a72d157a42f3b5a63a81/2023/2023-03-07/20230307.R</span></span>
+<span id="cb5-46" class="hljs-ln-code"><a href=""></a></span>
+<span id="cb5-47" class="hljs-ln-code"><a href=""></a><span class="co"># calculate extra months to make plot rectangular</span></span>
+<span id="cb5-48" class="hljs-ln-code"><a href=""></a>cal_ncol <span class="ot">&lt;-</span> <span class="dv">3</span></span>
+<span id="cb5-49" class="hljs-ln-code"><a href=""></a>startMonth <span class="ot">&lt;-</span> <span class="fu">month</span>(<span class="fu">floor_date</span>(<span class="fu">min</span>(travel_days<span class="sc">$</span>date), <span class="st">"month"</span>))</span>
+<span id="cb5-50" class="hljs-ln-code"><a href=""></a>endMonth <span class="ot">&lt;-</span> <span class="fu">month</span>(<span class="fu">ceiling_date</span>(<span class="fu">max</span>(travel_days<span class="sc">$</span>date), <span class="st">"month"</span>) <span class="sc">-</span> <span class="dv">1</span>)</span>
+<span id="cb5-51" class="hljs-ln-code"><a href=""></a>n_extra_month <span class="ot">&lt;-</span> cal_ncol <span class="sc">-</span> ((endMonth <span class="sc">-</span> startMonth <span class="sc">+</span> <span class="dv">1</span>) <span class="sc">%%</span> cal_ncol)</span>
+<span id="cb5-52" class="hljs-ln-code"><a href=""></a>padding_days <span class="ot">&lt;-</span> <span class="fu">summarise</span>(</span>
+<span id="cb5-53" class="hljs-ln-code"><a href=""></a>  travel_days,</span>
+<span id="cb5-54" class="hljs-ln-code"><a href=""></a>  <span class="at">startDate =</span> <span class="fu">floor_date</span>(<span class="fu">min</span>(date), <span class="st">"month"</span>),</span>
+<span id="cb5-55" class="hljs-ln-code"><a href=""></a>  <span class="at">endDate =</span> <span class="fu">ceiling_date</span>(<span class="fu">max</span>(date) <span class="sc">%m+%</span> <span class="fu">months</span>(n_extra_month), <span class="st">"month"</span>) <span class="sc">-</span> <span class="dv">1</span></span>
+<span id="cb5-56" class="hljs-ln-code"><a href=""></a>) <span class="sc">|&gt;</span></span>
+<span id="cb5-57" class="hljs-ln-code"><a href=""></a>  <span class="fu">reframe</span>(<span class="at">date =</span> <span class="fu">seq</span>(startDate, endDate, <span class="at">by =</span> <span class="st">"day"</span>))</span>
+<span id="cb5-58" class="hljs-ln-code"><a href=""></a></span>
+<span id="cb5-59" class="hljs-ln-code"><a href=""></a><span class="co"># prepare calendar data</span></span>
+<span id="cb5-60" class="hljs-ln-code"><a href=""></a>full_calendar <span class="ot">&lt;-</span> padding_days <span class="sc">|&gt;</span></span>
+<span id="cb5-61" class="hljs-ln-code"><a href=""></a>  <span class="fu">anti_join</span>(daily_loc, <span class="at">by =</span> <span class="st">"date"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb5-62" class="hljs-ln-code"><a href=""></a>  <span class="fu">bind_rows</span>(daily_loc) <span class="sc">|&gt;</span></span>
+<span id="cb5-63" class="hljs-ln-code"><a href=""></a>  <span class="fu">mutate</span>(</span>
+<span id="cb5-64" class="hljs-ln-code"><a href=""></a>    <span class="at">Year =</span> <span class="fu">year</span>(date),</span>
+<span id="cb5-65" class="hljs-ln-code"><a href=""></a>    <span class="at">Month =</span> <span class="fu">month</span>(date, <span class="at">label =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb5-66" class="hljs-ln-code"><a href=""></a>    <span class="at">Day =</span> <span class="fu">wday</span>(date, <span class="at">label =</span> <span class="cn">TRUE</span>, <span class="at">week_start =</span> <span class="dv">1</span>),</span>
+<span id="cb5-67" class="hljs-ln-code"><a href=""></a>    <span class="at">mday =</span> <span class="fu">mday</span>(date),</span>
+<span id="cb5-68" class="hljs-ln-code"><a href=""></a>    <span class="at">Month_week =</span> (<span class="dv">5</span> <span class="sc">+</span> <span class="fu">day</span>(date) <span class="sc">+</span></span>
+<span id="cb5-69" class="hljs-ln-code"><a href=""></a>      <span class="fu">wday</span>(<span class="fu">floor_date</span>(date, <span class="st">"month"</span>), <span class="at">week_start =</span> <span class="dv">1</span>)) <span class="sc">%/%</span> <span class="dv">7</span></span>
+<span id="cb5-70" class="hljs-ln-code"><a href=""></a>  )</span>
+<span id="cb5-71" class="hljs-ln-code"><a href=""></a></span>
+<span id="cb5-72" class="hljs-ln-code"><a href=""></a><span class="do">## ---- travel-dates-calendar-display ----</span></span>
+<span id="cb5-73" class="hljs-ln-code"><a href=""></a></span>
+<span id="cb5-74" class="hljs-ln-code"><a href=""></a>base_data_aes <span class="ot">&lt;-</span> full_calendar <span class="sc">|&gt;</span></span>
+<span id="cb5-75" class="hljs-ln-code"><a href=""></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> Day, <span class="at">y =</span> Month_week))</span>
+<span id="cb5-76" class="hljs-ln-code"><a href=""></a></span>
+<span id="cb5-77" class="hljs-ln-code"><a href=""></a>layers_geom_text <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb5-78" class="hljs-ln-code"><a href=""></a>  <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">label =</span> mday), <span class="at">nudge_y =</span> <span class="fl">0.25</span>),</span>
+<span id="cb5-79" class="hljs-ln-code"><a href=""></a>  <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">label =</span> flag), <span class="at">nudge_y =</span> <span class="sc">-</span><span class="fl">0.25</span>)</span>
+<span id="cb5-80" class="hljs-ln-code"><a href=""></a>)</span>
+<span id="cb5-81" class="hljs-ln-code"><a href=""></a>layers_scale_coord <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb5-82" class="hljs-ln-code"><a href=""></a>  <span class="fu">scale_y_reverse</span>(),</span>
+<span id="cb5-83" class="hljs-ln-code"><a href=""></a>  <span class="fu">coord_fixed</span>(<span class="at">expand =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb5-84" class="hljs-ln-code"><a href=""></a>)</span>
+<span id="cb5-85" class="hljs-ln-code"><a href=""></a>layers_facet_labs <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb5-86" class="hljs-ln-code"><a href=""></a>  <span class="fu">facet_wrap</span>(<span class="fu">vars</span>(Month),</span>
+<span id="cb5-87" class="hljs-ln-code"><a href=""></a>    <span class="at">ncol =</span> cal_ncol</span>
+<span id="cb5-88" class="hljs-ln-code"><a href=""></a>  ),</span>
+<span id="cb5-89" class="hljs-ln-code"><a href=""></a>  <span class="fu">labs</span>(<span class="at">y =</span> <span class="cn">NULL</span>, <span class="at">x =</span> <span class="cn">NULL</span>)</span>
+<span id="cb5-90" class="hljs-ln-code"><a href=""></a>)</span>
+<span id="cb5-91" class="hljs-ln-code"><a href=""></a>layers_theme <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb5-92" class="hljs-ln-code"><a href=""></a>  <span class="fu">theme_bw</span>(),</span>
+<span id="cb5-93" class="hljs-ln-code"><a href=""></a>  <span class="fu">theme</span>(</span>
+<span id="cb5-94" class="hljs-ln-code"><a href=""></a>    <span class="at">plot.margin =</span> <span class="fu">margin</span>(<span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>),</span>
+<span id="cb5-95" class="hljs-ln-code"><a href=""></a>    <span class="at">panel.grid.major =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb5-96" class="hljs-ln-code"><a href=""></a>    <span class="at">panel.grid.minor =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb5-97" class="hljs-ln-code"><a href=""></a>    <span class="co"># panel.spacing = unit(0, "lines"),</span></span>
+<span id="cb5-98" class="hljs-ln-code"><a href=""></a>    <span class="at">panel.border =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb5-99" class="hljs-ln-code"><a href=""></a>    <span class="at">axis.ticks =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb5-100" class="hljs-ln-code"><a href=""></a>    <span class="at">axis.text.y =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb5-101" class="hljs-ln-code"><a href=""></a>    <span class="at">strip.background =</span> <span class="fu">element_rect</span>(<span class="at">fill =</span> <span class="st">"grey95"</span>),</span>
+<span id="cb5-102" class="hljs-ln-code"><a href=""></a>    <span class="at">strip.text =</span> <span class="fu">element_text</span>(<span class="at">hjust =</span> <span class="dv">0</span>)</span>
+<span id="cb5-103" class="hljs-ln-code"><a href=""></a>  )</span>
+<span id="cb5-104" class="hljs-ln-code"><a href=""></a>)</span>
+<span id="cb5-105" class="hljs-ln-code"><a href=""></a></span>
+<span id="cb5-106" class="hljs-ln-code"><a href=""></a><span class="do">## ---- tooltip-travel-calendar ----</span></span>
+<span id="cb5-107" class="hljs-ln-code"><a href=""></a></span>
+<span id="cb5-108" class="hljs-ln-code"><a href=""></a>p_cal_girafe <span class="ot">&lt;-</span> base_data_aes <span class="sc">+</span></span>
+<span id="cb5-109" class="hljs-ln-code"><a href=""></a>  <span class="fu">geom_tile_interactive</span>(</span>
+<span id="cb5-110" class="hljs-ln-code"><a href=""></a>    <span class="fu">aes</span>(</span>
+<span id="cb5-111" class="hljs-ln-code"><a href=""></a>      <span class="at">tooltip =</span> <span class="fu">paste</span>(details, <span class="st">"@"</span>, location),</span>
+<span id="cb5-112" class="hljs-ln-code"><a href=""></a>      <span class="at">data_id =</span> location</span>
+<span id="cb5-113" class="hljs-ln-code"><a href=""></a>    ),</span>
+<span id="cb5-114" class="hljs-ln-code"><a href=""></a>    <span class="at">alpha =</span> <span class="fl">0.2</span>,</span>
+<span id="cb5-115" class="hljs-ln-code"><a href=""></a>    <span class="at">fill =</span> <span class="st">"transparent"</span>,</span>
+<span id="cb5-116" class="hljs-ln-code"><a href=""></a>    <span class="at">colour =</span> <span class="st">"grey80"</span></span>
+<span id="cb5-117" class="hljs-ln-code"><a href=""></a>  ) <span class="sc">+</span></span>
+<span id="cb5-118" class="hljs-ln-code"><a href=""></a>  layers_geom_text <span class="sc">+</span></span>
+<span id="cb5-119" class="hljs-ln-code"><a href=""></a>  layers_scale_coord <span class="sc">+</span></span>
+<span id="cb5-120" class="hljs-ln-code"><a href=""></a>  <span class="fu">coord_fixed</span>(<span class="at">expand =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb5-121" class="hljs-ln-code"><a href=""></a>  layers_facet_labs <span class="sc">+</span></span>
+<span id="cb5-122" class="hljs-ln-code"><a href=""></a>  layers_theme</span>
+<span id="cb5-123" class="hljs-ln-code"><a href=""></a></span>
+<span id="cb5-124" class="hljs-ln-code"><a href=""></a><span class="co"># girafe(ggobj = p_cal_girafe)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div><div class="column small">
 <!-- ![](assets/notability-v2/pipeline-data-prep-table.png){.sketch-inline fig-alt="Data prep block"} -->
@@ -738,6 +740,40 @@ Cynthia A. Huang
           display:block!important;
       }</style></aside>
 </section>
+<section id="separate-1" class="slide level2" data-auto-animate="true">
+<h2 data-id="quarto-animate-title">SEPARATE</h2>
+<!-- ```{.r code-line-numbers="5-41|43-71|72-104|106-124" -->
+<div class="columns">
+<div class="column smallest">
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>data-prep.R</strong></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6" data-filename="data-prep.R" data-code-line-numbers="43-71"><pre class="sourceCode numberSource r number-lines code-with-copy" data-id="quarto-animate-code"><code class="sourceCode r hljs"><span id="cb6-1" class="hljs-ln-code"><a href=""></a>calc_calendar_vars <span class="ot">&lt;-</span> <span class="cf">function</span>(.data, date_col,</span>
+<span id="cb6-2" class="hljs-ln-code"><a href=""></a>                               <span class="at">locale =</span> <span class="fu">Sys.getlocale</span>(<span class="st">"LC_TIME"</span>),</span>
+<span id="cb6-3" class="hljs-ln-code"><a href=""></a>                               <span class="at">week_start =</span> <span class="dv">1</span>) {</span>
+<span id="cb6-4" class="hljs-ln-code"><a href=""></a>  .data <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb6-5" class="hljs-ln-code"><a href=""></a>    <span class="at">TC_year =</span> <span class="fu">year</span>({{ date_col }}),</span>
+<span id="cb6-6" class="hljs-ln-code"><a href=""></a>    <span class="at">TC_month_label =</span> tsibble<span class="sc">::</span><span class="fu">yearmonth</span>({{ date_col }}),</span>
+<span id="cb6-7" class="hljs-ln-code"><a href=""></a>    <span class="at">TC_mday =</span> <span class="fu">mday</span>({{ date_col }}),</span>
+<span id="cb6-8" class="hljs-ln-code"><a href=""></a>    <span class="at">TC_wday_label =</span> <span class="fu">wday</span>({{ date_col }},</span>
+<span id="cb6-9" class="hljs-ln-code"><a href=""></a>      <span class="at">label =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb6-10" class="hljs-ln-code"><a href=""></a>      <span class="at">locale =</span> locale,</span>
+<span id="cb6-11" class="hljs-ln-code"><a href=""></a>      <span class="at">week_start =</span> week_start</span>
+<span id="cb6-12" class="hljs-ln-code"><a href=""></a>    ),</span>
+<span id="cb6-13" class="hljs-ln-code"><a href=""></a>    <span class="at">TC_wday =</span> <span class="fu">wday</span>({{ date_col }}, <span class="at">week_start =</span> week_start),</span>
+<span id="cb6-14" class="hljs-ln-code"><a href=""></a>    <span class="at">TC_month_week =</span> (<span class="dv">5</span> <span class="sc">+</span> <span class="fu">day</span>({{ date_col }}) <span class="sc">+</span></span>
+<span id="cb6-15" class="hljs-ln-code"><a href=""></a>      <span class="fu">wday</span>(<span class="fu">floor_date</span>({{ date_col }}, <span class="st">"month"</span>), <span class="at">week_start =</span> week_start)) <span class="sc">%/%</span> <span class="dv">7</span>,</span>
+<span id="cb6-16" class="hljs-ln-code"><a href=""></a>    <span class="at">TC_is_weekend =</span></span>
+<span id="cb6-17" class="hljs-ln-code"><a href=""></a>      <span class="fu">ifelse</span>(<span class="fu">wday</span>({{ date_col }}, <span class="at">week_start =</span> <span class="dv">1</span>) <span class="sc">%in%</span> <span class="fu">c</span>(<span class="dv">6</span>, <span class="dv">7</span>), <span class="cn">TRUE</span>, <span class="cn">FALSE</span>)</span>
+<span id="cb6-18" class="hljs-ln-code"><a href=""></a>  )</span>
+<span id="cb6-19" class="hljs-ln-code"><a href=""></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div><div class="column small">
+<!-- ![](assets/notability-v2/pipeline-data-prep-table.png){.sketch-inline fig-alt="Data prep block"} -->
+<p><img data-src="assets/notability-v2/pipeline-assembly-inputs.png" class="sketch-inline" alt="Plot assembly block"></p>
+</div></div>
+</section>
 <section id="separate-into-modular-internals" class="slide level2">
 <h2>SEPARATE into modular internals</h2>
 <div class="columns">
@@ -750,40 +786,40 @@ Cynthia A. Huang
 <div class="code-with-filename-file">
 <pre><strong>internals</strong></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6" data-filename="internals" data-code-line-numbers="|2-5|7-17|19-31"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href=""></a>gg_facet_wrap_months <span class="ot">&lt;-</span> <span class="cf">function</span>(){</span>
-<span id="cb6-2"><a href=""></a>  <span class="do">## Data Prep</span></span>
-<span id="cb6-3"><a href=""></a>  cal_data <span class="ot">&lt;-</span> .events_long <span class="sc">|&gt;</span></span>
-<span id="cb6-4"><a href=""></a>    <span class="fu">fill_missing_units</span>({{ date_col }}) <span class="sc">|&gt;</span></span>
-<span id="cb6-5"><a href=""></a>    <span class="fu">calc_calendar_vars</span>({{ date_col }})</span>
-<span id="cb6-6"><a href=""></a></span>
-<span id="cb6-7"><a href=""></a>  <span class="do">## Plot Elements</span></span>
-<span id="cb6-8"><a href=""></a>  .geom <span class="ot">=</span> <span class="fu">list</span>(</span>
-<span id="cb6-9"><a href=""></a>    <span class="fu">geom_tile</span>(<span class="at">color =</span> <span class="st">"grey70"</span>, <span class="at">fill =</span> <span class="st">"transparent"</span>),</span>
-<span id="cb6-10"><a href=""></a>    <span class="fu">geom_text</span>(<span class="at">nudge_y =</span> <span class="fl">0.25</span>)</span>
-<span id="cb6-11"><a href=""></a>  ),</span>
-<span id="cb6-12"><a href=""></a>  .scale_coord <span class="ot">=</span> <span class="fu">list</span>(</span>
-<span id="cb6-13"><a href=""></a>    <span class="fu">scale_y_reverse</span>(),</span>
-<span id="cb6-14"><a href=""></a>    <span class="fu">scale_x_discrete</span>(<span class="at">position =</span> <span class="st">"top"</span>),</span>
-<span id="cb6-15"><a href=""></a>    <span class="fu">coord_fixed</span>(<span class="at">expand =</span> <span class="cn">TRUE</span>)),</span>
-<span id="cb6-16"><a href=""></a>  .theme <span class="ot">=</span> <span class="fu">list</span>(<span class="fu">theme_bw_tilecal</span>()),</span>
-<span id="cb6-17"><a href=""></a>  .other <span class="ot">=</span> <span class="fu">list</span>()</span>
-<span id="cb6-18"><a href=""></a></span>
-<span id="cb6-19"><a href=""></a>  <span class="do">## Plot Assembly</span></span>
-<span id="cb6-20"><a href=""></a>  base_plot <span class="ot">&lt;-</span> cal_data <span class="sc">|&gt;</span></span>
-<span id="cb6-21"><a href=""></a>    ggplot2<span class="sc">::</span><span class="fu">ggplot</span>(<span class="at">mapping =</span> <span class="fu">aes_string</span>(</span>
-<span id="cb6-22"><a href=""></a>      <span class="at">x =</span> <span class="st">"TC_wday_label"</span>,</span>
-<span id="cb6-23"><a href=""></a>      <span class="at">y =</span> <span class="st">"TC_month_week"</span>,</span>
-<span id="cb6-24"><a href=""></a>      <span class="at">label =</span> <span class="st">"TC_mday"</span></span>
-<span id="cb6-25"><a href=""></a>    )) <span class="sc">+</span></span>
-<span id="cb6-26"><a href=""></a>    <span class="fu">facet_wrap</span>(<span class="fu">c</span>(<span class="st">"TC_month_label"</span>), <span class="at">axes =</span> <span class="st">"all_x"</span>, <span class="at">nrow =</span> nrow, <span class="at">ncol =</span> ncol) <span class="sc">+</span></span>
-<span id="cb6-27"><a href=""></a>    <span class="fu">labs</span>(<span class="at">y =</span> <span class="cn">NULL</span>, <span class="at">x =</span> <span class="cn">NULL</span>) <span class="sc">+</span></span>
-<span id="cb6-28"><a href=""></a>    .geom <span class="sc">+</span></span>
-<span id="cb6-29"><a href=""></a>    .scale_coord <span class="sc">+</span></span>
-<span id="cb6-30"><a href=""></a>    .theme <span class="sc">+</span></span>
-<span id="cb6-31"><a href=""></a>    .other</span>
-<span id="cb6-32"><a href=""></a></span>
-<span id="cb6-33"><a href=""></a>  base_plot</span>
-<span id="cb6-34"><a href=""></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7" data-filename="internals" data-code-line-numbers="|2-5|7-17|19-31"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href=""></a>gg_facet_wrap_months <span class="ot">&lt;-</span> <span class="cf">function</span>(){</span>
+<span id="cb7-2"><a href=""></a>  <span class="do">## Data Prep</span></span>
+<span id="cb7-3"><a href=""></a>  cal_data <span class="ot">&lt;-</span> .events_long <span class="sc">|&gt;</span></span>
+<span id="cb7-4"><a href=""></a>    <span class="fu">fill_missing_units</span>({{ date_col }}) <span class="sc">|&gt;</span></span>
+<span id="cb7-5"><a href=""></a>    <span class="fu">calc_calendar_vars</span>({{ date_col }})</span>
+<span id="cb7-6"><a href=""></a></span>
+<span id="cb7-7"><a href=""></a>  <span class="do">## Plot Elements</span></span>
+<span id="cb7-8"><a href=""></a>  .geom <span class="ot">=</span> <span class="fu">list</span>(</span>
+<span id="cb7-9"><a href=""></a>    <span class="fu">geom_tile</span>(<span class="at">color =</span> <span class="st">"grey70"</span>, <span class="at">fill =</span> <span class="st">"transparent"</span>),</span>
+<span id="cb7-10"><a href=""></a>    <span class="fu">geom_text</span>(<span class="at">nudge_y =</span> <span class="fl">0.25</span>)</span>
+<span id="cb7-11"><a href=""></a>  ),</span>
+<span id="cb7-12"><a href=""></a>  .scale_coord <span class="ot">=</span> <span class="fu">list</span>(</span>
+<span id="cb7-13"><a href=""></a>    <span class="fu">scale_y_reverse</span>(),</span>
+<span id="cb7-14"><a href=""></a>    <span class="fu">scale_x_discrete</span>(<span class="at">position =</span> <span class="st">"top"</span>),</span>
+<span id="cb7-15"><a href=""></a>    <span class="fu">coord_fixed</span>(<span class="at">expand =</span> <span class="cn">TRUE</span>)),</span>
+<span id="cb7-16"><a href=""></a>  .theme <span class="ot">=</span> <span class="fu">list</span>(<span class="fu">theme_bw_tilecal</span>()),</span>
+<span id="cb7-17"><a href=""></a>  .other <span class="ot">=</span> <span class="fu">list</span>()</span>
+<span id="cb7-18"><a href=""></a></span>
+<span id="cb7-19"><a href=""></a>  <span class="do">## Plot Assembly</span></span>
+<span id="cb7-20"><a href=""></a>  base_plot <span class="ot">&lt;-</span> cal_data <span class="sc">|&gt;</span></span>
+<span id="cb7-21"><a href=""></a>    ggplot2<span class="sc">::</span><span class="fu">ggplot</span>(<span class="at">mapping =</span> <span class="fu">aes_string</span>(</span>
+<span id="cb7-22"><a href=""></a>      <span class="at">x =</span> <span class="st">"TC_wday_label"</span>,</span>
+<span id="cb7-23"><a href=""></a>      <span class="at">y =</span> <span class="st">"TC_month_week"</span>,</span>
+<span id="cb7-24"><a href=""></a>      <span class="at">label =</span> <span class="st">"TC_mday"</span></span>
+<span id="cb7-25"><a href=""></a>    )) <span class="sc">+</span></span>
+<span id="cb7-26"><a href=""></a>    <span class="fu">facet_wrap</span>(<span class="fu">c</span>(<span class="st">"TC_month_label"</span>), <span class="at">axes =</span> <span class="st">"all_x"</span>, <span class="at">nrow =</span> nrow, <span class="at">ncol =</span> ncol) <span class="sc">+</span></span>
+<span id="cb7-27"><a href=""></a>    <span class="fu">labs</span>(<span class="at">y =</span> <span class="cn">NULL</span>, <span class="at">x =</span> <span class="cn">NULL</span>) <span class="sc">+</span></span>
+<span id="cb7-28"><a href=""></a>    .geom <span class="sc">+</span></span>
+<span id="cb7-29"><a href=""></a>    .scale_coord <span class="sc">+</span></span>
+<span id="cb7-30"><a href=""></a>    .theme <span class="sc">+</span></span>
+<span id="cb7-31"><a href=""></a>    .other</span>
+<span id="cb7-32"><a href=""></a></span>
+<span id="cb7-33"><a href=""></a>  base_plot</span>
+<span id="cb7-34"><a href=""></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div></div>
 </section>
@@ -799,27 +835,27 @@ Cynthia A. Huang
 <div class="code-with-filename-file">
 <pre><strong>function-interface</strong></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7" data-filename="function-interface" data-code-line-numbers="1-9|10-20"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href=""></a><span class="fu">gg_facet_wrap_months</span>(</span>
-<span id="cb7-2"><a href=""></a>  <span class="do">## --- data ----</span></span>
-<span id="cb7-3"><a href=""></a>  .events_long,</span>
-<span id="cb7-4"><a href=""></a>  date_col,</span>
-<span id="cb7-5"><a href=""></a>  <span class="at">locale =</span> <span class="cn">NULL</span>,</span>
-<span id="cb7-6"><a href=""></a>  <span class="do">## --- facets / layout ----</span></span>
-<span id="cb7-7"><a href=""></a>  <span class="at">week_start =</span> <span class="cn">NULL</span>,</span>
-<span id="cb7-8"><a href=""></a>  <span class="at">nrow =</span> <span class="cn">NULL</span>,</span>
-<span id="cb7-9"><a href=""></a>  <span class="at">ncol =</span> <span class="cn">NULL</span>,</span>
-<span id="cb7-10"><a href=""></a>  <span class="do">## --- default layers ---</span></span>
-<span id="cb7-11"><a href=""></a>  <span class="at">.geom =</span> <span class="fu">list</span>(</span>
-<span id="cb7-12"><a href=""></a>    <span class="fu">geom_tile</span>(<span class="at">color =</span> <span class="st">"grey70"</span>, <span class="at">fill =</span> <span class="st">"transparent"</span>),</span>
-<span id="cb7-13"><a href=""></a>    <span class="fu">geom_text</span>(<span class="at">nudge_y =</span> <span class="fl">0.25</span>)</span>
-<span id="cb7-14"><a href=""></a>  ),</span>
-<span id="cb7-15"><a href=""></a>  <span class="at">.scale_coord =</span> <span class="fu">list</span>(</span>
-<span id="cb7-16"><a href=""></a>    <span class="fu">scale_y_reverse</span>(),</span>
-<span id="cb7-17"><a href=""></a>    <span class="fu">scale_x_discrete</span>(<span class="at">position =</span> <span class="st">"top"</span>),</span>
-<span id="cb7-18"><a href=""></a>    <span class="fu">coord_fixed</span>(<span class="at">expand =</span> <span class="cn">TRUE</span>)),</span>
-<span id="cb7-19"><a href=""></a>  <span class="at">.theme =</span> <span class="fu">list</span>(<span class="fu">theme_bw_tilecal</span>()),</span>
-<span id="cb7-20"><a href=""></a>  <span class="at">.other =</span> <span class="fu">list</span>()</span>
-<span id="cb7-21"><a href=""></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8" data-filename="function-interface" data-code-line-numbers="1-9|10-20"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href=""></a><span class="fu">gg_facet_wrap_months</span>(</span>
+<span id="cb8-2"><a href=""></a>  <span class="do">## --- data ----</span></span>
+<span id="cb8-3"><a href=""></a>  .events_long,</span>
+<span id="cb8-4"><a href=""></a>  date_col,</span>
+<span id="cb8-5"><a href=""></a>  <span class="at">locale =</span> <span class="cn">NULL</span>,</span>
+<span id="cb8-6"><a href=""></a>  <span class="do">## --- facets / layout ----</span></span>
+<span id="cb8-7"><a href=""></a>  <span class="at">week_start =</span> <span class="cn">NULL</span>,</span>
+<span id="cb8-8"><a href=""></a>  <span class="at">nrow =</span> <span class="cn">NULL</span>,</span>
+<span id="cb8-9"><a href=""></a>  <span class="at">ncol =</span> <span class="cn">NULL</span>,</span>
+<span id="cb8-10"><a href=""></a>  <span class="do">## --- default layers ---</span></span>
+<span id="cb8-11"><a href=""></a>  <span class="at">.geom =</span> <span class="fu">list</span>(</span>
+<span id="cb8-12"><a href=""></a>    <span class="fu">geom_tile</span>(<span class="at">color =</span> <span class="st">"grey70"</span>, <span class="at">fill =</span> <span class="st">"transparent"</span>),</span>
+<span id="cb8-13"><a href=""></a>    <span class="fu">geom_text</span>(<span class="at">nudge_y =</span> <span class="fl">0.25</span>)</span>
+<span id="cb8-14"><a href=""></a>  ),</span>
+<span id="cb8-15"><a href=""></a>  <span class="at">.scale_coord =</span> <span class="fu">list</span>(</span>
+<span id="cb8-16"><a href=""></a>    <span class="fu">scale_y_reverse</span>(),</span>
+<span id="cb8-17"><a href=""></a>    <span class="fu">scale_x_discrete</span>(<span class="at">position =</span> <span class="st">"top"</span>),</span>
+<span id="cb8-18"><a href=""></a>    <span class="fu">coord_fixed</span>(<span class="at">expand =</span> <span class="cn">TRUE</span>)),</span>
+<span id="cb8-19"><a href=""></a>  <span class="at">.theme =</span> <span class="fu">list</span>(<span class="fu">theme_bw_tilecal</span>()),</span>
+<span id="cb8-20"><a href=""></a>  <span class="at">.other =</span> <span class="fu">list</span>()</span>
+<span id="cb8-21"><a href=""></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div></div>
 </section>
@@ -835,28 +871,28 @@ Cynthia A. Huang
 <div class="code-with-filename-file">
 <pre><strong>function-interface</strong></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8" data-filename="function-interface" data-code-line-numbers="10-21"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href=""></a><span class="fu">gg_facet_wrap_months</span>(</span>
-<span id="cb8-2"><a href=""></a>  <span class="do">## --- data ----</span></span>
-<span id="cb8-3"><a href=""></a>  .events_long,</span>
-<span id="cb8-4"><a href=""></a>  date_col,</span>
-<span id="cb8-5"><a href=""></a>  <span class="at">locale =</span> <span class="cn">NULL</span>,</span>
-<span id="cb8-6"><a href=""></a>  <span class="do">## --- facets / layout ----</span></span>
-<span id="cb8-7"><a href=""></a>  <span class="at">week_start =</span> <span class="cn">NULL</span>,</span>
-<span id="cb8-8"><a href=""></a>  <span class="at">nrow =</span> <span class="cn">NULL</span>,</span>
-<span id="cb8-9"><a href=""></a>  <span class="at">ncol =</span> <span class="cn">NULL</span>,</span>
-<span id="cb8-10"><a href=""></a>  <span class="do">## --- chart elements ---</span></span>
-<span id="cb8-11"><a href=""></a>  <span class="at">.day_tiles =</span> <span class="fu">list</span>(</span>
-<span id="cb8-12"><a href=""></a>    <span class="fu">geom_tile</span>(<span class="at">color =</span> <span class="st">"grey70"</span>, <span class="at">fill =</span> <span class="st">"transparent"</span>)</span>
-<span id="cb8-13"><a href=""></a>  ),</span>
-<span id="cb8-14"><a href=""></a>  <span class="at">.day_labels =</span> <span class="fu">list</span>(</span>
-<span id="cb8-15"><a href=""></a>    <span class="fu">geom_text</span>(<span class="at">nudge_y =</span> <span class="fl">0.25</span>)</span>
-<span id="cb8-16"><a href=""></a>  ),</span>
-<span id="cb8-17"><a href=""></a>  <span class="at">.calendar_layout =</span> <span class="fu">list</span>(</span>
-<span id="cb8-18"><a href=""></a>    <span class="fu">scale_y_reverse</span>(),</span>
-<span id="cb8-19"><a href=""></a>    <span class="fu">scale_x_discrete</span>(<span class="at">position =</span> <span class="st">"top"</span>),</span>
-<span id="cb8-20"><a href=""></a>    <span class="fu">coord_fixed</span>(<span class="at">expand =</span> <span class="cn">TRUE</span>)),</span>
-<span id="cb8-21"><a href=""></a>  <span class="at">.theme =</span> <span class="fu">list</span>(<span class="fu">theme_bw_tilecal</span>())</span>
-<span id="cb8-22"><a href=""></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9" data-filename="function-interface" data-code-line-numbers="10-21"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href=""></a><span class="fu">gg_facet_wrap_months</span>(</span>
+<span id="cb9-2"><a href=""></a>  <span class="do">## --- data ----</span></span>
+<span id="cb9-3"><a href=""></a>  .events_long,</span>
+<span id="cb9-4"><a href=""></a>  date_col,</span>
+<span id="cb9-5"><a href=""></a>  <span class="at">locale =</span> <span class="cn">NULL</span>,</span>
+<span id="cb9-6"><a href=""></a>  <span class="do">## --- facets / layout ----</span></span>
+<span id="cb9-7"><a href=""></a>  <span class="at">week_start =</span> <span class="cn">NULL</span>,</span>
+<span id="cb9-8"><a href=""></a>  <span class="at">nrow =</span> <span class="cn">NULL</span>,</span>
+<span id="cb9-9"><a href=""></a>  <span class="at">ncol =</span> <span class="cn">NULL</span>,</span>
+<span id="cb9-10"><a href=""></a>  <span class="do">## --- chart elements ---</span></span>
+<span id="cb9-11"><a href=""></a>  <span class="at">.day_tiles =</span> <span class="fu">list</span>(</span>
+<span id="cb9-12"><a href=""></a>    <span class="fu">geom_tile</span>(<span class="at">color =</span> <span class="st">"grey70"</span>, <span class="at">fill =</span> <span class="st">"transparent"</span>)</span>
+<span id="cb9-13"><a href=""></a>  ),</span>
+<span id="cb9-14"><a href=""></a>  <span class="at">.day_labels =</span> <span class="fu">list</span>(</span>
+<span id="cb9-15"><a href=""></a>    <span class="fu">geom_text</span>(<span class="at">nudge_y =</span> <span class="fl">0.25</span>)</span>
+<span id="cb9-16"><a href=""></a>  ),</span>
+<span id="cb9-17"><a href=""></a>  <span class="at">.calendar_layout =</span> <span class="fu">list</span>(</span>
+<span id="cb9-18"><a href=""></a>    <span class="fu">scale_y_reverse</span>(),</span>
+<span id="cb9-19"><a href=""></a>    <span class="fu">scale_x_discrete</span>(<span class="at">position =</span> <span class="st">"top"</span>),</span>
+<span id="cb9-20"><a href=""></a>    <span class="fu">coord_fixed</span>(<span class="at">expand =</span> <span class="cn">TRUE</span>)),</span>
+<span id="cb9-21"><a href=""></a>  <span class="at">.theme =</span> <span class="fu">list</span>(<span class="fu">theme_bw_tilecal</span>())</span>
+<span id="cb9-22"><a href=""></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div></div>
 <aside class="notes">
@@ -882,15 +918,15 @@ Cynthia A. Huang
 <div class="small">
 <div class="cell columns column-output-location">
 <div class="column">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9" data-code-line-numbers="7-9"><pre class="sourceCode numberSource r number-lines code-with-copy" data-id="quarto-animate-code"><code class="sourceCode r hljs"><span id="cb9-1" class="hljs-ln-code"><a href=""></a><span class="fu">library</span>(ggtilecal)</span>
-<span id="cb9-2" class="hljs-ln-code"><a href=""></a><span class="fu">library</span>(ggplot2)</span>
-<span id="cb9-3" class="hljs-ln-code"><a href=""></a></span>
-<span id="cb9-4" class="hljs-ln-code"><a href=""></a>dates_df <span class="ot">&lt;-</span> <span class="fu">make_empty_month_days</span>(</span>
-<span id="cb9-5" class="hljs-ln-code"><a href=""></a>  <span class="fu">c</span>(<span class="st">"2024-01-05"</span>, <span class="st">"2024-06-30"</span>), <span class="at">dates_to =</span> <span class="st">"date"</span>)</span>
-<span id="cb9-6" class="hljs-ln-code"><a href=""></a></span>
-<span id="cb9-7" class="hljs-ln-code"><a href=""></a><span class="fu">gg_facet_wrap_months</span>(</span>
-<span id="cb9-8" class="hljs-ln-code"><a href=""></a>  dates_df,</span>
-<span id="cb9-9" class="hljs-ln-code"><a href=""></a>  date)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10" data-code-line-numbers="7-9"><pre class="sourceCode numberSource r number-lines code-with-copy" data-id="quarto-animate-code"><code class="sourceCode r hljs"><span id="cb10-1" class="hljs-ln-code"><a href=""></a><span class="fu">library</span>(ggtilecal)</span>
+<span id="cb10-2" class="hljs-ln-code"><a href=""></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb10-3" class="hljs-ln-code"><a href=""></a></span>
+<span id="cb10-4" class="hljs-ln-code"><a href=""></a>dates_df <span class="ot">&lt;-</span> <span class="fu">make_empty_month_days</span>(</span>
+<span id="cb10-5" class="hljs-ln-code"><a href=""></a>  <span class="fu">c</span>(<span class="st">"2024-01-05"</span>, <span class="st">"2024-06-30"</span>), <span class="at">dates_to =</span> <span class="st">"date"</span>)</span>
+<span id="cb10-6" class="hljs-ln-code"><a href=""></a></span>
+<span id="cb10-7" class="hljs-ln-code"><a href=""></a><span class="fu">gg_facet_wrap_months</span>(</span>
+<span id="cb10-8" class="hljs-ln-code"><a href=""></a>  dates_df,</span>
+<span id="cb10-9" class="hljs-ln-code"><a href=""></a>  date)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div><div class="column fragment">
 <div class="cell-output-display">
 <div>
@@ -907,21 +943,21 @@ Cynthia A. Huang
 <div class="small">
 <div class="cell columns column-output-location">
 <div class="column">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10" data-code-line-numbers="8-14|11"><pre class="sourceCode numberSource r number-lines code-with-copy" data-id="quarto-animate-code"><code class="sourceCode r hljs"><span id="cb10-1" class="hljs-ln-code"><a href=""></a><span class="fu">library</span>(ggtilecal)</span>
-<span id="cb10-2" class="hljs-ln-code"><a href=""></a><span class="fu">library</span>(ggplot2)</span>
-<span id="cb10-3" class="hljs-ln-code"><a href=""></a></span>
-<span id="cb10-4" class="hljs-ln-code"><a href=""></a>dates_df <span class="ot">&lt;-</span> <span class="fu">make_empty_month_days</span>(</span>
-<span id="cb10-5" class="hljs-ln-code"><a href=""></a>  <span class="fu">c</span>(<span class="st">"2024-01-05"</span>, <span class="st">"2024-06-30"</span>), <span class="at">dates_to =</span> <span class="st">"date"</span>)</span>
-<span id="cb10-6" class="hljs-ln-code"><a href=""></a></span>
-<span id="cb10-7" class="hljs-ln-code"><a href=""></a><span class="fu">gg_facet_wrap_months</span>(dates_df, date,</span>
-<span id="cb10-8" class="hljs-ln-code"><a href=""></a>    <span class="at">.geom =</span> <span class="fu">list</span>(</span>
-<span id="cb10-9" class="hljs-ln-code"><a href=""></a>      <span class="fu">geom_tile</span>(<span class="at">color =</span> <span class="st">"grey70"</span>, <span class="at">fill =</span> <span class="st">"transparent"</span>),</span>
-<span id="cb10-10" class="hljs-ln-code"><a href=""></a>      <span class="fu">geom_text</span>(<span class="at">nudge_y =</span> <span class="fl">0.25</span>,</span>
-<span id="cb10-11" class="hljs-ln-code"><a href=""></a>                <span class="at">color =</span> <span class="st">"#6a329f"</span>)),</span>
-<span id="cb10-12" class="hljs-ln-code"><a href=""></a>    <span class="at">.theme =</span> <span class="fu">list</span>(<span class="fu">theme_bw_tilecal</span>(),</span>
-<span id="cb10-13" class="hljs-ln-code"><a href=""></a>      <span class="fu">theme</span>(</span>
-<span id="cb10-14" class="hljs-ln-code"><a href=""></a>        <span class="at">strip.background =</span> <span class="fu">element_rect</span>(<span class="at">fill =</span> <span class="st">"#d9d2e9"</span>)))</span>
-<span id="cb10-15" class="hljs-ln-code"><a href=""></a>    )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11" data-code-line-numbers="8-14|11"><pre class="sourceCode numberSource r number-lines code-with-copy" data-id="quarto-animate-code"><code class="sourceCode r hljs"><span id="cb11-1" class="hljs-ln-code"><a href=""></a><span class="fu">library</span>(ggtilecal)</span>
+<span id="cb11-2" class="hljs-ln-code"><a href=""></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb11-3" class="hljs-ln-code"><a href=""></a></span>
+<span id="cb11-4" class="hljs-ln-code"><a href=""></a>dates_df <span class="ot">&lt;-</span> <span class="fu">make_empty_month_days</span>(</span>
+<span id="cb11-5" class="hljs-ln-code"><a href=""></a>  <span class="fu">c</span>(<span class="st">"2024-01-05"</span>, <span class="st">"2024-06-30"</span>), <span class="at">dates_to =</span> <span class="st">"date"</span>)</span>
+<span id="cb11-6" class="hljs-ln-code"><a href=""></a></span>
+<span id="cb11-7" class="hljs-ln-code"><a href=""></a><span class="fu">gg_facet_wrap_months</span>(dates_df, date,</span>
+<span id="cb11-8" class="hljs-ln-code"><a href=""></a>    <span class="at">.geom =</span> <span class="fu">list</span>(</span>
+<span id="cb11-9" class="hljs-ln-code"><a href=""></a>      <span class="fu">geom_tile</span>(<span class="at">color =</span> <span class="st">"grey70"</span>, <span class="at">fill =</span> <span class="st">"transparent"</span>),</span>
+<span id="cb11-10" class="hljs-ln-code"><a href=""></a>      <span class="fu">geom_text</span>(<span class="at">nudge_y =</span> <span class="fl">0.25</span>,</span>
+<span id="cb11-11" class="hljs-ln-code"><a href=""></a>                <span class="at">color =</span> <span class="st">"#6a329f"</span>)),</span>
+<span id="cb11-12" class="hljs-ln-code"><a href=""></a>    <span class="at">.theme =</span> <span class="fu">list</span>(<span class="fu">theme_bw_tilecal</span>(),</span>
+<span id="cb11-13" class="hljs-ln-code"><a href=""></a>      <span class="fu">theme</span>(</span>
+<span id="cb11-14" class="hljs-ln-code"><a href=""></a>        <span class="at">strip.background =</span> <span class="fu">element_rect</span>(<span class="at">fill =</span> <span class="st">"#d9d2e9"</span>)))</span>
+<span id="cb11-15" class="hljs-ln-code"><a href=""></a>    )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div><div class="column fragment">
 <div class="cell-output-display">
 <div>
@@ -953,71 +989,71 @@ Cynthia A. Huang
 <div class="code-with-filename-file">
 <pre><strong>gg_facet_wrap_months.R</strong></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11" data-code-line-numbers="3-15|17-27"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href=""></a><span class="co">#' Make Monthly Calendar Facets</span></span>
-<span id="cb11-2"><a href=""></a><span class="co">#'</span></span>
-<span id="cb11-3"><a href=""></a><span class="co">#' Generates calendar with monthly facets by:</span></span>
-<span id="cb11-4"><a href=""></a><span class="co">#' - Padding event list with any missing days via `fill_missing_units()`</span></span>
-<span id="cb11-5"><a href=""></a><span class="co">#' - Calculating variables for calendar layout via `calc_calendar_vars()`</span></span>
-<span id="cb11-6"><a href=""></a><span class="co">#' - Returning a ggplot object as per Details.</span></span>
-<span id="cb11-7"><a href=""></a><span class="co">#'</span></span>
-<span id="cb11-8"><a href=""></a><span class="co">#' Returns a ggplot with the following fixed components</span></span>
-<span id="cb11-9"><a href=""></a><span class="co">#' using calculated layout variables:</span></span>
-<span id="cb11-10"><a href=""></a><span class="co">#' - `aes()` mapping:</span></span>
-<span id="cb11-11"><a href=""></a><span class="co">#'    - `x` is day of week,</span></span>
-<span id="cb11-12"><a href=""></a><span class="co">#'    - `y` is week in month,</span></span>
-<span id="cb11-13"><a href=""></a><span class="co">#'    - `label` is day of month</span></span>
-<span id="cb11-14"><a href=""></a><span class="co">#' - `facet_wrap()` by month</span></span>
-<span id="cb11-15"><a href=""></a><span class="co">#' - `labs()` to remove axis labels for calculated layout variables</span></span>
-<span id="cb11-16"><a href=""></a><span class="co">#'</span></span>
-<span id="cb11-17"><a href=""></a><span class="co">#' and default customisable components:</span></span>
-<span id="cb11-18"><a href=""></a><span class="co">#' - `geom_tile()`, `geom_text()` to label each day which inherit calculated variables</span></span>
-<span id="cb11-19"><a href=""></a><span class="co">#' - `scale_y_reverse()` to order day in month correctly</span></span>
-<span id="cb11-20"><a href=""></a><span class="co">#' - `scale_x_discrete()` to position weekday labels</span></span>
-<span id="cb11-21"><a href=""></a><span class="co">#' - `coord_fixed()` to square each tile</span></span>
-<span id="cb11-22"><a href=""></a><span class="co">#' - `theme_bw_tilecal()` to apply sensible theme defaults</span></span>
-<span id="cb11-23"><a href=""></a><span class="co">#' </span></span>
-<span id="cb11-24"><a href=""></a><span class="co">#' for the month facets: </span></span>
-<span id="cb11-25"><a href=""></a><span class="co">#'  - `nrow` the number of month facet rows </span></span>
-<span id="cb11-26"><a href=""></a><span class="co">#'  - or `ncol` the number of month facet columns</span></span>
-<span id="cb11-27"><a href=""></a><span class="co">#'  - a labeller function for the monthly facet strip labels, see `label_yearmonth()`</span></span>
-<span id="cb11-28"><a href=""></a><span class="co">#'  </span></span>
-<span id="cb11-29"><a href=""></a><span class="co">#' To modify components alter the `.geom` and `.scale_coord`,</span></span>
-<span id="cb11-30"><a href=""></a><span class="co">#' which inherit the calculate layout mapping by default</span></span>
-<span id="cb11-31"><a href=""></a><span class="co">#' (via the ggplot2 `inherit.aes` argument).</span></span>
-<span id="cb11-32"><a href=""></a><span class="co">#'</span></span>
-<span id="cb11-33"><a href=""></a><span class="co">#' To additional components use the ggplot `+` function as normal,</span></span>
-<span id="cb11-34"><a href=""></a><span class="co">#' or pass components to the `.other` argument.</span></span>
-<span id="cb11-35"><a href=""></a><span class="co">#' This can be used to add interactive geoms (e.g. from `ggiraph`)</span></span>
-<span id="cb11-36"><a href=""></a><span class="co">#'</span></span>
-<span id="cb11-37"><a href=""></a><span class="co">#' To modify the theme, use the ggplot `+` function as normal,</span></span>
-<span id="cb11-38"><a href=""></a><span class="co">#' or add additional elements to the list in `.theme`.</span></span>
-<span id="cb11-39"><a href=""></a><span class="co">#'</span></span>
-<span id="cb11-40"><a href=""></a><span class="co">#' To remove any of the optional components, set the argument to any empty `list()`</span></span>
-<span id="cb11-41"><a href=""></a><span class="co">#'</span></span>
-<span id="cb11-42"><a href=""></a><span class="co">#' @inheritParams ggplot2::facet_wrap</span></span>
-<span id="cb11-43"><a href=""></a><span class="co">#' @inheritParams fill_missing_units</span></span>
-<span id="cb11-44"><a href=""></a><span class="co">#' @inheritParams calc_calendar_vars</span></span>
-<span id="cb11-45"><a href=""></a><span class="co">#' @param labeller A facet labeling function, for the calendar month titles, defaults to `label_yearmonth()`</span></span>
-<span id="cb11-46"><a href=""></a><span class="co">#' @param .geom,.scale_coord,.theme,.other</span></span>
-<span id="cb11-47"><a href=""></a><span class="co">#'    Customisable lists of ggplot2 components to add to the plot.</span></span>
-<span id="cb11-48"><a href=""></a><span class="co">#'    An empty `list()` leaves the plot unmodified.</span></span>
-<span id="cb11-49"><a href=""></a><span class="co">#'</span></span>
-<span id="cb11-50"><a href=""></a><span class="co">#' @return ggplot</span></span>
-<span id="cb11-51"><a href=""></a><span class="co">#' @export</span></span>
-<span id="cb11-52"><a href=""></a><span class="co">#'</span></span>
-<span id="cb11-53"><a href=""></a><span class="co">#' @examples</span></span>
-<span id="cb11-54"><a href=""></a><span class="co">#' \dontrun{</span></span>
-<span id="cb11-55"><a href=""></a><span class="co">#' library(dplyr)</span></span>
-<span id="cb11-56"><a href=""></a><span class="co">#' library(ggplot2)</span></span>
-<span id="cb11-57"><a href=""></a><span class="co">#' demo_events_gpt |&gt;</span></span>
-<span id="cb11-58"><a href=""></a><span class="co">#'   reframe_events(startDate, endDate) |&gt;</span></span>
-<span id="cb11-59"><a href=""></a><span class="co">#'   group_by(unit_date) |&gt;</span></span>
-<span id="cb11-60"><a href=""></a><span class="co">#'   slice_min(order_by = duration) |&gt;</span></span>
-<span id="cb11-61"><a href=""></a><span class="co">#'   gg_facet_wrap_months(unit_date, </span></span>
-<span id="cb11-62"><a href=""></a><span class="co">#'                        labeller=label_yearmonth("%b %Y")) +</span></span>
-<span id="cb11-63"><a href=""></a><span class="co">#'   geom_text(aes(label = event_emoji), nudge_y = -0.25, na.rm = TRUE) } </span></span>
-<span id="cb11-64"><a href=""></a><span class="co">#' @importFrom ggplot2 geom_tile geom_text facet_wrap labs aes</span></span>
-<span id="cb11-65"><a href=""></a><span class="co">#'     scale_y_reverse scale_x_discrete coord_fixed vars</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12" data-code-line-numbers="3-15|17-27"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href=""></a><span class="co">#' Make Monthly Calendar Facets</span></span>
+<span id="cb12-2"><a href=""></a><span class="co">#'</span></span>
+<span id="cb12-3"><a href=""></a><span class="co">#' Generates calendar with monthly facets by:</span></span>
+<span id="cb12-4"><a href=""></a><span class="co">#' - Padding event list with any missing days via `fill_missing_units()`</span></span>
+<span id="cb12-5"><a href=""></a><span class="co">#' - Calculating variables for calendar layout via `calc_calendar_vars()`</span></span>
+<span id="cb12-6"><a href=""></a><span class="co">#' - Returning a ggplot object as per Details.</span></span>
+<span id="cb12-7"><a href=""></a><span class="co">#'</span></span>
+<span id="cb12-8"><a href=""></a><span class="co">#' Returns a ggplot with the following fixed components</span></span>
+<span id="cb12-9"><a href=""></a><span class="co">#' using calculated layout variables:</span></span>
+<span id="cb12-10"><a href=""></a><span class="co">#' - `aes()` mapping:</span></span>
+<span id="cb12-11"><a href=""></a><span class="co">#'    - `x` is day of week,</span></span>
+<span id="cb12-12"><a href=""></a><span class="co">#'    - `y` is week in month,</span></span>
+<span id="cb12-13"><a href=""></a><span class="co">#'    - `label` is day of month</span></span>
+<span id="cb12-14"><a href=""></a><span class="co">#' - `facet_wrap()` by month</span></span>
+<span id="cb12-15"><a href=""></a><span class="co">#' - `labs()` to remove axis labels for calculated layout variables</span></span>
+<span id="cb12-16"><a href=""></a><span class="co">#'</span></span>
+<span id="cb12-17"><a href=""></a><span class="co">#' and default customisable components:</span></span>
+<span id="cb12-18"><a href=""></a><span class="co">#' - `geom_tile()`, `geom_text()` to label each day which inherit calculated variables</span></span>
+<span id="cb12-19"><a href=""></a><span class="co">#' - `scale_y_reverse()` to order day in month correctly</span></span>
+<span id="cb12-20"><a href=""></a><span class="co">#' - `scale_x_discrete()` to position weekday labels</span></span>
+<span id="cb12-21"><a href=""></a><span class="co">#' - `coord_fixed()` to square each tile</span></span>
+<span id="cb12-22"><a href=""></a><span class="co">#' - `theme_bw_tilecal()` to apply sensible theme defaults</span></span>
+<span id="cb12-23"><a href=""></a><span class="co">#' </span></span>
+<span id="cb12-24"><a href=""></a><span class="co">#' for the month facets: </span></span>
+<span id="cb12-25"><a href=""></a><span class="co">#'  - `nrow` the number of month facet rows </span></span>
+<span id="cb12-26"><a href=""></a><span class="co">#'  - or `ncol` the number of month facet columns</span></span>
+<span id="cb12-27"><a href=""></a><span class="co">#'  - a labeller function for the monthly facet strip labels, see `label_yearmonth()`</span></span>
+<span id="cb12-28"><a href=""></a><span class="co">#'  </span></span>
+<span id="cb12-29"><a href=""></a><span class="co">#' To modify components alter the `.geom` and `.scale_coord`,</span></span>
+<span id="cb12-30"><a href=""></a><span class="co">#' which inherit the calculate layout mapping by default</span></span>
+<span id="cb12-31"><a href=""></a><span class="co">#' (via the ggplot2 `inherit.aes` argument).</span></span>
+<span id="cb12-32"><a href=""></a><span class="co">#'</span></span>
+<span id="cb12-33"><a href=""></a><span class="co">#' To additional components use the ggplot `+` function as normal,</span></span>
+<span id="cb12-34"><a href=""></a><span class="co">#' or pass components to the `.other` argument.</span></span>
+<span id="cb12-35"><a href=""></a><span class="co">#' This can be used to add interactive geoms (e.g. from `ggiraph`)</span></span>
+<span id="cb12-36"><a href=""></a><span class="co">#'</span></span>
+<span id="cb12-37"><a href=""></a><span class="co">#' To modify the theme, use the ggplot `+` function as normal,</span></span>
+<span id="cb12-38"><a href=""></a><span class="co">#' or add additional elements to the list in `.theme`.</span></span>
+<span id="cb12-39"><a href=""></a><span class="co">#'</span></span>
+<span id="cb12-40"><a href=""></a><span class="co">#' To remove any of the optional components, set the argument to any empty `list()`</span></span>
+<span id="cb12-41"><a href=""></a><span class="co">#'</span></span>
+<span id="cb12-42"><a href=""></a><span class="co">#' @inheritParams ggplot2::facet_wrap</span></span>
+<span id="cb12-43"><a href=""></a><span class="co">#' @inheritParams fill_missing_units</span></span>
+<span id="cb12-44"><a href=""></a><span class="co">#' @inheritParams calc_calendar_vars</span></span>
+<span id="cb12-45"><a href=""></a><span class="co">#' @param labeller A facet labeling function, for the calendar month titles, defaults to `label_yearmonth()`</span></span>
+<span id="cb12-46"><a href=""></a><span class="co">#' @param .geom,.scale_coord,.theme,.other</span></span>
+<span id="cb12-47"><a href=""></a><span class="co">#'    Customisable lists of ggplot2 components to add to the plot.</span></span>
+<span id="cb12-48"><a href=""></a><span class="co">#'    An empty `list()` leaves the plot unmodified.</span></span>
+<span id="cb12-49"><a href=""></a><span class="co">#'</span></span>
+<span id="cb12-50"><a href=""></a><span class="co">#' @return ggplot</span></span>
+<span id="cb12-51"><a href=""></a><span class="co">#' @export</span></span>
+<span id="cb12-52"><a href=""></a><span class="co">#'</span></span>
+<span id="cb12-53"><a href=""></a><span class="co">#' @examples</span></span>
+<span id="cb12-54"><a href=""></a><span class="co">#' \dontrun{</span></span>
+<span id="cb12-55"><a href=""></a><span class="co">#' library(dplyr)</span></span>
+<span id="cb12-56"><a href=""></a><span class="co">#' library(ggplot2)</span></span>
+<span id="cb12-57"><a href=""></a><span class="co">#' demo_events_gpt |&gt;</span></span>
+<span id="cb12-58"><a href=""></a><span class="co">#'   reframe_events(startDate, endDate) |&gt;</span></span>
+<span id="cb12-59"><a href=""></a><span class="co">#'   group_by(unit_date) |&gt;</span></span>
+<span id="cb12-60"><a href=""></a><span class="co">#'   slice_min(order_by = duration) |&gt;</span></span>
+<span id="cb12-61"><a href=""></a><span class="co">#'   gg_facet_wrap_months(unit_date, </span></span>
+<span id="cb12-62"><a href=""></a><span class="co">#'                        labeller=label_yearmonth("%b %Y")) +</span></span>
+<span id="cb12-63"><a href=""></a><span class="co">#'   geom_text(aes(label = event_emoji), nudge_y = -0.25, na.rm = TRUE) } </span></span>
+<span id="cb12-64"><a href=""></a><span class="co">#' @importFrom ggplot2 geom_tile geom_text facet_wrap labs aes</span></span>
+<span id="cb12-65"><a href=""></a><span class="co">#'     scale_y_reverse scale_x_discrete coord_fixed vars</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
 </section></section>
