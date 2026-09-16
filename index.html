@@ -264,7 +264,7 @@ Cynthia A. Huang
 <div class="code-with-filename-file">
 <pre><strong>calendR-interface</strong></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1" data-filename="calendR-interface"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href=""></a><span class="fu">calendR</span>(</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1" data-filename="calendR-interface" data-code-line-numbers="|18-19"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href=""></a><span class="fu">calendR</span>(</span>
 <span id="cb1-2"><a href=""></a>    <span class="at">year =</span> <span class="fu">format</span>(<span class="fu">Sys.Date</span>(), <span class="st">"%Y"</span>),</span>
 <span id="cb1-3"><a href=""></a>    <span class="at">month =</span> <span class="cn">NULL</span>,</span>
 <span id="cb1-4"><a href=""></a>    <span class="at">from =</span> <span class="cn">NULL</span>,</span>
@@ -323,7 +323,7 @@ Cynthia A. Huang
 <div class="code-with-filename-file">
 <pre><strong>ggweekly-interface</strong></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2" data-filename="ggweekly-interface"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href=""></a><span class="fu">ggweek_planner</span>(</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2" data-filename="ggweekly-interface" data-code-line-numbers="|8-10"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href=""></a><span class="fu">ggweek_planner</span>(</span>
 <span id="cb2-2"><a href=""></a>    <span class="at">start_day =</span> lubridate<span class="sc">::</span><span class="fu">today</span>(),</span>
 <span id="cb2-3"><a href=""></a>    <span class="at">end_day =</span> start_day <span class="sc">+</span></span>
 <span id="cb2-4"><a href=""></a>        lubridate<span class="sc">::</span><span class="fu">weeks</span>(<span class="dv">8</span>) <span class="sc">-</span> lubridate<span class="sc">::</span><span class="fu">days</span>(<span class="dv">1</span>),</span>
@@ -365,7 +365,7 @@ Cynthia A. Huang
 <div class="code-with-filename-file">
 <pre><strong>very-long-ggplot-script.R</strong></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4" data-filename="very-long-ggplot-script.R"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href=""></a><span class="co"># source(here::here("_utilities/travel_dates_load.R"))</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4" data-filename="very-long-ggplot-script.R" data-code-line-numbers="|5-41|43-71|72-104|106-124"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href=""></a><span class="co"># source(here::here("_utilities/travel_dates_load.R"))</span></span>
 <span id="cb4-2"><a href=""></a><span class="fu">library</span>(ggplot2)</span>
 <span id="cb4-3"><a href=""></a><span class="fu">library</span>(ggiraph)</span>
 <span id="cb4-4"><a href=""></a></span>
@@ -488,7 +488,7 @@ Cynthia A. Huang
 <span id="cb4-121"><a href=""></a>    layers_facet_labs <span class="sc">+</span></span>
 <span id="cb4-122"><a href=""></a>    layers_theme</span>
 <span id="cb4-123"><a href=""></a></span>
-<span id="cb4-124"><a href=""></a><span class="co"># girafe(ggobj = p_cal_girafe)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb4-124"><a href=""></a><span class="fu">girafe</span>(<span class="at">ggobj =</span> p_cal_girafe)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div></div>
 <aside class="notes">
@@ -505,18 +505,7 @@ Cynthia A. Huang
           display:block!important;
       }</style></aside>
 </section>
-<section>
-<section id="down-the-function-design-rabbit-hole" class="title-slide slide level1 center">
-<h1>Down the function design rabbit hole…</h1>
-
-</section>
 <section id="section-6" class="slide level2">
-<h2></h2>
-<div class="sketch-container">
-<p><img data-src="assets/notability-v2/helper-blackbox-questions.png" alt="Arguments for dates, fills and text colour disappearing into an opaque box that hides data prep and plot assembly"></p>
-</div>
-</section>
-<section id="section-7" class="slide level2">
 <h2></h2>
 <div class="love-container">
 <p><img data-src="assets/headshot-cynthia.jpg" class="headshot-circle" alt="Headshot of Cynthia Huang"></p>
@@ -524,7 +513,12 @@ Cynthia A. Huang
 <p><img data-src="assets/notability/ggplot2-helper-replace-vert.png" width="400"></p>
 </div>
 </section>
-<section id="section-8" class="slide level2">
+<section>
+<section id="down-the-function-design-rabbit-hole" class="title-slide slide level1 center">
+<h1>Down the function design rabbit hole…</h1>
+
+</section>
+<section id="section-7" class="slide level2">
 <h2></h2>
 <div class="sketch-container dialogue-stage">
 <div class="dialogue-wrap">
@@ -532,7 +526,7 @@ Cynthia A. Huang
 </div>
 </div>
 </section>
-<section id="section-9" class="slide level2">
+<section id="section-8" class="slide level2">
 <h2></h2>
 <div class="sketch-container dialogue-stage">
 <div class="dialogue-wrap">
@@ -541,7 +535,7 @@ Cynthia A. Huang
 </div>
 </div>
 </section>
-<section id="section-10" class="slide level2">
+<section id="section-9" class="slide level2">
 <h2></h2>
 <div class="love-container">
 <p><i class="fa-solid fa-paste fa-5x" aria-label="paste"></i></p>
@@ -559,7 +553,7 @@ Cynthia A. Huang
 <h1>From procrasti-plotting to procrasti-packaging</h1>
 
 </section>
-<section id="section-11" class="slide level2">
+<section id="section-10" class="slide level2">
 <h2></h2>
 <div class="columns">
 <div class="column">
@@ -841,7 +835,7 @@ Cynthia A. Huang
 <div class="code-with-filename-file">
 <pre><strong>function-interface</strong></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8" data-filename="function-interface" data-code-line-numbers="|10-21"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href=""></a><span class="fu">gg_facet_wrap_months</span>(</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8" data-filename="function-interface" data-code-line-numbers="10-21"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href=""></a><span class="fu">gg_facet_wrap_months</span>(</span>
 <span id="cb8-2"><a href=""></a>  <span class="do">## --- data ----</span></span>
 <span id="cb8-3"><a href=""></a>  .events_long,</span>
 <span id="cb8-4"><a href=""></a>  date_col,</span>
@@ -952,7 +946,7 @@ Cynthia A. Huang
 </ul>
 </div></div>
 </section>
-<section id="section-12" class="slide level2">
+<section id="section-11" class="slide level2">
 <h2></h2>
 <div class="cell">
 <div class="code-with-filename">
@@ -1028,8 +1022,8 @@ Cynthia A. Huang
 </div>
 </section></section>
 <section>
-<section id="reusing-ggplot2-happily-ever-after" class="title-slide slide level1 center">
-<h1>Reusing ggplot2 happily ever after?</h1>
+<section id="reusing-happily-ever-after" class="title-slide slide level1 center">
+<h1>Reusing happily ever after?</h1>
 
 </section>
 <section id="from-custom-code" class="slide level2">
@@ -1050,8 +1044,28 @@ Cynthia A. Huang
 </section>
 <section id="and-beyond" class="slide level2">
 <h2>and beyond?</h2>
-
-<img data-src="assets/temp/fig-ggtime-teaser.png" class="r-stretch"></section>
+<div class="callout callout-caution callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Danger</strong></p>
+</div>
+<div class="callout-content">
+<p>Time is complicated, so is torturing ggplot2 to care about time.</p>
+<p>Stay away if you value your sanity.</p>
+</div>
+</div>
+</div>
+<div class="fragment">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="assets/temp/fig-ggtime-teaser.png" class="quarto-figure quarto-figure-center"></p>
+</figure>
+</div>
+</div>
+</section>
 <section id="keep-calm-and" class="slide level2">
 <h2>Keep calm, and…</h2>
 
@@ -1061,17 +1075,17 @@ Cynthia A. Huang
 <div class="columns">
 <div class="column">
 <p><img data-src="assets/temp/screenshot-skill.png"></p>
-</div><div class="column fragment">
+</div><div class="column">
 <div class="sketch-container">
+<p><span class="small">🔗 Slides, links, skill &amp; more: <a href="https://github.com/cynthiahqy/positconf2026">github.com/cynthiahqy/positconf2026</a></span></p>
+</div>
+<div class="sketch-container fragment">
 <p>📣 Tell me about your ggplot2 reuse experiences!</p>
 <div class="quarto-figure quarto-figure-center">
 <figure>
 <p><img data-src="assets/qrcode-survey.svg" class="qr-code quarto-figure quarto-figure-center" alt="QR code linking to https://www.cynthiahqy.com/survey"></p>
 </figure>
 </div>
-</div>
-<div class="sketch-container">
-<p><span class="small">🔗 Slides, links, skill &amp; more: <a href="https://github.com/cynthiahqy/positconf2026">github.com/cynthiahqy/positconf2026</a></span></p>
 </div>
 </div></div>
 
