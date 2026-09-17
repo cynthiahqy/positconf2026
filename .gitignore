@@ -92,3 +92,6 @@ rsconnect/
 
 # Quarto render artefacts
 *.pptx
+
+# LinkedIn post drafts and exported slides
+linkedin/
